@@ -79,10 +79,12 @@ export class SupabaseService {
   }
 
   /**
-   * Reset password
+   * Reset password - Send recovery email
    */
   async resetPassword(email: string) {
-    const { data, error } = await this.supabase.auth.resetPasswordForEmail(email);
+    const { data, error } = await this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
     return { data, error };
   }
 

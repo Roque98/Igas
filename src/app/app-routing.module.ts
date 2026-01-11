@@ -55,6 +55,16 @@ const routes: Routes = [
       {
         path: 'register',
         loadComponent: () => import('./demo/pages/authentication/auth-signup/auth-signup.component').then((c) => c.AuthSignupComponent)
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./demo/pages/authentication/auth-forgot-password/auth-forgot-password.component').then((c) => c.AuthForgotPasswordComponent)
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./demo/pages/authentication/auth-reset-password/auth-reset-password.component').then((c) => c.AuthResetPasswordComponent)
       }
     ]
   }
