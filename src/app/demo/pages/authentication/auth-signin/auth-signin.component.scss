@@ -1,9 +1,33 @@
+// Container for password input with eye icon
+.input-group {
+  position: relative;
+
+  // Password input with space for icon
+  #password {
+    padding-right: 45px;
+
+    ::ng-deep.datta-rtl & {
+      padding-right: 12px;
+      padding-left: 45px;
+    }
+  }
+}
+
+// Toggle password visibility icon
 #togglePassword {
   cursor: pointer;
   position: absolute;
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 10;
+  color: #888;
+  transition: color 0.2s ease;
+  pointer-events: auto;
+
+  &:hover {
+    color: #333;
+  }
 
   ::ng-deep.datta-rtl & {
     right: auto;
