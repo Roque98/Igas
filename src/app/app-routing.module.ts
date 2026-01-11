@@ -64,10 +64,15 @@ const routes: Routes = [
     ]
   },
   {
-    path: 'reset-password',
+    path: '',
     component: GuestComponent,
-    loadComponent: () =>
-      import('./demo/pages/authentication/auth-reset-password/auth-reset-password.component').then((c) => c.AuthResetPasswordComponent)
+    children: [
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./demo/pages/authentication/auth-reset-password/auth-reset-password.component').then((c) => c.AuthResetPasswordComponent)
+      }
+    ]
   }
 ];
 
