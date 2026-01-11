@@ -1,5 +1,5 @@
 // angular import
-import { ChangeDetectorRef, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
@@ -15,7 +15,6 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
   styleUrls: ['./auth-signin.component.scss']
 })
 export class AuthSigninComponent implements OnInit {
-  private cd = inject(ChangeDetectorRef);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
 
@@ -88,7 +87,6 @@ export class AuthSigninComponent implements OnInit {
       console.error('Unexpected error:', err);
     } finally {
       this.loading.set(false);
-      this.cd.detectChanges();
     }
   }
 

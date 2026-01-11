@@ -1,5 +1,5 @@
 // angular import
-import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
@@ -14,7 +14,6 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
   styleUrls: ['./auth-signup.component.scss']
 })
 export class AuthSignupComponent {
-  private cd = inject(ChangeDetectorRef);
 
   submitted = signal(false);
   error = signal('');
@@ -40,7 +39,6 @@ export class AuthSignupComponent {
     event.preventDefault();
     const credentials = this.registerModel();
     console.log('register user logged in with:', credentials);
-    this.cd.detectChanges();
   }
 
   togglePasswordVisibility() {
