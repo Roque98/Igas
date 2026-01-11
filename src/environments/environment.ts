@@ -6,7 +6,11 @@ import packageInfo from '../../package.json';
 
 export const environment = {
   appVersion: packageInfo.version,
-  production: true
+  production: false,
+  supabase: {
+    url: 'YOUR_SUPABASE_URL',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY'
+  }
 };
 /*
  * For easier debugging in development mode, you can import the following file
