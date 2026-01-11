@@ -1,5 +1,5 @@
 // angular import
-import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
@@ -14,15 +14,18 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
   templateUrl: './auth-signin.component.html',
   styleUrls: ['./auth-signin.component.scss']
 })
-export class AuthSigninComponent {
+export class AuthSigninComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+
+  private readonly REMEMBER_EMAIL_KEY = 'igas_remember_email';
 
   submitted = signal(false);
   error = signal('');
   showPassword = signal(false);
   loading = signal(false);
+  rememberMe = signal(true);
 
   loginModal = signal<{ email: string; password: string }>({
     email: '',
@@ -35,6 +38,18 @@ export class AuthSigninComponent {
     required(schemaPath.password, { message: 'La contraseña es obligatoria' });
     minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
   });
+
+  ngOnInit() {
+    // Load saved email if exists
+    const savedEmail = this.getSavedEmail();
+    if (savedEmail) {
+      this.loginModal.set({
+        email: savedEmail,
+        password: ''
+      });
+      this.rememberMe.set(true);
+    }
+  }
 
   async onSubmit(event: Event) {
     this.submitted.set(true);
@@ -57,6 +72,14 @@ export class AuthSigninComponent {
         console.error('Login error:', error);
       } else if (data.user) {
         console.log('User logged in successfully:', data.user);
+
+        // Handle remember me
+        if (this.rememberMe()) {
+          this.saveEmail(credentials.email);
+        } else {
+          this.clearSavedEmail();
+        }
+
         // Redirect to dashboard
         this.router.navigate(['/dashboard']);
       }
@@ -71,5 +94,30 @@ export class AuthSigninComponent {
 
   togglePasswordVisibility() {
     this.showPassword.set(!this.showPassword());
+  }
+
+  private saveEmail(email: string): void {
+    try {
+      localStorage.setItem(this.REMEMBER_EMAIL_KEY, email);
+    } catch (error) {
+      console.error('Error saving email to localStorage:', error);
+    }
+  }
+
+  private getSavedEmail(): string | null {
+    try {
+      return localStorage.getItem(this.REMEMBER_EMAIL_KEY);
+    } catch (error) {
+      console.error('Error reading email from localStorage:', error);
+      return null;
+    }
+  }
+
+  private clearSavedEmail(): void {
+    try {
+      localStorage.removeItem(this.REMEMBER_EMAIL_KEY);
+    } catch (error) {
+      console.error('Error clearing email from localStorage:', error);
+    }
   }
 }
