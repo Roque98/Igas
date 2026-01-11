@@ -48,6 +48,7 @@ Toda la documentación del proyecto está en la carpeta `documentacion/`:
 
 ### 🔧 Configuración
 - **[🔐 Supabase](./documentacion/SUPABASE.md)** - Configuración de backend y autenticación
+- **[🔑 Autenticación](./documentacion/AUTENTICACION.md)** - Sistema de login/logout y guards
 - **[🔄 GitFlow](./documentacion/GITFLOW.md)** - Flujo de trabajo con Git
 - **[📝 Commits](./documentacion/COMMITS.md)** - Convenciones de commits
 

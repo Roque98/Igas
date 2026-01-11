@@ -11,26 +11,14 @@ Bienvenido a la documentación de desarrollo del proyecto IGAS. Esta wiki contie
 
 ### 🔧 Configuración
 - [Supabase - Backend y Autenticación](./SUPABASE.md)
-- [Variables de Entorno](./VARIABLES_ENTORNO.md)
 - [GitFlow - Flujo de Trabajo](./GITFLOW.md)
 
 ### 🏗️ Arquitectura
-- [Estructura de Carpetas](./ARQUITECTURA.md#estructura-de-carpetas)
-- [Componentes y Servicios](./ARQUITECTURA.md#componentes)
-- [Guards y Routing](./ARQUITECTURA.md#routing)
+- [Estructura del Proyecto](./ARQUITECTURA.md)
+- [Sistema de Autenticación](./AUTENTICACION.md)
 
 ### 💻 Desarrollo
-- [Estándares de Código](./ESTANDARES.md)
 - [Convenciones de Commits](./COMMITS.md)
-- [Testing](./TESTING.md)
-
-### 🔐 Seguridad
-- [Mejores Prácticas](./SEGURIDAD.md)
-- [Manejo de Credenciales](./SEGURIDAD.md#credenciales)
-
-### 📦 Deployment
-- [Build y Deploy](./DEPLOYMENT.md)
-- [CI/CD](./DEPLOYMENT.md#cicd)
 
 ## 🛠️ Stack Tecnológico
 
