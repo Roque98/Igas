@@ -171,8 +171,8 @@ import { publicGuard } from './core/guards/auth.guard';
 
 const routes: Routes = [
   {
-    path: 'auth/signin',
-    component: SignInComponent,
+    path: 'login',
+    component: AuthSigninComponent,
     canActivate: [publicGuard]
   }
 ];

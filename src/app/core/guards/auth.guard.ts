@@ -22,7 +22,7 @@ export const authGuard: CanActivateFn = async (route, state) => {
   }
 
   // Redirect to login if not authenticated
-  router.navigate(['/auth/signin'], {
+  router.navigate(['/login'], {
     queryParams: { returnUrl: state.url }
   });
   return false;
@@ -32,8 +32,8 @@ export const authGuard: CanActivateFn = async (route, state) => {
  * Public Guard - Redirects authenticated users away from public pages (like login)
  * Usage in routes:
  * {
- *   path: 'auth/signin',
- *   component: SignInComponent,
+ *   path: 'login',
+ *   component: AuthSigninComponent,
  *   canActivate: [publicGuard]
  * }
  */
