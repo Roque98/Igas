@@ -12,7 +12,7 @@
           <div class="mb-4">
             <i class="feather icon-unlock auth-icon"></i>
           </div>
-          <h3 class="mb-4">Login</h3>
+          <h3 class="mb-4">Iniciar Sesión</h3>
           @if (error()) {
             <div class="alert alert-danger" role="alert">
               {{ error() }}
@@ -24,7 +24,7 @@
               class="form-control"
               id="floatingInput"
               [class.is-invalid]="submitted() && loginForm.email().invalid()"
-              placeholder="Email Address"
+              placeholder="Correo Electrónico"
               [field]="loginForm.email"
             />
             @if (submitted() && loginForm.email().invalid()) {
@@ -43,7 +43,7 @@
                 class="form-control"
                 [field]="loginForm.password"
                 [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             } @else {
               <input
@@ -52,7 +52,7 @@
                 class="form-control"
                 [field]="loginForm.password"
                 [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             }
             <i
@@ -71,25 +71,25 @@
           <div class="form-group text-start">
             <div class="checkbox checkbox-fill d-inline">
               <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="" />
-              <label for="checkbox-fill-a1" class="cr">Save Details</label>
+              <label for="checkbox-fill-a1" class="cr">Recordar datos</label>
             </div>
           </div>
           <button type="submit" class="btn btn-primary mb-4" [disabled]="loading()">
             @if (loading()) {
               <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Logging in...
+              Iniciando sesión...
             } @else {
-              Login
+              Iniciar Sesión
             }
           </button>
           <p class="mb-2 text-muted">
-            Forgot password?
-            <a [routerLink]="['#']">Reset</a>
+            ¿Olvidaste tu contraseña?
+            <a [routerLink]="['#']">Recuperar</a>
           </p>
         </form>
         <p class="mb-0 text-muted">
-          Don’t have an account?
-          <a [routerLink]="['/register']">Sign up</a>
+          ¿No tienes cuenta?
+          <a [routerLink]="['/register']">Registrarse</a>
         </p>
       </div>
     </div>

@@ -27,11 +27,11 @@ export class AuthSignupComponent {
   });
 
   registerForm = form(this.registerModel, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required' });
-    email(schemaPath.email, { message: 'Enter a valid email address' });
-    required(schemaPath.password, { message: 'Password is required' });
-    minLength(schemaPath.password, 8, { message: 'Password must be at least 8 characters' });
-    required(schemaPath.username, { message: 'Username is required' });
+    required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
+    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
+    required(schemaPath.password, { message: 'La contraseña es obligatoria' });
+    minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
+    required(schemaPath.username, { message: 'El nombre de usuario es obligatorio' });
   });
 
   onSubmit(event: Event) {

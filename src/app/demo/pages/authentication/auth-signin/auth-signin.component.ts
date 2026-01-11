@@ -30,10 +30,10 @@ export class AuthSigninComponent {
   });
 
   loginForm = form(this.loginModal, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required' });
-    email(schemaPath.email, { message: 'Enter a valid email address' });
-    required(schemaPath.password, { message: 'Password is required' });
-    minLength(schemaPath.password, 8, { message: 'Password must be at least 8 characters' });
+    required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
+    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
+    required(schemaPath.password, { message: 'La contraseña es obligatoria' });
+    minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
   });
 
   async onSubmit(event: Event) {
@@ -61,7 +61,7 @@ export class AuthSigninComponent {
         this.router.navigate(['/dashboard']);
       }
     } catch (err: any) {
-      this.error.set('An unexpected error occurred. Please try again.');
+      this.error.set('Ocurrió un error inesperado. Por favor, intenta de nuevo.');
       console.error('Unexpected error:', err);
     } finally {
       this.loading.set(false);
