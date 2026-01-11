@@ -13,6 +13,11 @@
             <i class="feather icon-unlock auth-icon"></i>
           </div>
           <h3 class="mb-4">Login</h3>
+          @if (error()) {
+            <div class="alert alert-danger" role="alert">
+              {{ error() }}
+            </div>
+          }
           <div class="input-group mb-3">
             <input
               type="email"
@@ -69,7 +74,14 @@
               <label for="checkbox-fill-a1" class="cr">Save Details</label>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mb-4">Login</button>
+          <button type="submit" class="btn btn-primary mb-4" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Logging in...
+            } @else {
+              Login
+            }
+          </button>
           <p class="mb-2 text-muted">
             Forgot password?
             <a [routerLink]="['#']">Reset</a>
