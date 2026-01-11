@@ -60,13 +60,14 @@ const routes: Routes = [
         path: 'forgot-password',
         loadComponent: () =>
           import('./demo/pages/authentication/auth-forgot-password/auth-forgot-password.component').then((c) => c.AuthForgotPasswordComponent)
-      },
-      {
-        path: 'reset-password',
-        loadComponent: () =>
-          import('./demo/pages/authentication/auth-reset-password/auth-reset-password.component').then((c) => c.AuthResetPasswordComponent)
       }
     ]
+  },
+  {
+    path: 'reset-password',
+    component: GuestComponent,
+    loadComponent: () =>
+      import('./demo/pages/authentication/auth-reset-password/auth-reset-password.component').then((c) => c.AuthResetPasswordComponent)
   }
 ];
 
