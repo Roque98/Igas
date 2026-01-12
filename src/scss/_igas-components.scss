@@ -1,0 +1,424 @@
+// ============================================================================
+// iGAS Custom UI Components
+// ============================================================================
+// Componentes personalizados con branding iGAS
+// ============================================================================
+
+@import 'variables';
+
+// ============================================================================
+// BOTONES PRIMARIOS CON AMARILLO iGAS
+// ============================================================================
+
+.btn-primary {
+  background-color: $igas-yellow-primary !important;
+  border-color: $igas-yellow-primary !important;
+  color: #fff !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: darken($igas-yellow-primary, 10%) !important;
+    border-color: darken($igas-yellow-primary, 10%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba($igas-yellow-primary, 0.3);
+  }
+
+  &:active, &:focus {
+    background-color: darken($igas-yellow-primary, 15%) !important;
+    border-color: darken($igas-yellow-primary, 15%) !important;
+  }
+
+  &:disabled {
+    background-color: lighten($igas-yellow-primary, 20%) !important;
+    border-color: lighten($igas-yellow-primary, 20%) !important;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-outline-primary {
+  color: $igas-yellow-primary !important;
+  border-color: $igas-yellow-primary !important;
+  background-color: transparent !important;
+
+  &:hover {
+    background-color: $igas-yellow-primary !important;
+    border-color: $igas-yellow-primary !important;
+    color: #fff !important;
+  }
+}
+
+// Botones secundarios con gris iGAS
+.btn-secondary {
+  background-color: $igas-gray-dark !important;
+  border-color: $igas-gray-dark !important;
+  color: #fff !important;
+
+  &:hover {
+    background-color: darken($igas-gray-dark, 10%) !important;
+    border-color: darken($igas-gray-dark, 10%) !important;
+  }
+}
+
+// ============================================================================
+// BADGES DE SEMÁFORO SLA
+// ============================================================================
+
+.badge-sla {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  // SLA OK (0-70%)
+  &.badge-sla-ok {
+    background-color: lighten($sla-green, 45%);
+    color: darken($sla-green, 10%);
+    border: 1px solid lighten($sla-green, 30%);
+
+    &::before {
+      background-color: $sla-green;
+    }
+  }
+
+  // SLA Advertencia (70-100%)
+  &.badge-sla-warning {
+    background-color: lighten($sla-yellow, 40%);
+    color: darken($sla-yellow, 30%);
+    border: 1px solid lighten($sla-yellow, 25%);
+
+    &::before {
+      background-color: $sla-yellow;
+      animation: pulse-yellow 2s infinite;
+    }
+  }
+
+  // SLA Crítico (>100%)
+  &.badge-sla-critical {
+    background-color: lighten($sla-red, 35%);
+    color: darken($sla-red, 10%);
+    border: 1px solid lighten($sla-red, 20%);
+
+    &::before {
+      background-color: $sla-red;
+      animation: pulse-red 1s infinite;
+    }
+  }
+}
+
+@keyframes pulse-yellow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba($sla-red, 0.7);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba($sla-red, 0);
+  }
+}
+
+// ============================================================================
+// BADGES DE PRIORIDAD
+// ============================================================================
+
+.badge-priority {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    display: inline-block;
+  }
+
+  // Prioridad Crítica
+  &.badge-priority-critical {
+    background-color: lighten($priority-critical, 35%);
+    color: darken($priority-critical, 10%);
+    border: 1px solid lighten($priority-critical, 20%);
+
+    &::before {
+      border-bottom: 10px solid $priority-critical;
+    }
+  }
+
+  // Prioridad Alta
+  &.badge-priority-high {
+    background-color: lighten($priority-high, 40%);
+    color: darken($priority-high, 20%);
+    border: 1px solid lighten($priority-high, 25%);
+
+    &::before {
+      border-bottom: 10px solid $priority-high;
+    }
+  }
+
+  // Prioridad Media
+  &.badge-priority-medium {
+    background-color: lighten($priority-medium, 40%);
+    color: darken($priority-medium, 30%);
+    border: 1px solid lighten($priority-medium, 25%);
+
+    &::before {
+      border-bottom: 10px solid $priority-medium;
+    }
+  }
+
+  // Prioridad Baja
+  &.badge-priority-low {
+    background-color: lighten($priority-low, 45%);
+    color: darken($priority-low, 10%);
+    border: 1px solid lighten($priority-low, 30%);
+
+    &::before {
+      border-bottom: 10px solid $priority-low;
+    }
+  }
+}
+
+// ============================================================================
+// CARDS CON ESTILOS CORPORATIVOS
+// ============================================================================
+
+.card-igas {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .card-header-igas {
+    background: linear-gradient(135deg, $igas-yellow-primary 0%, $igas-yellow-alt 100%);
+    color: #fff;
+    padding: 15px 20px;
+    font-weight: 600;
+    border-bottom: none;
+
+    &.card-header-secondary {
+      background: linear-gradient(135deg, $igas-gray-dark 0%, lighten($igas-gray-dark, 10%) 100%);
+    }
+  }
+
+  .card-body-igas {
+    padding: 20px;
+  }
+
+  .card-footer-igas {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    padding: 12px 20px;
+  }
+}
+
+// Variantes de cards
+.card-igas-outlined {
+  border: 2px solid $igas-yellow-primary;
+  box-shadow: none;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba($igas-yellow-primary, 0.2);
+  }
+}
+
+.card-igas-minimal {
+  border: none;
+  border-left: 4px solid $igas-yellow-primary;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// ============================================================================
+// COMPONENTES DE ESTADO (ACTIVO/INACTIVO)
+// ============================================================================
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  // Estado Activo
+  &.status-active {
+    background-color: lighten(#4CAF50, 45%);
+    color: darken(#4CAF50, 10%);
+    border: 1px solid lighten(#4CAF50, 30%);
+
+    &::before {
+      background-color: #4CAF50;
+      box-shadow: 0 0 4px #4CAF50;
+    }
+  }
+
+  // Estado Inactivo
+  &.status-inactive {
+    background-color: #f5f5f5;
+    color: #757575;
+    border: 1px solid #e0e0e0;
+
+    &::before {
+      background-color: #9e9e9e;
+    }
+  }
+
+  // Estado Suspendido
+  &.status-suspended {
+    background-color: lighten(#FF9800, 40%);
+    color: darken(#FF9800, 20%);
+    border: 1px solid lighten(#FF9800, 25%);
+
+    &::before {
+      background-color: #FF9800;
+    }
+  }
+
+  // Estado En Proceso
+  &.status-processing {
+    background-color: lighten(#2196F3, 45%);
+    color: darken(#2196F3, 10%);
+    border: 1px solid lighten(#2196F3, 30%);
+
+    &::before {
+      background-color: #2196F3;
+      animation: pulse-blue 1.5s infinite;
+    }
+  }
+}
+
+@keyframes pulse-blue {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// ============================================================================
+// INDICADORES DE PROGRESO CON BRANDING iGAS
+// ============================================================================
+
+.progress-igas {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  overflow: hidden;
+
+  .progress-bar-igas {
+    background: linear-gradient(90deg, $igas-yellow-primary 0%, $igas-yellow-alt 100%);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-image: linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 20px 20px;
+      animation: progress-animation 1s linear infinite;
+    }
+  }
+}
+
+@keyframes progress-animation {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 20px;
+  }
+}
+
+// ============================================================================
+// HELPERS Y UTILIDADES
+// ============================================================================
+
+// Text colors
+.text-igas-yellow {
+  color: $igas-yellow-primary !important;
+}
+
+.text-igas-gray {
+  color: $igas-gray-dark !important;
+}
+
+// Background colors
+.bg-igas-yellow {
+  background-color: $igas-yellow-primary !important;
+}
+
+.bg-igas-gray {
+  background-color: $igas-gray-dark !important;
+}
+
+// Borders
+.border-igas-yellow {
+  border-color: $igas-yellow-primary !important;
+}
+
+.border-igas-gray {
+  border-color: $igas-gray-dark !important;
+}

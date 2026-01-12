@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes UI iGAS - Guía de Uso</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #e5a100 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            color: #F9B000;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .component-showcase {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .component-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        h3 {
+            color: #58585A;
+            margin: 25px 0 15px 0;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border: 1px solid #b3d9e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Componentes UI iGAS</h1>
+            <p>Guía completa de componentes personalizados con branding corporativo</p>
+        </div>
+
+        <div class="content">
+            <!-- Paleta de Colores -->
+            <div class="section">
+                <h2 class="section-title">Paleta de Colores</h2>
+                <p>Variables SCSS disponibles en <code>src/scss/_variables.scss</code></p>
+
+                <table>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Valor</th>
+                        <th>Color</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td><code>$igas-yellow-primary</code></td>
+                        <td>#F9B000</td>
+                        <td style="background: #F9B000;"></td>
+                        <td>Color primario, botones principales</td>
+                    </tr>
+                    <tr>
+                        <td><code>$igas-yellow-alt</code></td>
+                        <td>#FDB913</td>
+                        <td style="background: #FDB913;"></td>
+                        <td>Amarillo alternativo, gradientes</td>
+                    </tr>
+                    <tr>
+                        <td><code>$igas-gray-dark</code></td>
+                        <td>#58585A</td>
+                        <td style="background: #58585A;"></td>
+                        <td>Gris oscuro, textos, botones secundarios</td>
+                    </tr>
+                    <tr>
+                        <td><code>$sla-green</code></td>
+                        <td>#4CAF50</td>
+                        <td style="background: #4CAF50;"></td>
+                        <td>SLA OK (0-70%)</td>
+                    </tr>
+                    <tr>
+                        <td><code>$sla-yellow</code></td>
+                        <td>#FFC107</td>
+                        <td style="background: #FFC107;"></td>
+                        <td>SLA Advertencia (70-100%)</td>
+                    </tr>
+                    <tr>
+                        <td><code>$sla-red</code></td>
+                        <td>#F44336</td>
+                        <td style="background: #F44336;"></td>
+                        <td>SLA Crítico (>100%)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Botones -->
+            <div class="section">
+                <h2 class="section-title">Botones</h2>
+
+                <h3>Botón Primario (Amarillo iGAS)</h3>
+                <div class="component-showcase">
+                    <div class="component-row">
+                        <button class="btn btn-primary">Botón Primario</button>
+                        <button class="btn btn-primary" disabled>Deshabilitado</button>
+                    </div>
+                </div>
+                <pre>&lt;button class="btn btn-primary"&gt;Botón Primario&lt;/button&gt;</pre>
+
+                <h3>Botón Outline Primario</h3>
+                <div class="component-showcase">
+                    <button class="btn btn-outline-primary">Outline Primario</button>
+                </div>
+                <pre>&lt;button class="btn btn-outline-primary"&gt;Outline Primario&lt;/button&gt;</pre>
+
+                <h3>Botón Secundario (Gris iGAS)</h3>
+                <div class="component-showcase">
+                    <button class="btn btn-secondary">Botón Secundario</button>
+                </div>
+                <pre>&lt;button class="btn btn-secondary"&gt;Botón Secundario&lt;/button&gt;</pre>
+
+                <div class="info-box">
+                    <strong>📌 Características:</strong>
+                    <ul>
+                        <li>Efecto hover con elevación (translateY(-2px))</li>
+                        <li>Sombra con color del botón</li>
+                        <li>Transiciones suaves (0.3s)</li>
+                        <li>Estado deshabilitado con opacity reducida</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Badges SLA -->
+            <div class="section">
+                <h2 class="section-title">Badges de Semáforo SLA</h2>
+                <p>Indicadores visuales del cumplimiento de SLA con animaciones</p>
+
+                <h3>Estados de SLA</h3>
+                <div class="component-showcase">
+                    <div class="component-row">
+                        <span class="badge-sla badge-sla-ok">SLA OK</span>
+                        <span class="badge-sla badge-sla-warning">SLA Advertencia</span>
+                        <span class="badge-sla badge-sla-critical">SLA Crítico</span>
+                    </div>
+                </div>
+
+                <pre>&lt;span class="badge-sla badge-sla-ok"&gt;SLA OK&lt;/span&gt;
+&lt;span class="badge-sla badge-sla-warning"&gt;SLA Advertencia&lt;/span&gt;
+&lt;span class="badge-sla badge-sla-critical"&gt;SLA Crítico&lt;/span&gt;</pre>
+
+                <table>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Rango SLA</th>
+                        <th>Color</th>
+                        <th>Animación</th>
+                    </tr>
+                    <tr>
+                        <td><code>badge-sla-ok</code></td>
+                        <td>0-70%</td>
+                        <td>Verde (#4CAF50)</td>
+                        <td>Sin animación</td>
+                    </tr>
+                    <tr>
+                        <td><code>badge-sla-warning</code></td>
+                        <td>70-100%</td>
+                        <td>Amarillo (#FFC107)</td>
+                        <td>Pulse (2s)</td>
+                    </tr>
+                    <tr>
+                        <td><code>badge-sla-critical</code></td>
+                        <td>>100%</td>
+                        <td>Rojo (#F44336)</td>
+                        <td>Pulse rápido (1s)</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Badges de Prioridad -->
+            <div class="section">
+                <h2 class="section-title">Badges de Prioridad</h2>
+                <p>Indicadores de prioridad de tickets con ícono de flecha</p>
+
+                <h3>Niveles de Prioridad</h3>
+                <div class="component-showcase">
+                    <div class="component-row">
+                        <span class="badge-priority badge-priority-critical">Crítica</span>
+                        <span class="badge-priority badge-priority-high">Alta</span>
+                        <span class="badge-priority badge-priority-medium">Media</span>
+                        <span class="badge-priority badge-priority-low">Baja</span>
+                    </div>
+                </div>
+
+                <pre>&lt;span class="badge-priority badge-priority-critical"&gt;Crítica&lt;/span&gt;
+&lt;span class="badge-priority badge-priority-high"&gt;Alta&lt;/span&gt;
+&lt;span class="badge-priority badge-priority-medium"&gt;Media&lt;/span&gt;
+&lt;span class="badge-priority badge-priority-low"&gt;Baja&lt;/span&gt;</pre>
+
+                <table>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Color</th>
+                        <th>Variable</th>
+                    </tr>
+                    <tr>
+                        <td><code>badge-priority-critical</code></td>
+                        <td>Rojo</td>
+                        <td><code>$priority-critical</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>badge-priority-high</code></td>
+                        <td>Naranja</td>
+                        <td><code>$priority-high</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>badge-priority-medium</code></td>
+                        <td>Amarillo</td>
+                        <td><code>$priority-medium</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>badge-priority-low</code></td>
+                        <td>Verde</td>
+                        <td><code>$priority-low</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Cards -->
+            <div class="section">
+                <h2 class="section-title">Cards con Branding iGAS</h2>
+
+                <h3>Card Standard con Header</h3>
+                <div class="component-showcase">
+                    <div class="card-igas" style="max-width: 400px;">
+                        <div class="card-header-igas">
+                            Ticket #IGAS-20260111-0001
+                        </div>
+                        <div class="card-body-igas">
+                            <p>Contenido del card con información del ticket...</p>
+                        </div>
+                        <div class="card-footer-igas">
+                            Footer opcional
+                        </div>
+                    </div>
+                </div>
+
+                <pre>&lt;div class="card-igas"&gt;
+  &lt;div class="card-header-igas"&gt;
+    Título del Card
+  &lt;/div&gt;
+  &lt;div class="card-body-igas"&gt;
+    Contenido
+  &lt;/div&gt;
+  &lt;div class="card-footer-igas"&gt;
+    Footer
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+                <h3>Variantes de Cards</h3>
+                <pre>&lt;!-- Card con borde --&gt;
+&lt;div class="card-igas card-igas-outlined"&gt;...&lt;/div&gt;
+
+&lt;!-- Card minimal con borde izquierdo --&gt;
+&lt;div class="card-igas card-igas-minimal"&gt;...&lt;/div&gt;</pre>
+            </div>
+
+            <!-- Badges de Estado -->
+            <div class="section">
+                <h2 class="section-title">Badges de Estado</h2>
+
+                <h3>Estados Disponibles</h3>
+                <div class="component-showcase">
+                    <div class="component-row">
+                        <span class="status-badge status-active">Activo</span>
+                        <span class="status-badge status-inactive">Inactivo</span>
+                        <span class="status-badge status-suspended">Suspendido</span>
+                        <span class="status-badge status-processing">En Proceso</span>
+                    </div>
+                </div>
+
+                <pre>&lt;span class="status-badge status-active"&gt;Activo&lt;/span&gt;
+&lt;span class="status-badge status-inactive"&gt;Inactivo&lt;/span&gt;
+&lt;span class="status-badge status-suspended"&gt;Suspendido&lt;/span&gt;
+&lt;span class="status-badge status-processing"&gt;En Proceso&lt;/span&gt;</pre>
+
+                <div class="info-box">
+                    <strong>📌 Características:</strong>
+                    <ul>
+                        <li>Indicador circular animado</li>
+                        <li>Efecto pulse en estados activos</li>
+                        <li>Colores semánticos claros</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="section">
+                <h2 class="section-title">Barra de Progreso</h2>
+
+                <h3>Progress Bar con Branding iGAS</h3>
+                <div class="component-showcase">
+                    <div class="progress-igas">
+                        <div class="progress-bar-igas" style="width: 75%;"></div>
+                    </div>
+                </div>
+
+                <pre>&lt;div class="progress-igas"&gt;
+  &lt;div class="progress-bar-igas" style="width: 75%;"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+                <div class="info-box">
+                    <strong>📌 Características:</strong>
+                    <ul>
+                        <li>Gradiente amarillo iGAS</li>
+                        <li>Animación de rayas diagonales</li>
+                        <li>Transiciones suaves al cambiar progreso</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Helpers -->
+            <div class="section">
+                <h2 class="section-title">Clases Helper</h2>
+
+                <table>
+                    <tr>
+                        <th>Clase</th>
+                        <th>Descripción</th>
+                    </tr>
+                    <tr>
+                        <td><code>.text-igas-yellow</code></td>
+                        <td>Texto en amarillo iGAS</td>
+                    </tr>
+                    <tr>
+                        <td><code>.text-igas-gray</code></td>
+                        <td>Texto en gris iGAS</td>
+                    </tr>
+                    <tr>
+                        <td><code>.bg-igas-yellow</code></td>
+                        <td>Fondo amarillo iGAS</td>
+                    </tr>
+                    <tr>
+                        <td><code>.bg-igas-gray</code></td>
+                        <td>Fondo gris iGAS</td>
+                    </tr>
+                    <tr>
+                        <td><code>.border-igas-yellow</code></td>
+                        <td>Borde amarillo iGAS</td>
+                    </tr>
+                    <tr>
+                        <td><code>.border-igas-gray</code></td>
+                        <td>Borde gris iGAS</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Uso en Angular -->
+            <div class="section">
+                <h2 class="section-title">Uso en Angular</h2>
+
+                <h3>Ejemplo en Componente</h3>
+                <pre>&lt;!-- En tu template de Angular --&gt;
+&lt;div class="card-igas"&gt;
+  &lt;div class="card-header-igas"&gt;
+    {{ ticket.folio }}
+  &lt;/div&gt;
+  &lt;div class="card-body-igas"&gt;
+    &lt;p&gt;{{ ticket.descripcion }}&lt;/p&gt;
+
+    &lt;div class="component-row"&gt;
+      &lt;span
+        class="badge-priority"
+        [ngClass]="{
+          'badge-priority-critical': ticket.prioridad === 'Crítica',
+          'badge-priority-high': ticket.prioridad === 'Alta',
+          'badge-priority-medium': ticket.prioridad === 'Media',
+          'badge-priority-low': ticket.prioridad === 'Baja'
+        }"&gt;
+        {{ ticket.prioridad }}
+      &lt;/span&gt;
+
+      &lt;span
+        class="badge-sla"
+        [ngClass]="{
+          'badge-sla-ok': ticket.porcentajeSLA &lt; 70,
+          'badge-sla-warning': ticket.porcentajeSLA >= 70 && ticket.porcentajeSLA &lt;= 100,
+          'badge-sla-critical': ticket.porcentajeSLA > 100
+        }"&gt;
+        SLA: {{ ticket.porcentajeSLA }}%
+      &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -9,11 +9,30 @@ $header-height: 70px;
 $Menu-width: 264px;
 $Menu-collapsed-width: 80px;
 
+// =======================================
+//     iGAS Corporate Colors
+// =======================================
+$igas-yellow-primary: #F9B000;    // Amarillo/Dorado Principal
+$igas-yellow-alt: #FDB913;        // Amarillo alternativo
+$igas-gray-dark: #58585A;         // Gris Oscuro
+$igas-gray-text: #3E3E3E;         // Textos secundarios
+
+// Colores Funcionales (Semáforo SLA)
+$sla-green: #4CAF50;              // 0-70% SLA (OK)
+$sla-yellow: #FFC107;             // 70-100% SLA (Advertencia)
+$sla-red: #F44336;                // >100% SLA (Crítico)
+
+// Prioridades de Tickets
+$priority-critical: #F44336;      // Crítica (rojo)
+$priority-high: #FF9800;          // Alta (naranja)
+$priority-medium: #FFC107;        // Media (amarillo)
+$priority-low: #4CAF50;           // Baja (verde)
+
 // color list for build layouts
 // temp variables
 $theme-color: linear-gradient(-135deg, #1de9b6 0%, #1dc4e9 100%);
 $theme-color2: linear-gradient(-135deg, #899fd4 0%, #a389d4 100%);
-$primary-color: #04a9f5;
+$primary-color: $igas-yellow-primary; // Cambiado a amarillo iGAS
 $warning-color: #f4c22b;
 $danger-color: #f44236;
 $success-color: #1de9b6;
