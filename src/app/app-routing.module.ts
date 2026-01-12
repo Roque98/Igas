@@ -52,10 +52,11 @@ const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./demo/pages/authentication/auth-signin/auth-signin.component').then((c) => c.AuthSigninComponent)
       },
-      {
-        path: 'register',
-        loadComponent: () => import('./demo/pages/authentication/auth-signup/auth-signup.component').then((c) => c.AuthSignupComponent)
-      },
+      // Registro deshabilitado - Los usuarios son creados por administradores
+      // {
+      //   path: 'register',
+      //   loadComponent: () => import('./demo/pages/authentication/auth-signup/auth-signup.component').then((c) => c.AuthSignupComponent)
+      // },
       {
         path: 'forgot-password',
         loadComponent: () =>
