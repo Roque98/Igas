@@ -8,6 +8,7 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
   selector: 'app-nav-right',
@@ -19,6 +20,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 export class NavRightComponent {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   // Observable para el usuario actual
   currentUser$ = this.supabase.currentUser$;
@@ -33,7 +35,9 @@ export class NavRightComponent {
     const { error } = await this.supabase.signOut();
     if (error) {
       console.error('Error logging out:', error);
+      this.notificationService.error('Error al cerrar sesión. Por favor, intenta de nuevo.');
     } else {
+      this.notificationService.info('Has cerrado sesión correctamente.');
       this.router.navigate(['/login']);
     }
   }

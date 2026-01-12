@@ -7,6 +7,7 @@ import { Field, form, minLength, required } from '@angular/forms/signals';
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
@@ -18,6 +19,7 @@ import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messa
 export class AuthResetPasswordComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   submitted = signal(false);
   error = signal('');
@@ -87,6 +89,10 @@ export class AuthResetPasswordComponent implements OnInit {
         console.error('Password update error:', error);
       } else {
         console.log('Password updated successfully');
+
+        // Show success notification
+        this.notificationService.success('Tu contraseña ha sido actualizada correctamente.');
+
         // Redirect to dashboard
         this.router.navigate(['/dashboard']);
       }

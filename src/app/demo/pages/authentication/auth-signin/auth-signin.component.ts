@@ -7,6 +7,7 @@ import { email, Field, form, minLength, required } from '@angular/forms/signals'
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
@@ -19,6 +20,7 @@ export class AuthSigninComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private notificationService = inject(NotificationService);
 
   private readonly REMEMBER_EMAIL_KEY = 'igas_remember_email';
 
@@ -95,6 +97,9 @@ export class AuthSigninComponent implements OnInit {
         } else {
           this.clearSavedEmail();
         }
+
+        // Show success notification
+        this.notificationService.success('¡Bienvenido! Has iniciado sesión correctamente.');
 
         // Redirect to dashboard
         this.router.navigate(['/dashboard']);
