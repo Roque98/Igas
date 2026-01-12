@@ -12,7 +12,17 @@ export class SupabaseService {
   public currentUser$: Observable<User | null> = this.currentUser.asObservable();
 
   constructor() {
-    this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey);
+    // Create Supabase client with explicit auth configuration
+    this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
+      auth: {
+        autoRefreshToken: true, // Automatically refresh the token before expiry
+        persistSession: true, // Persist session in localStorage
+        detectSessionInUrl: true, // Detect OAuth session in URL (for password reset)
+        storage: window.localStorage, // Use localStorage for session persistence
+        storageKey: 'igas-auth-token', // Custom storage key for better organization
+        flowType: 'pkce' // Use PKCE flow for better security
+      }
+    });
     this.loadUser();
     this.authChanges();
   }
@@ -56,17 +66,39 @@ export class SupabaseService {
 
   /**
    * Listen to auth state changes
+   * Handles automatic token refresh and session management
    */
   private authChanges() {
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      // Handle token refresh errors
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Token refreshed successfully');
-      } else if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
+    this.supabase.auth.onAuthStateChange(async (event, session) => {
+      // Log authentication events for debugging
+      switch (event) {
+        case 'SIGNED_IN':
+          console.log('✅ User signed in successfully');
+          break;
+        case 'SIGNED_OUT':
+          console.log('👋 User signed out');
+          break;
+        case 'TOKEN_REFRESHED':
+          console.log('🔄 Token refreshed automatically');
+          // Token was successfully refreshed before expiry
+          break;
+        case 'USER_UPDATED':
+          console.log('👤 User profile updated');
+          break;
+        case 'PASSWORD_RECOVERY':
+          console.log('🔑 Password recovery initiated');
+          break;
+        default:
+          console.log(`🔔 Auth event: ${event}`);
       }
 
+      // Update current user observable
       this.currentUser.next(session?.user ?? null);
+
+      // Handle session expiry or refresh errors
+      if (!session && event !== 'SIGNED_OUT') {
+        console.warn('⚠️ Session lost - user may need to re-authenticate');
+      }
     });
   }
 
@@ -135,5 +167,56 @@ export class SupabaseService {
   async getSession() {
     const { data, error } = await this.supabase.auth.getSession();
     return { data, error };
+  }
+
+  /**
+   * Manually refresh the session token
+   * This is useful if you need to force a token refresh
+   * Note: Supabase automatically refreshes tokens, so this is rarely needed
+   */
+  async refreshSession() {
+    try {
+      const { data, error } = await this.supabase.auth.refreshSession();
+
+      if (error) {
+        console.error('❌ Error refreshing session:', error);
+        // If refresh fails, sign out to clear bad tokens
+        await this.signOut();
+        return { data: null, error };
+      }
+
+      console.log('✅ Session refreshed manually');
+      return { data, error: null };
+    } catch (error) {
+      console.error('❌ Unexpected error refreshing session:', error);
+      return { data: null, error };
+    }
+  }
+
+  /**
+   * Get session information including token expiry
+   * Useful for debugging and monitoring session status
+   */
+  async getSessionInfo() {
+    const { data, error } = await this.getSession();
+
+    if (error || !data.session) {
+      return null;
+    }
+
+    const session = data.session;
+    const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null;
+    const now = new Date();
+    const timeUntilExpiry = expiresAt ? expiresAt.getTime() - now.getTime() : null;
+    const minutesUntilExpiry = timeUntilExpiry ? Math.floor(timeUntilExpiry / 1000 / 60) : null;
+
+    return {
+      user: session.user,
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresAt,
+      minutesUntilExpiry,
+      isExpired: expiresAt ? now > expiresAt : true
+    };
   }
 }

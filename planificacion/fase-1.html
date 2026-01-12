@@ -331,7 +331,7 @@ Completar el sistema de autenticación, implementar gestión de usuarios, roles 
 <li>✅ Recuperación de contraseña (ya implementado)</li>
 <li>✅ Cambio de contraseña (ya implementado)</li>
 <li>✅ Mejorar manejo de errores con mensajes en español <a href="#version-1-1-0" style="font-size: 11px; color: #4CAF50;">[v1.1.0]</a></li>
-<li>⚪ Implementar refresh token automático</li>
+<li>✅ Implementar refresh token automático <a href="#version-1-8-0" style="font-size: 11px; color: #4CAF50;">[v1.8.0]</a></li>
 <li>⚪ Configurar políticas de contraseña en Supabase</li>
 <li>⚪ Implementar bloqueo de cuenta después de X intentos fallidos</li>
 
@@ -767,7 +767,21 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-7-0"><strong>v1.7.0</strong> - 12 de enero de 2026</p>
+    <p id="version-1-8-0"><strong>v1.8.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar refresh token automático <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Configuración explícita de autoRefreshToken en cliente Supabase</li>
+        <li>✅ Configuración de persistSession con localStorage</li>
+        <li>✅ Implementación de PKCE flow para mejor seguridad</li>
+        <li>✅ Custom storage key (igas-auth-token) para mejor organización</li>
+        <li>✅ Logging detallado de eventos de autenticación (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, etc.)</li>
+        <li>✅ Método refreshSession() para refresh manual si es necesario</li>
+        <li>✅ Método getSessionInfo() para debugging y monitoreo de tokens</li>
+        <li>✅ Información de expiración de tokens (minutesUntilExpiry)</li>
+        <li>✅ Manejo automático de errores de refresh con fallback a signOut</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-7-0"><strong>v1.7.0</strong> - 12 de enero de 2026</p>
     <ul>
         <li>✅ Eliminar links y referencias a "registro" en página de login <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
         <li>✅ Comentado signup menu item en navigation.ts</li>
@@ -861,7 +875,7 @@ CREATE TRIGGER profiles_audit_trigger
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
             Última actualización: 12 de enero de 2026<br>
-            Fase 1: v1.7.0 - 7 tareas completadas
+            Fase 1: v1.8.0 - 8 tareas completadas
         </p>
     </div>
 </body>
