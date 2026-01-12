@@ -9,13 +9,18 @@
     <div class="card">
       <div class="card-body text-center">
         <form (ngSubmit)="onSubmit($event)">
+          <!-- Logo iGAS -->
           <div class="mb-4">
-            <i class="feather icon-unlock auth-icon"></i>
+            <img src="assets/images/logo-igas.png" alt="iGAS" style="height: 60px; margin-bottom: 20px;" />
           </div>
-          <h3 class="mb-4">Iniciar Sesión</h3>
+          <h3 class="mb-2 text-igas-gray">Bienvenido</h3>
+          <p class="text-muted mb-4">Sistema de Mesa de Ayuda iGAS</p>
           @if (error()) {
-            <div class="alert alert-danger" role="alert">
-              {{ error() }}
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="feather icon-alert-circle me-2"></i>
+              <div>
+                <strong>Error:</strong> {{ error() }}
+              </div>
             </div>
           }
           <div class="input-group mb-3">
