@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 5: Mantenimientos e Instalaciones - iGAS Service Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 10px 0 0;
+        }
+
+        .badge-proceso { background: #FFC107; color: #333; }
+        .badge-pendiente { background: rgba(255,255,255,0.3); }
+        .badge-completado { background: #4CAF50; }
+        .badge-critica { background: #F44336; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .progress-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .content-section h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        .content-section h4 {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .content-section li {
+            margin: 8px 0;
+        }
+
+        .content-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #F44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #3E3E3E;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-wrap: wrap;
+            }
+
+            .navbar a {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html" class="active">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 5: Mantenimientos e Instalaciones</h1>
+            <span class="badge badge-pendiente">Pendiente</span>
+            <span class="badge badge-proceso">0%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-card">
+            <h3>Progreso de la Fase</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+                <div class="progress-bar-text">0% Completado</div>
+            </div>
+        </div>
+
+        <div class="content-section"><h2>Objetivo</h2>
+Desarrollar módulos de mantenimientos mensuales de BD con checklist y módulo de instalaciones con checklist, firma digital del cliente y generación automática de tickets/casos pendientes.
+
+---
+
+<div class="content-section"><h2>Tareas</h2>
+
+<h3>1. Modelo de Datos - Mantenimientos en Supabase</h3>
+
+<h4>1.1 Tabla de Mantenimientos</h4>
+</p><div class="code-block">CREATE TABLE public.mantenimientos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  cliente_id UUID REFERENCES clientes(id) NOT NULL,
+  sucursal_id UUID REFERENCES sucursales(id),
+  tipo TEXT CHECK (tipo IN ('Mensual BD', 'Preventivo', 'Correctivo', 'Actualización')) DEFAULT 'Mensual BD',
+  fecha_programada DATE NOT NULL,
+  fecha_realizado TIMESTAMPTZ,
+  responsable_id UUID REFERENCES profiles(id),
+  estatus TEXT CHECK (estatus IN ('Programado', 'En proceso', 'Completado', 'Cancelado', 'Requiere acción')) DEFAULT 'Programado',
+  resultado TEXT CHECK (resultado IN ('OK', 'Requiere acción', 'Cancelado')),
+  notas_generales TEXT,
+  tiempo_invertido_minutos INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_mantenimientos_cliente ON mantenimientos(cliente_id);
+CREATE INDEX idx_mantenimientos_fecha ON mantenimientos(fecha_programada);
+CREATE INDEX idx_mantenimientos_estatus ON mantenimientos(estatus);
+CREATE INDEX idx_mantenimientos_responsable ON mantenimientos(responsable_id);</div>
+
+
+<h4>1.2 Template de Checklist</h4>
+</p><div class="code-block">CREATE TABLE public.checklist_templates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT NOT NULL,
+  tipo_mantenimiento TEXT NOT NULL,
+  descripcion TEXT,
+  orden INTEGER,
+  activo BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE public.checklist_items_template (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  template_id UUID REFERENCES checklist_templates(id) ON DELETE CASCADE,
+  categoria TEXT, -- "Backup", "Integridad", "Espacio", "Índices", "Logs", etc.
+  descripcion TEXT NOT NULL,
+  orden INTEGER NOT NULL,
+  es_critico BOOLEAN DEFAULT false,
+  ayuda_texto TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insertar template para Mantenimiento Mensual BD
+INSERT INTO checklist_templates (nombre, tipo_mantenimiento, descripcion, orden)
+VALUES ('Mantenimiento Mensual BD', 'Mensual BD', 'Checklist estándar para mantenimiento mensual de base de datos', 1);
+
+-- Insertar items del checklist
+INSERT INTO checklist_items_template (template_id, categoria, descripcion, orden, es_critico) VALUES
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Backup', 'Verificar que existe backup reciente (menos de 24h)', 1, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Backup', 'Verificar integridad del backup', 2, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Espacio', 'Verificar espacio disponible en disco (mínimo 20%)', 3, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Integridad', 'Ejecutar DBCC CHECKDB (SQL Server) o equivalente', 4, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Índices', 'Revisar y optimizar índices fragmentados', 5, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Logs', 'Revisar logs de errores', 6, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Performance', 'Verificar queries lentos', 7, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Mantenimiento Mensual BD'), 'Seguridad', 'Verificar permisos y usuarios', 8, false);</div>
+
+
+<h4>1.3 Checklist Ejecutado</h4>
+</p><div class="code-block">CREATE TABLE public.mantenimiento_checklist (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  mantenimiento_id UUID REFERENCES mantenimientos(id) ON DELETE CASCADE,
+  item_descripcion TEXT NOT NULL,
+  categoria TEXT,
+  orden INTEGER,
+  estado TEXT CHECK (estado IN ('Hecho', 'Pendiente', 'No aplica')) NOT NULL,
+  es_critico BOOLEAN DEFAULT false,
+  comentario TEXT,
+  evidencia_url TEXT, -- URL de Storage para captura/foto
+  verificado_por UUID REFERENCES profiles(id),
+  verificado_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_checklist_mantenimiento ON mantenimiento_checklist(mantenimiento_id);</div>
+
+
+<h4>1.4 Evidencias de Mantenimiento</h4>
+</p><div class="code-block">CREATE TABLE public.mantenimiento_evidencias (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  mantenimiento_id UUID REFERENCES mantenimientos(id) ON DELETE CASCADE,
+  nombre_archivo TEXT NOT NULL,
+  ruta_storage TEXT NOT NULL,
+  tipo_archivo TEXT,
+  descripcion TEXT,
+  subido_por UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h3>2. Modelo de Datos - Instalaciones</h3>
+
+<h4>2.1 Tabla de Instalaciones</h4>
+</p><div class="code-block">CREATE TABLE public.instalaciones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  folio TEXT UNIQUE,
+  cliente_id UUID REFERENCES clientes(id) NOT NULL,
+  sucursal_id UUID REFERENCES sucursales(id) NOT NULL,
+  tipo_instalacion TEXT CHECK (tipo_instalacion IN ('Nueva', 'Actualización', 'Migración', 'Reinstalación')),
+  fecha_programada DATE,
+  fecha_inicio TIMESTAMPTZ,
+  fecha_fin TIMESTAMPTZ,
+  responsable_id UUID REFERENCES profiles(id),
+  equipo_instalacion UUID REFERENCES equipos(id),
+  estatus TEXT CHECK (estatus IN ('Programada', 'En proceso', 'Pendientes', 'Cerrada', 'Cancelada')) DEFAULT 'Programada',
+
+  -- Módulos a instalar
+  modulos_instalados TEXT[], -- Array: "POS", "Volumétrico", "Facturación", etc.
+
+  -- Firma digital
+  firma_cliente_url TEXT,
+  nombre_firmante TEXT,
+  puesto_firmante TEXT,
+  fecha_firma TIMESTAMPTZ,
+
+  notas_generales TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_instalaciones_cliente ON instalaciones(cliente_id);
+CREATE INDEX idx_instalaciones_fecha ON instalaciones(fecha_programada);
+CREATE INDEX idx_instalaciones_estatus ON instalaciones(estatus);</div>
+
+
+<h4>2.2 Template de Checklist de Instalación</h4>
+</p><div class="code-block">-- Usar misma estructura de checklist_templates
+INSERT INTO checklist_templates (nombre, tipo_mantenimiento, descripcion, orden)
+VALUES ('Instalación Completa iGAS', 'Instalación', 'Checklist para instalación completa de sistema iGAS', 1);
+
+INSERT INTO checklist_items_template (template_id, categoria, descripcion, orden, es_critico) VALUES
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Infraestructura', 'Verificar servidor/equipo cumple requisitos mínimos', 1, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Infraestructura', 'Verificar conexión a internet estable', 2, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Software', 'Instalar SQL Server / PostgreSQL', 3, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Software', 'Crear base de datos iGAS', 4, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Volumétrico', 'Instalar módulo Volumétrico A30', 5, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Volumétrico', 'Configurar dispensarios', 6, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'POS', 'Instalar módulo POS', 7, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'POS', 'Configurar impresora ticket', 8, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Facturación', 'Instalar módulo Facturación', 9, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Facturación', 'Configurar certificados SAT', 10, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'HASP', 'Instalar licencia HASP', 11, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'HASP', 'Verificar reconocimiento de licencia', 12, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Red', 'Configurar red local', 13, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Red', 'Configurar acceso remoto (AnyDesk)', 14, false),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Capacitación', 'Capacitar usuario en operación básica', 15, true),
+  ((SELECT id FROM checklist_templates WHERE nombre = 'Instalación Completa iGAS'), 'Pruebas', 'Realizar pruebas funcionales', 16, true);</div>
+
+
+<h4>2.3 Checklist de Instalación Ejecutado</h4>
+</p><div class="code-block">CREATE TABLE public.instalacion_checklist (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  instalacion_id UUID REFERENCES instalaciones(id) ON DELETE CASCADE,
+  item_descripcion TEXT NOT NULL,
+  categoria TEXT,
+  modulo TEXT, -- "POS", "Volumétrico", "Facturación", etc.
+  orden INTEGER,
+  estado TEXT CHECK (estado IN ('Hecho', 'Pendiente', 'No aplica')) NOT NULL,
+  es_critico BOOLEAN DEFAULT false,
+  comentario TEXT,
+  evidencia_url TEXT,
+  verificado_por UUID REFERENCES profiles(id),
+  verificado_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h4>2.4 Items Pendientes de Instalación</h4>
+</p><div class="code-block">CREATE TABLE public.instalacion_pendientes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  instalacion_id UUID REFERENCES instalaciones(id) ON DELETE CASCADE,
+  descripcion TEXT NOT NULL,
+  prioridad TEXT CHECK (prioridad IN ('Alta', 'Media', 'Baja')) DEFAULT 'Media',
+  fecha_compromiso DATE,
+  asignado_a UUID REFERENCES profiles(id),
+  ticket_id UUID REFERENCES tickets(id), -- Si se generó ticket
+  caso_id UUID REFERENCES casos(id), -- Si se generó caso
+  estatus TEXT CHECK (estatus IN ('Pendiente', 'En proceso', 'Resuelto')) DEFAULT 'Pendiente',
+  notas TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h3>3. Funciones Automáticas</h3>
+
+<h4>3.1 Generar Tickets/Casos de Pendientes</h4>
+</p><div class="code-block">-- Función para crear ticket automáticamente desde pendiente
+CREATE OR REPLACE FUNCTION generar_ticket_desde_pendiente(
+  p_pendiente_id UUID
+) RETURNS UUID AS $
+DECLARE
+  v_ticket_id UUID;
+  v_pendiente RECORD;
+  v_instalacion RECORD;
+BEGIN
+  -- Obtener pendiente
+  SELECT * INTO v_pendiente FROM instalacion_pendientes WHERE id = p_pendiente_id;
+
+  -- Obtener instalación
+  SELECT * INTO v_instalacion FROM instalaciones WHERE id = v_pendiente.instalacion_id;
+
+  -- Crear ticket
+  INSERT INTO tickets (
+    cliente_id,
+    sucursal_id,
+    categoria_id,
+    prioridad,
+    canal,
+    descripcion,
+    estatus_id,
+    sla_objetivo_minutos,
+    creado_por
+  )
+  SELECT
+    v_instalacion.cliente_id,
+    v_instalacion.sucursal_id,
+    (SELECT id FROM categorias_servicio WHERE nombre = 'Implementación'),
+    v_pendiente.prioridad,
+    'Portal',
+    'Pendiente de instalación: ' || v_pendiente.descripcion,
+    (SELECT id FROM estatus_tickets WHERE nombre = 'Nuevo'),
+    480, -- 8 horas
+    v_instalacion.responsable_id
+  RETURNING id INTO v_ticket_id;
+
+  -- Actualizar pendiente con ticket generado
+  UPDATE instalacion_pendientes
+  SET ticket_id = v_ticket_id
+  WHERE id = p_pendiente_id;
+
+  RETURN v_ticket_id;
+END;
+$ LANGUAGE plpgsql SECURITY DEFINER;</div>
+
+
+<h4>3.2 Trigger para Generar Alertas de Mantenimientos</h4>
+</p><div class="code-block">-- Generar alertas de mantenimientos programados
+CREATE OR REPLACE FUNCTION notificar_mantenimiento_programado()
+RETURNS void AS $
+BEGIN
+  INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, datos)
+  SELECT
+    m.responsable_id,
+    'mantenimiento_programado',
+    'Mantenimiento programado',
+    'Tienes un mantenimiento programado para ' || c.nombre_comercial || ' el ' || m.fecha_programada,
+    jsonb_build_object('mantenimiento_id', m.id, 'cliente', c.nombre_comercial, 'fecha', m.fecha_programada)
+  FROM mantenimientos m
+  JOIN clientes c ON m.cliente_id = c.id
+  WHERE
+    m.estatus = 'Programado' AND
+    m.fecha_programada = CURRENT_DATE AND
+    m.responsable_id IS NOT NULL;
+END;
+$ LANGUAGE plpgsql;</div>
+
+
+<h3>4. Storage para Firmas y Evidencias</h3>
+</p><div class="code-block">-- Bucket para firmas digitales
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('firmas-clientes', 'firmas-clientes', false);
+
+-- Bucket para evidencias de mantenimientos
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('mantenimiento-evidencias', 'mantenimiento-evidencias', false);
+
+-- Bucket para evidencias de instalaciones
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('instalacion-evidencias', 'instalacion-evidencias', false);</div>
+
+
+<h3>5. Backend - Servicios Angular</h3>
+
+<h4>5.1 MantenimientoService</h4>
+</p><div class="code-block">export interface Mantenimiento {
+  id: string;
+  cliente_id: string;
+  sucursal_id?: string;
+  tipo: 'Mensual BD' | 'Preventivo' | 'Correctivo' | 'Actualización';
+  fecha_programada: string;
+  fecha_realizado?: string;
+  responsable_id?: string;
+  estatus: 'Programado' | 'En proceso' | 'Completado' | 'Cancelado' | 'Requiere acción';
+  resultado?: 'OK' | 'Requiere acción' | 'Cancelado';
+  notas_generales?: string;
+  tiempo_invertido_minutos?: number;
+}
+
+export interface ChecklistItem {
+  id: string;
+  item_descripcion: string;
+  categoria?: string;
+  orden: number;
+  estado: 'Hecho' | 'Pendiente' | 'No aplica';
+  es_critico: boolean;
+  comentario?: string;
+  evidencia_url?: string;
+}</div>
+
+
+<li>⚪ Crear MantenimientoService</li>
+<li>⚪ Implementar CRUD de mantenimientos</li>
+<li>⚪ Implementar getMantenimientosProgramados(fecha)</li>
+<li>⚪ Implementar getChecklistTemplate(tipo)</li>
+<li>⚪ Implementar guardarChecklist(mantenimientoId, items)</li>
+<li>⚪ Implementar completarMantenimiento(id, resultado)</li>
+<li>⚪ Implementar subirEvidencia(mantenimientoId, file)</li>
+<li>⚪ Implementar generarTicketSiRequiereAccion(mantenimientoId)</li>
+
+<h4>5.2 InstalacionService</h4>
+</p><div class="code-block">export interface Instalacion {
+  id: string;
+  folio?: string;
+  cliente_id: string;
+  sucursal_id: string;
+  tipo_instalacion: 'Nueva' | 'Actualización' | 'Migración' | 'Reinstalación';
+  fecha_programada?: string;
+  responsable_id?: string;
+  estatus: 'Programada' | 'En proceso' | 'Pendientes' | 'Cerrada' | 'Cancelada';
+  modulos_instalados?: string[];
+  firma_cliente_url?: string;
+  nombre_firmante?: string;
+  fecha_firma?: string;
+}
+
+export interface Pendiente {
+  id: string;
+  descripcion: string;
+  prioridad: 'Alta' | 'Media' | 'Baja';
+  fecha_compromiso?: string;
+  asignado_a?: string;
+  estatus: 'Pendiente' | 'En proceso' | 'Resuelto';
+}</div>
+
+
+<li>⚪ Crear InstalacionService</li>
+<li>⚪ Implementar CRUD de instalaciones</li>
+<li>⚪ Implementar getChecklistTemplate(modulos)</li>
+<li>⚪ Implementar guardarChecklist(instalacionId, items)</li>
+<li>⚪ Implementar guardarFirma(instalacionId, firmaBase64, datos)</li>
+<li>⚪ Implementar agregarPendiente(instalacionId, pendiente)</li>
+<li>⚪ Implementar generarTicketDesdePendiente(pendienteId)</li>
+<li>⚪ Implementar cerrarInstalacion(id)</li>
+
+<h3>6. Frontend - Módulo de Mantenimientos</h3>
+
+<h4>6.1 Calendario de Mantenimientos</h4>
+
+<li>⚪ Crear módulo features/mantenimientos</li>
+<li>⚪ Crear componente calendario mensual:</li>
+  - ⚪ Vista de calendario con mantenimientos programados
+  - ⚪ Colores por estatus
+  - ⚪ Click en día para ver/agregar mantenimientos
+  - ⚪ Arrastrar para reprogramar
+  - ⚪ Filtros por técnico, cliente, estatus
+
+<h4>6.2 Listado de Mantenimientos</h4>
+
+<li>⚪ Crear componente de listado:</li>
+  - ⚪ Tabla con: Fecha, Cliente, Sucursal, Tipo, Responsable, Estatus, Resultado
+  - ⚪ Badges de estatus
+  - ⚪ Badge de resultado (OK en verde, Requiere acción en rojo)
+  - ⚪ Filtros por fecha, estatus, responsable
+  - ⚪ Botón "Programar mantenimiento"
+
+<h4>6.3 Formulario de Mantenimiento</h4>
+
+<li>⚪ Crear componente de programación:</li>
+  - ⚪ Selector de cliente/sucursal
+  - ⚪ Selector de tipo
+  - ⚪ Date picker de fecha
+  - ⚪ Selector de responsable
+  - ⚪ Notas
+
+<h4>6.4 Ejecución de Mantenimiento (Checklist)</h4>
+
+<li>⚪ Crear componente de ejecución:</li>
+  - ⚪ Header con datos del cliente
+  - ⚪ Botón "Iniciar mantenimiento" (registra fecha_inicio)
+  - ⚪ Checklist interactivo:
+    - Items agrupados por categoría
+    - Checkbox para marcar Hecho/Pendiente/No aplica
+    - Campo de comentario por item
+    - Upload de evidencia (foto/captura) por item
+    - Indicador visual de items críticos
+  - ⚪ Contador de tiempo invertido
+  - ⚪ Campo de notas generales
+  - ⚪ Botón "Completar mantenimiento":
+    - Validar que items críticos estén completados
+    - Seleccionar resultado (OK / Requiere acción)
+    - Si "Requiere acción", preguntar si generar ticket
+    - Guardar y cerrar
+
+<h3>7. Frontend - Módulo de Instalaciones</h3>
+
+<h4>7.1 Pipeline de Instalaciones</h4>
+
+<li>⚪ Crear componente de pipeline (Kanban):</li>
+  - ⚪ Columnas: Programada, En proceso, Pendientes, Cerrada
+  - ⚪ Cards de instalaciones arrastrables
+  - ⚪ Información resumida en card
+  - ⚪ Click para ver detalle
+
+<h4>7.2 Formulario de Instalación</h4>
+
+<li>⚪ Crear componente de programación:</li>
+  - ⚪ Selector de cliente/sucursal
+  - ⚪ Selector de tipo
+  - ⚪ Multiselect de módulos a instalar
+  - ⚪ Date picker de fecha
+  - ⚪ Selector de equipo/responsable
+  - ⚪ Generar checklist según módulos seleccionados
+
+<h4>7.3 Ejecución de Instalación</h4>
+
+<li>⚪ Crear componente de ejecución:</li>
+  - ⚪ Similar a mantenimientos
+  - ⚪ Checklist dinámico según módulos
+  - ⚪ Sección de pendientes:
+    - Agregar pendiente inline
+    - Descripción, prioridad, fecha compromiso
+    - Asignar responsable
+    - Opción "Generar ticket automáticamente"
+  - ⚪ Sección de firma digital:
+    - Canvas para firma
+    - Input nombre del firmante
+    - Input puesto
+    - Botón "Guardar firma"
+    - Preview de firma guardada
+  - ⚪ Validación antes de cerrar:
+    - Items críticos completados
+    - Firma del cliente capturada
+    - Pendientes asignados o resueltos
+
+<h4>7.4 Componente de Firma Digital</h4>
+</p><div class="code-block">// Usar library: signature_pad o angular-signature-pad</div>
+
+
+<li>⚪ Implementar canvas de firma</li>
+<li>⚪ Botón "Limpiar"</li>
+<li>⚪ Botón "Guardar"</li>
+<li>⚪ Convertir a base64</li>
+<li>⚪ Subir a Storage de Supabase</li>
+<li>⚪ Mostrar preview</li>
+
+<h3>8. Reportes</h3>
+
+<h4>8.1 Reporte de Mantenimientos</h4>
+
+<li>⚪ Crear componente de reporte:</li>
+  - ⚪ Mantenimientos realizados vs pendientes
+  - ⚪ Porcentaje de mantenimientos OK vs Requiere acción
+  - ⚪ Tiempo promedio de mantenimiento
+  - ⚪ Gráfica por mes (ApexCharts)
+  - ⚪ Exportar a PDF/Excel
+
+<h4>8.2 Reporte de Instalaciones</h4>
+
+<li>⚪ Crear componente de reporte:</li>
+  - ⚪ Instalaciones cerradas vs pendientes
+  - ⚪ Promedio de pendientes por instalación
+  - ⚪ Tiempo promedio de instalación
+  - ⚪ Gráfica de instalaciones por mes
+
+---
+
+<div class="content-section"><h2>Entregables</h2>
+
+<li>⚪ Módulo de mantenimientos con checklist dinámico</li>
+<li>⚪ Módulo de instalaciones con checklist personalizable</li>
+<li>⚪ Sistema de firma digital</li>
+<li>⚪ Generación automática de tickets desde pendientes</li>
+<li>⚪ Calendario de mantenimientos</li>
+<li>⚪ Pipeline de instalaciones (Kanban)</li>
+<li>⚪ Evidencias fotográficas</li>
+<li>⚪ Reportes de productividad</li>
+
+<div class="content-section"><h2>Dependencias</h2>
+
+<li>Fase 0: Configuración inicial</li>
+<li>Fase 1: Usuarios</li>
+<li>Fase 2: Tickets (para generación automática)</li>
+<li>Fase 4: Clientes</li>
+
+<div class="content-section"><h2>Criterios de Aceptación</h2>
+
+<li>⚪ Mantenimientos pueden programarse y ejecutarse con checklist</li>
+<li>⚪ Instalaciones tienen checklist según módulos instalados</li>
+<li>⚪ Firma digital se captura y almacena correctamente</li>
+<li>⚪ Pendientes generan tickets automáticamente</li>
+<li>⚪ Evidencias se suben a Storage</li>
+<li>⚪ Items críticos validan antes de completar</li>
+<li>⚪ Calendario muestra mantenimientos del mes</li>
+
+<div class="content-section"><h2>Notas Técnicas</h2>
+
+<li>**Storage de Supabase** para firmas y evidencias</li>
+<li>**Templates dinámicos** para checklists personalizables</li>
+<li>Usar **signature_pad** o librería similar para firma</li>
+<li>**Triggers** para notificaciones de mantenimientos programados</li>
+<li>Considerar **offline mode** para instalaciones en campo (PWA)</li>
+</p></div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Última actualización: 11 de enero de 2026
+        </p>
+    </div>
+</body>
+</html>

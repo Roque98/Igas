@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 0: Configuración Inicial - APP Mesa de Ayuda iGAS v1.0</title>
+    <style>
+        @page {
+            margin: 2cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 30px 30px 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .subsection-title {
+            color: #F9B000;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #F9B000;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box strong {
+            color: #F9B000;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completado {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-proceso {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .status-pendiente {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .checklist li:before {
+            position: absolute;
+            left: 0;
+            font-size: 16px;
+        }
+
+        .checklist li.done:before {
+            content: '✅';
+        }
+
+        .checklist li.pending:before {
+            content: '⚪';
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .keyword { color: #66d9ef; }
+        .string { color: #a6e22e; }
+        .comment { color: #75715e; }
+
+        ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        ul li {
+            margin: 8px 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding: 30px;
+            background: #3E3E3E;
+            color: white;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html" class="active">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 0: Configuración Inicial y Base</h1>
+            <p>Establecer la infraestructura base del proyecto</p>
+            <p style="margin-top: 15px;"><span class="status-badge status-proceso">En Proceso - 62%</span></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Progreso -->
+        <div class="section">
+            <h2 class="section-title">Progreso de la Fase</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 62%;"></div>
+                <div class="progress-text">62% Completado (30/48 tareas)</div>
+            </div>
+        </div>
+
+        <!-- Stack Tecnológico -->
+        <div class="section">
+            <h2 class="section-title">Stack Tecnológico Definido</h2>
+            <ul>
+                <li><strong>Frontend:</strong> Angular 21 con TypeScript</li>
+                <li><strong>Backend/BaaS:</strong> Supabase (PostgreSQL + Auth + Storage + Realtime)</li>
+                <li><strong>UI Framework:</strong> Bootstrap 5.3.8</li>
+                <li><strong>Estilos:</strong> SCSS</li>
+                <li><strong>Gráficas:</strong> ApexCharts</li>
+                <li><strong>Template Base:</strong> Datta-Able Admin Template</li>
+                <li><strong>Autenticación:</strong> Supabase Auth (JWT)</li>
+            </ul>
+        </div>
+
+        <!-- Setup del Proyecto -->
+        <div class="section">
+            <h2 class="section-title">1. Setup del Proyecto</h2>
+
+            <h3 class="subsection-title" id="setup-1-1">1.1 Configuración del Repositorio</h3>
+            <ul class="checklist">
+                <li class="done">Crear repositorio Git <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar .gitignore apropiado <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Definir estructura de ramas (main/dev/feature) <a href="#version-0-2-0" style="font-size: 11px; color: #4CAF50;">[v0.2.0]</a></li>
+                <li class="done">Configurar README.md con documentación del proyecto iGAS <a href="#version-0-2-0" style="font-size: 11px; color: #4CAF50;">[v0.2.0]</a></li>
+            </ul>
+
+            <h3 class="subsection-title" id="setup-1-2">1.2 Configuración del Frontend (Angular)</h3>
+            <ul class="checklist">
+                <li class="done">Inicializar proyecto Angular 21 <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar estructura de carpetas <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar variables de entorno (.env) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Instalar y configurar Bootstrap 5 <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar SCSS <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar ApexCharts <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Implementar template base Datta-Able <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Limpiar componentes demo no necesarios <a href="#version-0-2-0" style="font-size: 11px; color: #4CAF50;">[v0.2.0]</a></li>
+                <li class="pending">Configurar manejo de errores global</li>
+            </ul>
+
+            <h3 class="subsection-title" id="setup-1-3">1.3 Configuración de Supabase</h3>
+            <ul class="checklist">
+                <li class="done">Crear cuenta y proyecto en Supabase <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar variables de entorno (URL + anonKey) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Instalar @supabase/supabase-js <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Crear servicio SupabaseService básico <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="pending">Diseñar esquema de base de datos inicial</li>
+                <li class="pending">Crear migraciones SQL en Supabase</li>
+                <li class="pending">Configurar Row Level Security (RLS) policies</li>
+                <li class="pending">Configurar Storage buckets (para adjuntos)</li>
+            </ul>
+
+            <h3 class="subsection-title" id="setup-1-4">1.4 Configuración del Routing</h3>
+            <ul class="checklist">
+                <li class="done">Configurar routing principal <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Crear layout Admin <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Crear layout Guest <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Configurar guards básicos (authGuard, publicGuard) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="pending">Configurar lazy loading para módulos</li>
+            </ul>
+        </div>
+
+        <!-- Look & Feel -->
+        <div class="section">
+            <h2 class="section-title">2. Look & Feel - Sistema de Diseño iGAS</h2>
+
+            <h3 class="subsection-title">2.1 Paleta de Colores Corporativa</h3>
+            <div class="info-box">
+                <strong>Paleta de Colores iGAS:</strong>
+                <ul style="margin-top: 10px;">
+                    <li><strong style="color: #F9B000;">Amarillo Principal:</strong> #F9B000</li>
+                    <li><strong style="color: #FDB913;">Amarillo Alternativo:</strong> #FDB913</li>
+                    <li><strong style="color: #58585A;">Gris Oscuro:</strong> #58585A</li>
+                    <li><strong style="color: #3E3E3E;">Textos Secundarios:</strong> #3E3E3E</li>
+                </ul>
+            </div>
+
+            <pre><code><span class="comment">// Colores Corporativos iGAS</span>
+<span class="keyword">$igas-yellow-primary:</span> <span class="string">#F9B000</span>;    <span class="comment">// Amarillo/Dorado Principal</span>
+<span class="keyword">$igas-yellow-alt:</span> <span class="string">#FDB913</span>;        <span class="comment">// Amarillo alternativo</span>
+<span class="keyword">$igas-gray-dark:</span> <span class="string">#58585A</span>;         <span class="comment">// Gris Oscuro</span>
+<span class="keyword">$igas-gray-text:</span> <span class="string">#3E3E3E</span>;         <span class="comment">// Textos secundarios</span>
+
+<span class="comment">// Colores Funcionales (Semáforo SLA)</span>
+<span class="keyword">$sla-green:</span> <span class="string">#4CAF50</span>;              <span class="comment">// 0-70% SLA (OK)</span>
+<span class="keyword">$sla-yellow:</span> <span class="string">#FFC107</span>;             <span class="comment">// 70-100% SLA (Advertencia)</span>
+<span class="keyword">$sla-red:</span> <span class="string">#F44336</span>;                <span class="comment">// >100% SLA (Crítico)</span></code></pre>
+
+            <h3 class="subsection-title">2.2 Branding y Logo</h3>
+            <ul class="checklist">
+                <li class="pending">Agregar logo iGAS a assets</li>
+                <li class="pending">Actualizar logo en nav-logo component</li>
+                <li class="pending">Configurar favicon con logo iGAS</li>
+                <li class="pending">Definir uso de logo (versión blanca/color/sin texto)</li>
+            </ul>
+
+            <h3 class="subsection-title">2.3 Componentes UI Base</h3>
+            <ul class="checklist">
+                <li class="pending">Configurar botones primarios con amarillo iGAS</li>
+                <li class="pending">Crear badges de semáforo SLA (verde/amarillo/rojo)</li>
+                <li class="pending">Crear badges de prioridad</li>
+                <li class="pending">Configurar cards con estilos corporativos</li>
+                <li class="pending">Crear componentes de estado (activo/inactivo)</li>
+            </ul>
+        </div>
+
+        <!-- Sistema de Autenticación -->
+        <div class="section">
+            <h2 class="section-title">3. Sistema de Autenticación (Base)</h2>
+
+            <h3 class="subsection-title" id="auth-3-1">3.1 Supabase Auth - Implementado</h3>
+            <ul class="checklist">
+                <li class="done">Servicio de autenticación (signIn, signUp, signOut) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Recuperación de contraseña (resetPassword) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Actualización de contraseña (updatePassword) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Manejo de sesión (getSession) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Observable de usuario actual (currentUser$) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Auth guards (authGuard, publicGuard) <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+            </ul>
+
+            <h3 class="subsection-title" id="auth-3-2">3.2 Páginas de Autenticación</h3>
+            <ul class="checklist">
+                <li class="done">Página de Login <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Página de Registro <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Página de Forgot Password <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="done">Página de Reset Password <a href="#version-0-1-0" style="font-size: 11px; color: #4CAF50;">[v0.1.0]</a></li>
+                <li class="pending">Personalizar páginas con branding iGAS</li>
+                <li class="pending">Agregar validaciones mejoradas</li>
+                <li class="pending">Implementar mensajes de error amigables</li>
+            </ul>
+        </div>
+
+        <!-- Historial de Versiones -->
+        <div class="section" id="historial-versiones">
+            <h2 class="section-title">Historial de Versiones</h2>
+            <div class="info-box">
+                <p id="version-0-2-0"><strong>v0.2.0</strong> - 11 de enero de 2026</p>
+                <ul>
+                    <li>✅ Estructura de ramas Git definida (master/dev/feature/bugfix/hotfix) <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Documentación GITFLOW.md completada <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ README.md actualizado con estructura del proyecto <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Componentes demo ocultos (mantenidos como referencia) <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Sistema de navegación con propiedad hidden implementado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Sistema de versionado establecido</li>
+                </ul>
+
+                <p style="margin-top: 15px;" id="version-0-1-0"><strong>v0.1.0</strong> - Enero 2026 (Configuración inicial)</p>
+                <ul>
+                    <li>✅ Proyecto Angular 21 inicializado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Supabase integrado (Auth + Database) <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Template Datta-Able implementado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Bootstrap 5.3.8 configurado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ SCSS configurado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ ApexCharts integrado <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Routing con guards implementado <a href="#setup-1-4" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Páginas de autenticación creadas <a href="#auth-3-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Variables de entorno configuradas <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Estado Actual -->
+        <div class="section">
+            <h2 class="section-title">Estado Actual</h2>
+            <div class="info-box">
+                <p><strong>Completado:</strong></p>
+                <ul>
+                    <li>Proyecto Angular 21 inicializado</li>
+                    <li>Supabase integrado con autenticación básica</li>
+                    <li>Template Datta-Able funcionando</li>
+                    <li>Routing con guards implementado</li>
+                    <li>Páginas de autenticación creadas</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Pendiente:</strong></p>
+                <ul>
+                    <li>Personalización de branding iGAS</li>
+                    <li>Esquema de base de datos en Supabase</li>
+                    <li>Limpieza de componentes demo</li>
+                    <li>Sistema de diseño corporativo</li>
+                    <li>Servicios base y utilidades</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Notas Técnicas -->
+        <div class="section">
+            <h2 class="section-title">Notas Técnicas</h2>
+            <ul>
+                <li><strong>Supabase</strong> maneja el backend, no necesitamos implementar API REST separada</li>
+                <li><strong>PostgreSQL</strong> es la base de datos de Supabase</li>
+                <li><strong>Row Level Security (RLS)</strong> de Supabase proporciona seguridad a nivel de fila</li>
+                <li>Usar <strong>Supabase Storage</strong> para archivos adjuntos (fotos, PDFs, logs)</li>
+                <li>Considerar <strong>Supabase Realtime</strong> para actualizaciones en vivo de tickets</li>
+                <li><strong>Edge Functions</strong> de Supabase pueden usarse para lógica de negocio compleja</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Documento generado el 11 de enero de 2026<br>
+            Plan de Desarrollo - APP Mesa de Ayuda v1.0
+        </p>
+    </div>
+</body>
+</html>

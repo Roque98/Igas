@@ -1,8 +1,8 @@
 {
-  "name": "datta-able-free-angular-admin-template",
-  "version": "6.3.0",
-  "author": "CodedThemes",
-  "private": false,
+  "name": "igas-helpdesk",
+  "version": "0.2.0",
+  "author": "iGAS Control Volumétrico",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

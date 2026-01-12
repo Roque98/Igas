@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 6: Notificaciones, Alertas y Reportes - iGAS Service Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 10px 0 0;
+        }
+
+        .badge-proceso { background: #FFC107; color: #333; }
+        .badge-pendiente { background: rgba(255,255,255,0.3); }
+        .badge-completado { background: #4CAF50; }
+        .badge-critica { background: #F44336; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .progress-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .content-section h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        .content-section h4 {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .content-section li {
+            margin: 8px 0;
+        }
+
+        .content-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #F44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #3E3E3E;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-wrap: wrap;
+            }
+
+            .navbar a {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html" class="active">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 6: Notificaciones, Alertas y Reportes</h1>
+            <span class="badge badge-pendiente">Pendiente</span>
+            <span class="badge badge-proceso">0%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-card">
+            <h3>Progreso de la Fase</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+                <div class="progress-bar-text">0% Completado</div>
+            </div>
+        </div>
+
+        <div class="content-section"><h2>Objetivo</h2>
+Implementar sistema completo de notificaciones push/email, alertas automáticas y generador de reportes operativos con dashboards y gráficas usando ApexCharts.
+
+---
+
+<div class="content-section"><h2>Tareas</h2>
+
+<h3>1. Sistema de Notificaciones</h3>
+
+<h4>1.1 Tabla de Notificaciones (Ya creada parcialmente)</h4>
+</p><div class="code-block">-- Extender tabla de notificaciones
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS prioridad TEXT CHECK (prioridad IN ('Alta', 'Media', 'Baja')) DEFAULT 'Media';
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS url_accion TEXT;
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS icono TEXT;
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS color TEXT;
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS enviado_email BOOLEAN DEFAULT false;
+ALTER TABLE notificaciones ADD COLUMN IF NOT EXISTS fecha_email TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS idx_notificaciones_usuario ON notificaciones(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_notificaciones_leida ON notificaciones(leida);
+CREATE INDEX IF NOT EXISTS idx_notificaciones_created ON notificaciones(created_at DESC);</div>
+
+
+<h4>1.2 Tipos de Notificaciones</h4>
+</p><div class="code-block">-- Catálogo de tipos de notificaciones
+CREATE TABLE public.tipos_notificacion (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  codigo TEXT UNIQUE NOT NULL,
+  nombre TEXT NOT NULL,
+  descripcion TEXT,
+  enviar_push BOOLEAN DEFAULT true,
+  enviar_email BOOLEAN DEFAULT false,
+  template_email TEXT,
+  icono TEXT,
+  color TEXT,
+  prioridad TEXT DEFAULT 'Media',
+  activo BOOLEAN DEFAULT true
+);
+
+INSERT INTO tipos_notificacion (codigo, nombre, enviar_push, enviar_email, icono, color, prioridad) VALUES
+  ('ticket_asignado', 'Ticket asignado', true, false, 'assignment', '#04a9f5', 'Media'),
+  ('ticket_reasignado', 'Ticket reasignado', true, false, 'swap_horiz', '#f4c22b', 'Media'),
+  ('ticket_nuevo', 'Nuevo ticket', true, false, 'add_circle', '#1de9b6', 'Baja'),
+  ('ticket_comentario', 'Nuevo comentario en ticket', true, false, 'comment', '#a389d4', 'Baja'),
+  ('ticket_cambio_estatus', 'Cambio de estatus de ticket', true, false, 'cached', '#3ebfea', 'Baja'),
+  ('ticket_sla_amarillo', 'Ticket en SLA amarillo', true, true, 'warning', '#FFC107', 'Media'),
+  ('ticket_sla_rojo', 'Ticket en SLA rojo', true, true, 'error', '#F44336', 'Alta'),
+  ('caso_asignado', 'Caso asignado', true, true, 'work', '#04a9f5', 'Alta'),
+  ('caso_listo_validar', 'Caso listo para validar', true, true, 'check_circle', '#00A651', 'Alta'),
+  ('caso_regresado', 'Caso regresado a soporte', true, true, 'undo', '#f44236', 'Alta'),
+  ('licencia_por_vencer', 'Licencia próxima a vencer', true, true, 'vpn_key', '#f4c22b', 'Alta'),
+  ('licencia_vencida', 'Licencia vencida', true, true, 'vpn_key_off', '#f44236', 'Alta'),
+  ('poliza_por_vencer', 'Póliza próxima a vencer', true, true, 'description', '#f4c22b', 'Alta'),
+  ('poliza_vencida', 'Póliza vencida', true, true, 'report_problem', '#f44236', 'Alta'),
+  ('mantenimiento_programado', 'Mantenimiento programado', true, false, 'build', '#04a9f5', 'Media'),
+  ('instalacion_programada', 'Instalación programada', true, false, 'construction', '#1de9b6', 'Media');</div>
+
+
+<h4>1.3 Preferencias de Notificaciones por Usuario</h4>
+</p><div class="code-block">CREATE TABLE public.usuario_preferencias_notificaciones (
+  usuario_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  tipo_notificacion_codigo TEXT REFERENCES tipos_notificacion(codigo),
+  recibir_push BOOLEAN DEFAULT true,
+  recibir_email BOOLEAN DEFAULT true,
+  PRIMARY KEY (usuario_id, tipo_notificacion_codigo)
+);</div>
+
+
+<h4>1.4 Función Genérica para Crear Notificaciones</h4>
+</p><div class="code-block">CREATE OR REPLACE FUNCTION crear_notificacion(
+  p_usuario_id UUID,
+  p_tipo_codigo TEXT,
+  p_titulo TEXT,
+  p_mensaje TEXT,
+  p_datos JSONB DEFAULT NULL,
+  p_url_accion TEXT DEFAULT NULL
+) RETURNS UUID AS $
+DECLARE
+  v_tipo RECORD;
+  v_notif_id UUID;
+  v_preferencia RECORD;
+BEGIN
+  -- Obtener tipo de notificación
+  SELECT * INTO v_tipo FROM tipos_notificacion WHERE codigo = p_tipo_codigo;
+
+  -- Verificar preferencias del usuario
+  SELECT * INTO v_preferencia
+  FROM usuario_preferencias_notificaciones
+  WHERE usuario_id = p_usuario_id AND tipo_notificacion_codigo = p_tipo_codigo;
+
+  -- Si no existe preferencia, usar defaults del tipo
+  IF NOT FOUND THEN
+    v_preferencia.recibir_push := v_tipo.enviar_push;
+    v_preferencia.recibir_email := v_tipo.enviar_email;
+  END IF;
+
+  -- Solo crear si el usuario quiere recibirla
+  IF v_preferencia.recibir_push THEN
+    INSERT INTO notificaciones (
+      usuario_id,
+      tipo,
+      titulo,
+      mensaje,
+      datos,
+      url_accion,
+      icono,
+      color,
+      prioridad,
+      enviado_email
+    ) VALUES (
+      p_usuario_id,
+      p_tipo_codigo,
+      p_titulo,
+      p_mensaje,
+      p_datos,
+      p_url_accion,
+      v_tipo.icono,
+      v_tipo.color,
+      v_tipo.prioridad,
+      false
+    ) RETURNING id INTO v_notif_id;
+
+    -- Si debe enviar email, marcar para envío
+    IF v_preferencia.recibir_email AND v_tipo.enviar_email THEN
+      -- Esto será procesado por un job/edge function
+      UPDATE notificaciones
+      SET enviado_email = false
+      WHERE id = v_notif_id;
+    END IF;
+
+    RETURN v_notif_id;
+  END IF;
+
+  RETURN NULL;
+END;
+$ LANGUAGE plpgsql SECURITY DEFINER;</div>
+
+
+<h3>2. Sistema de Recordatorios Automáticos</h3>
+
+<h4>2.1 Tabla de Recordatorios</h4>
+</p><div class="code-block">CREATE TABLE public.recordatorios (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tipo TEXT CHECK (tipo IN ('ticket_sin_respuesta', 'ticket_seguimiento', 'caso_sin_movimiento')),
+  referencia_id UUID NOT NULL,
+  usuario_id UUID REFERENCES profiles(id),
+  mensaje TEXT,
+  tiempo_sin_movimiento_horas INTEGER,
+  notificacion_enviada BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h4>2.2 Job para Recordatorios (Edge Function o pg_cron)</h4>
+</p><div class="code-block">-- Detectar tickets sin movimiento
+CREATE OR REPLACE FUNCTION generar_recordatorios_tickets()
+RETURNS void AS $
+BEGIN
+  -- Tickets sin respuesta en 24 horas
+  INSERT INTO recordatorios (tipo, referencia_id, usuario_id, mensaje, tiempo_sin_movimiento_horas)
+  SELECT
+    'ticket_sin_respuesta',
+    t.id,
+    t.responsable_id,
+    'El ticket ' || t.folio || ' no ha tenido respuesta en 24 horas',
+    24
+  FROM tickets t
+  WHERE
+    t.estatus_id NOT IN (SELECT id FROM estatus_tickets WHERE es_final = true) AND
+    t.responsable_id IS NOT NULL AND
+    t.fecha_primera_respuesta IS NULL AND
+    EXTRACT(EPOCH FROM (NOW() - t.fecha_creacion))/3600 >= 24 AND
+    NOT EXISTS (
+      SELECT 1 FROM recordatorios r
+      WHERE r.tipo = 'ticket_sin_respuesta'
+        AND r.referencia_id = t.id
+        AND r.created_at > NOW() - INTERVAL '24 hours'
+    );
+
+  -- Tickets en seguimiento demasiado tiempo
+  INSERT INTO recordatorios (tipo, referencia_id, usuario_id, mensaje, tiempo_sin_movimiento_horas)
+  SELECT
+    'ticket_seguimiento',
+    t.id,
+    t.responsable_id,
+    'El ticket ' || t.folio || ' está en seguimiento hace más de 48 horas',
+    48
+  FROM tickets t
+  JOIN estatus_tickets e ON t.estatus_id = e.id
+  WHERE
+    e.nombre = 'Seguimiento' AND
+    t.updated_at < NOW() - INTERVAL '48 hours' AND
+    NOT EXISTS (
+      SELECT 1 FROM recordatorios r
+      WHERE r.tipo = 'ticket_seguimiento'
+        AND r.referencia_id = t.id
+        AND r.created_at > NOW() - INTERVAL '48 hours'
+    );
+
+  -- Crear notificaciones de recordatorios
+  INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, datos)
+  SELECT
+    r.usuario_id,
+    'recordatorio_' || r.tipo,
+    'Recordatorio',
+    r.mensaje,
+    jsonb_build_object('recordatorio_id', r.id, 'referencia_id', r.referencia_id)
+  FROM recordatorios r
+  WHERE r.notificacion_enviada = false;
+
+  -- Marcar como enviados
+  UPDATE recordatorios SET notificacion_enviada = true WHERE notificacion_enviada = false;
+END;
+$ LANGUAGE plpgsql;</div>
+
+
+<h3>3. Sistema de Emails</h3>
+
+<h4>3.1 Supabase Edge Function para Envío de Emails</h4>
+</p><div class="code-block">// supabase/functions/enviar-notificaciones-email/index.ts
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+
+serve(async (req) => {
+  // Obtener notificaciones pendientes de envío por email
+  const { data: notificaciones } = await supabaseAdmin
+    .from('notificaciones')
+    .select(`
+      *,
+      usuario:profiles(email, nombre_completo)
+    `)
+    .eq('enviado_email', false)
+    .eq('leida', false)
+    .limit(50)
+
+  for (const notif of notificaciones) {
+    // Obtener template del tipo
+    const { data: tipo } = await supabaseAdmin
+      .from('tipos_notificacion')
+      .select('template_email')
+      .eq('codigo', notif.tipo)
+      .single()
+
+    const emailHTML = renderTemplate(tipo.template_email, {
+      nombre: notif.usuario.nombre_completo,
+      titulo: notif.titulo,
+      mensaje: notif.mensaje,
+      url_accion: notif.url_accion
+    })
+
+    // Enviar email
+    await sendEmail({
+      to: notif.usuario.email,
+      subject: `[iGAS] ${notif.titulo}`,
+      html: emailHTML
+    })
+
+    // Marcar como enviado
+    await supabaseAdmin
+      .from('notificaciones')
+      .update({ enviado_email: true, fecha_email: new Date() })
+      .eq('id', notif.id)
+  }
+
+  return new Response(JSON.stringify({ enviados: notificaciones.length }))
+})</div>
+
+
+<li>⚪ Crear Edge Function para envío de emails</li>
+<li>⚪ Configurar Resend o SendGrid</li>
+<li>⚪ Crear templates HTML de emails</li>
+<li>⚪ Programar ejecución cada 5 minutos</li>
+
+<h3>4. Frontend - Sistema de Notificaciones</h3>
+
+<h4>4.1 Servicio de Notificaciones</h4>
+</p><div class="code-block">@Injectable({ providedIn: 'root' })
+export class NotificationService {
+  private notificaciones$ = new BehaviorSubject<Notificacion[]>([]);
+  private noLeidas$ = new BehaviorSubject<number>(0);
+
+  constructor(private supabase: SupabaseService) {
+    this.subscribeToNotifications();
+  }
+
+  private subscribeToNotifications() {
+    // Suscribirse a cambios en tiempo real con Supabase Realtime
+    this.supabase.client
+      .channel('notificaciones')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notificaciones',
+        filter: `usuario_id=eq.${this.supabase.user?.id}`
+      }, (payload) => {
+        this.addNotification(payload.new);
+        this.playNotificationSound();
+        this.showToast(payload.new);
+      })
+      .subscribe();
+
+    this.loadNotifications();
+  }
+}</div>
+
+
+<li>⚪ Crear NotificationService</li>
+<li>⚪ Implementar suscripción a Realtime</li>
+<li>⚪ Implementar getNotificaciones()</li>
+<li>⚪ Implementar marcarComoLeida(id)</li>
+<li>⚪ Implementar marcarTodasComoLeidas()</li>
+<li>⚪ Implementar eliminarNotificacion(id)</li>
+<li>⚪ Implementar contador de no leídas</li>
+<li>⚪ Implementar sonido de notificación</li>
+<li>⚪ Implementar toast/snackbar para nuevas notificaciones</li>
+
+<h4>4.2 Componente de Notificaciones en Navbar</h4>
+
+<li>⚪ Crear componente notification-bell:</li>
+  - ⚪ Icono de campana
+  - ⚪ Badge con contador de no leídas (rojo iGAS si >0)
+  - ⚪ Dropdown con últimas 10 notificaciones
+  - ⚪ Scroll infinito para cargar más
+  - ⚪ Click en notificación:
+    - Marcar como leída
+    - Navegar a url_accion si existe
+  - ⚪ Botón "Marcar todas como leídas"
+  - ⚪ Link "Ver todas"
+
+<h4>4.3 Página de Centro de Notificaciones</h4>
+
+<li>⚪ Crear página completa de notificaciones:</li>
+  - ⚪ Tabs: Todas / No leídas / Leídas
+  - ⚪ Filtros por tipo
+  - ⚪ Agrupadas por fecha (Hoy, Ayer, Esta semana, etc.)
+  - ⚪ Acciones: Eliminar, Marcar leída/no leída
+  - ⚪ Paginación
+
+<h4>4.4 Configuración de Preferencias</h4>
+
+<li>⚪ Crear página de preferencias de notificaciones:</li>
+  - ⚪ Tabla con todos los tipos de notificación
+  - ⚪ Switches para activar/desactivar push
+  - ⚪ Switches para activar/desactivar email
+  - ⚪ Guardar preferencias por usuario
+
+<h3>5. Sistema de Reportes</h3>
+
+<h4>5.1 Modelos de Reportes</h4>
+</p><div class="code-block">-- Vista para reporte de tickets
+CREATE OR REPLACE VIEW reporte_tickets AS
+SELECT
+  t.id,
+  t.folio,
+  t.fecha_creacion,
+  c.nombre_comercial as cliente,
+  cat.nombre as categoria,
+  t.prioridad,
+  e.nombre as estatus,
+  p.nombre_completo as responsable,
+  CASE
+    WHEN t.fecha_cierre IS NOT NULL THEN
+      EXTRACT(EPOCH FROM (t.fecha_cierre - t.fecha_creacion))/3600
+    ELSE NULL
+  END as horas_resolucion,
+  CASE
+    WHEN t.semaforo = 'verde' THEN 'Cumplido'
+    ELSE 'Incumplido'
+  END as cumplimiento_sla
+FROM tickets_con_sla t
+JOIN clientes c ON t.cliente_id = c.id
+JOIN categorias_servicio cat ON t.categoria_id = cat.id
+JOIN estatus_tickets e ON t.estatus_id = e.id
+LEFT JOIN profiles p ON t.responsable_id = p.id;
+
+-- Vista para reporte de casos
+CREATE OR REPLACE VIEW reporte_casos AS
+SELECT
+  c.id,
+  c.folio,
+  c.fecha_creacion,
+  cli.nombre_comercial as cliente,
+  c.area_destino,
+  c.motivo,
+  e.nombre as estatus,
+  p.nombre_completo as responsable,
+  c.fecha_compromiso,
+  CASE
+    WHEN c.fecha_cierre IS NOT NULL THEN
+      EXTRACT(EPOCH FROM (c.fecha_cierre - c.fecha_creacion))/3600
+    ELSE NULL
+  END as horas_resolucion,
+  c.semaforo
+FROM casos_con_sla c
+JOIN clientes cli ON c.cliente_id = cli.id
+JOIN estatus_casos e ON c.estatus_id = e.id
+LEFT JOIN profiles p ON c.responsable_id = p.id;</div>
+
+
+<h4>5.2 Backend - ReporteService</h4>
+</p><div class="code-block">export interface ReporteTickets {
+  total: number;
+  nuevos: number;
+  en_proceso: number;
+  resueltos: number;
+  cerrados: number;
+  cumplimiento_sla: number;
+  tiempo_promedio_resolucion: number;
+  por_categoria: { categoria: string; total: number }[];
+  por_prioridad: { prioridad: string; total: number }[];
+  tendencia_mensual: { mes: string; total: number }[];
+}</div>
+
+
+<li>⚪ Crear ReporteService</li>
+<li>⚪ Implementar getReporteTickets(filtros)</li>
+<li>⚪ Implementar getReporteCasos(filtros)</li>
+<li>⚪ Implementar getReporteProductividad(usuarioId, fechas)</li>
+<li>⚪ Implementar getReporteClientes()</li>
+<li>⚪ Implementar getReporteVencimientos()</li>
+<li>⚪ Implementar exportarAPDF(reporte)</li>
+<li>⚪ Implementar exportarAExcel(reporte)</li>
+
+<h3>6. Frontend - Módulo de Reportes</h3>
+
+<h4>6.1 Dashboard Principal</h4>
+
+<li>⚪ Crear dashboard principal con widgets:</li>
+  - **Tickets**:
+    - Total activos
+    - Nuevos hoy
+    - En SLA rojo
+    - Mis tickets
+  - **Casos**:
+    - Total activos
+    - Por área
+    - Casos vencidos
+  - **Clientes**:
+    - Total clientes activos
+    - Licencias por vencer (30 días)
+    - Pólizas por vencer (30 días)
+  - **Gráficas (ApexCharts)**:
+    - Tickets por categoría (Pie chart)
+    - Tendencia mensual de tickets (Line chart)
+    - Cumplimiento de SLA (Gauge/Radial bar)
+    - Casos por área (Bar chart)
+  - Usar colores corporativos iGAS
+
+<h4>6.2 Reporte de Tickets</h4>
+
+<li>⚪ Crear página de reporte de tickets:</li>
+  - ⚪ Filtros:
+    - Rango de fechas
+    - Cliente
+    - Categoría
+    - Prioridad
+    - Responsable
+    - Estatus
+  - ⚪ Métricas:
+    - Total de tickets
+    - % Cumplimiento SLA
+    - Tiempo promedio de resolución
+    - Tickets reabiertos
+  - ⚪ Gráficas:
+    - Tickets por periodo (línea)
+    - Por categoría (pie)
+    - Por prioridad (bar)
+    - Por responsable (bar horizontal)
+  - ⚪ Tabla detallada
+  - ⚪ Botones: Exportar PDF, Exportar Excel
+
+<h4>6.3 Reporte de Casos</h4>
+
+<li>⚪ Crear página de reporte de casos:</li>
+  - ⚪ Filtros similares a tickets
+  - ⚪ Métricas:
+    - Total de casos
+    - Por área
+    - % Cumplimiento
+    - Tiempo promedio por área
+  - ⚪ Gráficas con ApexCharts
+  - ⚪ Exportación
+
+<h4>6.4 Reporte de Productividad</h4>
+
+<li>⚪ Crear página de productividad por usuario:</li>
+  - ⚪ Selector de usuario
+  - ⚪ Selector de periodo
+  - ⚪ Métricas:
+    - Tickets atendidos
+    - Tickets resueltos
+    - % Cumplimiento SLA
+    - Tiempo promedio de respuesta
+    - Tiempo promedio de resolución
+  - ⚪ Ranking de usuarios
+  - ⚪ Gráfica de tendencia
+
+<h4>6.5 Reporte de Vencimientos</h4>
+
+<li>⚪ Crear página de vencimientos:</li>
+  - ⚪ Tab: Licencias
+    - Vencidas
+    - Por vencer (45/30/15 días)
+    - Lista detallada con cliente
+  - ⚪ Tab: Pólizas
+    - Vencidas
+    - Por vencer (30 días)
+    - Lista detallada
+  - ⚪ Exportación a Excel
+  - ⚪ Gráficas de vencimientos por mes
+
+<h3>7. Componentes de Gráficas (ApexCharts)</h3>
+
+<h4>7.1 Wrapper Components</h4>
+</p><div class="code-block">@Component({
+  selector: 'app-chart-line',
+  template: `<apx-chart [series]="series" [chart]="chart" [xaxis]="xaxis"></apx-chart>`
+})
+export class ChartLineComponent {
+  @Input() series: any[];
+  @Input() categories: string[];
+  chart = { type: 'line', height: 350 };
+  xaxis = { categories: this.categories };
+}</div>
+
+
+<li>⚪ Crear ChartLineComponent</li>
+<li>⚪ Crear ChartBarComponent</li>
+<li>⚪ Crear ChartPieComponent</li>
+<li>⚪ Crear ChartDonutComponent</li>
+<li>⚪ Crear ChartRadialBarComponent (para SLA)</li>
+<li>⚪ Crear ChartAreaComponent</li>
+<li>⚪ Aplicar colores iGAS en todos los charts</li>
+
+<h3>8. Exportación de Reportes</h3>
+
+<h4>8.1 Exportar a PDF</h4>
+</p><div class="code-block">// Usar jsPDF + html2canvas
+exportToPDF(elemento: ElementRef, nombreArchivo: string) {
+  html2canvas(elemento.nativeElement).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 10, 10);
+    pdf.save(nombreArchivo);
+  });
+}</div>
+
+
+<li>⚪ Instalar jsPDF y html2canvas</li>
+<li>⚪ Crear servicio ExportService</li>
+<li>⚪ Implementar exportToPDF()</li>
+<li>⚪ Agregar logo iGAS en PDF</li>
+<li>⚪ Agregar encabezado y pie de página</li>
+
+<h4>8.2 Exportar a Excel</h4>
+</p><div class="code-block">// Usar xlsx (SheetJS)
+exportToExcel(data: any[], nombreArchivo: string) {
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+  XLSX.writeFile(wb, nombreArchivo);
+}</div>
+
+
+<li>⚪ Instalar xlsx</li>
+<li>⚪ Implementar exportToExcel()</li>
+<li>⚪ Formatear columnas (fechas, números)</li>
+<li>⚪ Agregar estilos (opcional con xlsx-style)</li>
+
+---
+
+<div class="content-section"><h2>Entregables</h2>
+
+<li>⚪ Sistema de notificaciones push en tiempo real</li>
+<li>⚪ Sistema de emails automáticos</li>
+<li>⚪ Centro de notificaciones completo</li>
+<li>⚪ Preferencias de notificaciones configurables</li>
+<li>⚪ Recordatorios automáticos</li>
+<li>⚪ Dashboard principal con métricas</li>
+<li>⚪ Reportes de tickets completos</li>
+<li>⚪ Reportes de casos</li>
+<li>⚪ Reporte de productividad</li>
+<li>⚪ Reporte de vencimientos</li>
+<li>⚪ Gráficas interactivas con ApexCharts</li>
+<li>⚪ Exportación a PDF y Excel</li>
+
+<div class="content-section"><h2>Dependencias</h2>
+
+<li>Todas las fases anteriores (0-5)</li>
+<li>Supabase Realtime</li>
+<li>Supabase Edge Functions</li>
+
+<div class="content-section"><h2>Criterios de Aceptación</h2>
+
+<li>⚪ Notificaciones aparecen en tiempo real</li>
+<li>⚪ Contador de no leídas se actualiza automáticamente</li>
+<li>⚪ Emails se envían según preferencias</li>
+<li>⚪ Recordatorios se generan automáticamente</li>
+<li>⚪ Dashboard muestra métricas actualizadas</li>
+<li>⚪ Reportes se pueden filtrar por fechas</li>
+<li>⚪ Gráficas son interactivas y responsivas</li>
+<li>⚪ Exportación a PDF incluye logo y formato</li>
+<li>⚪ Exportación a Excel incluye datos formateados</li>
+
+<div class="content-section"><h2>Notas Técnicas</h2>
+
+<li>**Supabase Realtime** para notificaciones instantáneas</li>
+<li>**Edge Functions** para envío de emails programado</li>
+<li>**ApexCharts** para todas las gráficas</li>
+<li>**jsPDF** para exportación PDF</li>
+<li>**xlsx** para exportación Excel</li>
+<li>Usar **Web Push API** para notificaciones de navegador (opcional)</li>
+<li>Considerar **Service Worker** para notificaciones offline</li>
+<li>**Colores iGAS** en todas las gráficas (#F9B000, #4CAF50, #FFC107, #F44336)</li>
+</p></div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Última actualización: 11 de enero de 2026
+        </p>
+    </div>
+</body>
+</html>

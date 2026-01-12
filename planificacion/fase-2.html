@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 2: Módulo Core - Tickets de Soporte - iGAS Service Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 10px 0 0;
+        }
+
+        .badge-proceso { background: #FFC107; color: #333; }
+        .badge-pendiente { background: rgba(255,255,255,0.3); }
+        .badge-completado { background: #4CAF50; }
+        .badge-critica { background: #F44336; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .progress-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .content-section h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        .content-section h4 {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .content-section li {
+            margin: 8px 0;
+        }
+
+        .content-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #F44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #3E3E3E;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-wrap: wrap;
+            }
+
+            .navbar a {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html" class="active">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 2: Módulo Core - Tickets de Soporte</h1>
+            <span class="badge badge-crítica">Crítica</span>
+            <span class="badge badge-proceso">0%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-card">
+            <h3>Progreso de la Fase</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+                <div class="progress-bar-text">0% Completado</div>
+            </div>
+        </div>
+
+        <div class="content-section"><h2>Objetivo</h2>
+Desarrollar el módulo principal de tickets de soporte con sistema de SLA, semáforos, bitácora y gestión completa del ciclo de vida de tickets usando Supabase.
+
+---
+
+<div class="content-section"><h2>Tareas</h2>
+
+<h3>1. Modelo de Datos - Tickets en Supabase</h3>
+
+<h4>1.1 Tabla Principal de Tickets</h4>
+</p><div class="code-block">CREATE TABLE public.tickets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  folio TEXT UNIQUE NOT NULL,
+  cliente_id UUID REFERENCES clientes(id) NOT NULL,
+  sucursal_id UUID REFERENCES sucursales(id),
+  categoria_id UUID REFERENCES categorias_servicio(id) NOT NULL,
+  prioridad TEXT CHECK (prioridad IN ('Crítica', 'Alta', 'Media', 'Baja')) NOT NULL,
+  canal TEXT CHECK (canal IN ('Teléfono', 'WhatsApp', 'Correo', 'Portal')) NOT NULL,
+  responsable_id UUID REFERENCES profiles(id),
+  equipo_id UUID REFERENCES equipos(id),
+  descripcion TEXT NOT NULL,
+  estatus_id UUID REFERENCES estatus_tickets(id) NOT NULL,
+  sla_objetivo_minutos INTEGER NOT NULL,
+  fecha_creacion TIMESTAMPTZ DEFAULT NOW(),
+  fecha_primera_respuesta TIMESTAMPTZ,
+  fecha_resolucion TIMESTAMPTZ,
+  fecha_cierre TIMESTAMPTZ,
+  tiempo_pausado_minutos INTEGER DEFAULT 0,
+  creado_por UUID REFERENCES profiles(id) NOT NULL,
+  cerrado_por UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para búsquedas rápidas
+CREATE INDEX idx_tickets_folio ON tickets(folio);
+CREATE INDEX idx_tickets_cliente ON tickets(cliente_id);
+CREATE INDEX idx_tickets_responsable ON tickets(responsable_id);
+CREATE INDEX idx_tickets_estatus ON tickets(estatus_id);
+CREATE INDEX idx_tickets_fecha_creacion ON tickets(fecha_creacion DESC);</div>
+
+
+<h4>1.2 Tablas Relacionadas</h4>
+</p><div class="code-block">-- Participantes del ticket
+CREATE TABLE public.ticket_participantes (
+  ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+  usuario_id UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (ticket_id, usuario_id)
+);
+
+-- Adjuntos
+CREATE TABLE public.ticket_adjuntos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+  nombre_archivo TEXT NOT NULL,
+  ruta_storage TEXT NOT NULL,
+  tipo_archivo TEXT,
+  tamanio_bytes BIGINT,
+  subido_por UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Bitácora (timeline)
+CREATE TABLE public.ticket_bitacora (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+  usuario_id UUID REFERENCES profiles(id),
+  tipo TEXT CHECK (tipo IN ('nota', 'cambio_estatus', 'asignacion', 'adjunto', 'escalamiento')) NOT NULL,
+  mensaje TEXT,
+  datos_adicionales JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Historial de asignaciones
+CREATE TABLE public.ticket_historial_asignaciones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id UUID REFERENCES tickets(id) ON DELETE CASCADE,
+  de_usuario_id UUID REFERENCES profiles(id),
+  a_usuario_id UUID REFERENCES profiles(id),
+  motivo TEXT,
+  asignado_por UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h4>1.3 Catálogos</h4>
+</p><div class="code-block">-- Categorías de servicio
+CREATE TABLE public.categorias_servicio (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT UNIQUE NOT NULL,
+  descripcion TEXT,
+  icono TEXT,
+  color TEXT,
+  sla_default_minutos INTEGER,
+  estatus TEXT DEFAULT 'Activo',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO categorias_servicio (nombre, sla_default_minutos, color) VALUES
+  ('Volumétrico A30', 240, '#04a9f5'),
+  ('Facturación', 480, '#f4c22b'),
+  ('POS', 180, '#1de9b6'),
+  ('BD', 120, '#f44236'),
+  ('Hasp', 240, '#a389d4'),
+  ('Red', 180, '#3ebfea'),
+  ('Otros', 360, '#748892');
+
+-- Estatus de tickets
+CREATE TABLE public.estatus_tickets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT UNIQUE NOT NULL,
+  orden INTEGER,
+  pausa_sla BOOLEAN DEFAULT false,
+  es_final BOOLEAN DEFAULT false,
+  color TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO estatus_tickets (nombre, orden, pausa_sla, es_final, color) VALUES
+  ('Nuevo', 1, false, false, '#1de9b6'),
+  ('En atención', 2, false, false, '#04a9f5'),
+  ('En espera de cliente', 3, true, false, '#f4c22b'),
+  ('Seguimiento', 4, false, false, '#a389d4'),
+  ('Resuelto', 5, false, false, '#00A651'),
+  ('Cerrado', 6, false, true, '#748892');
+
+-- Canales de contacto
+CREATE TABLE public.canales_contacto (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT UNIQUE NOT NULL,
+  icono TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO canales_contacto (nombre, icono) VALUES
+  ('Teléfono', 'phone'),
+  ('WhatsApp', 'whatsapp'),
+  ('Correo', 'email'),
+  ('Portal', 'web');</div>
+
+
+<h3>2. Sistema de Folios Automático</h3>
+</p><div class="code-block">-- Secuencia por año
+CREATE SEQUENCE ticket_folio_seq;
+
+-- Función para generar folio TKT-AAAA-####
+CREATE OR REPLACE FUNCTION generar_folio_ticket()
+RETURNS TEXT AS $
+DECLARE
+  anio TEXT;
+  numero INTEGER;
+  folio TEXT;
+BEGIN
+  anio := EXTRACT(YEAR FROM NOW())::TEXT;
+  numero := nextval('ticket_folio_seq');
+
+  -- Reset secuencia si cambió el año
+  IF numero > 1 AND NOT EXISTS (
+    SELECT 1 FROM tickets
+    WHERE folio LIKE 'TKT-' || anio || '-%'
+  ) THEN
+    ALTER SEQUENCE ticket_folio_seq RESTART WITH 1;
+    numero := nextval('ticket_folio_seq');
+  END IF;
+
+  folio := 'TKT-' || anio || '-' || LPAD(numero::TEXT, 4, '0');
+  RETURN folio;
+END;
+$ LANGUAGE plpgsql;
+
+-- Trigger para asignar folio automáticamente
+CREATE OR REPLACE FUNCTION asignar_folio_ticket()
+RETURNS TRIGGER AS $
+BEGIN
+  IF NEW.folio IS NULL THEN
+    NEW.folio := generar_folio_ticket();
+  END IF;
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_asignar_folio
+  BEFORE INSERT ON tickets
+  FOR EACH ROW EXECUTE FUNCTION asignar_folio_ticket();</div>
+
+
+<h3>3. Sistema de SLA y Semáforos</h3>
+
+<h4>3.1 Configuración de SLA</h4>
+</p><div class="code-block">CREATE TABLE public.sla_config (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  prioridad TEXT,
+  categoria_id UUID REFERENCES categorias_servicio(id),
+  cliente_id UUID REFERENCES clientes(id), -- NULL = aplica a todos
+  tiempo_objetivo_minutos INTEGER NOT NULL,
+  aplica_horario_habil BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Horarios hábiles (ya creado en Fase 1)
+-- Días festivos
+CREATE TABLE public.dias_festivos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  fecha DATE UNIQUE NOT NULL,
+  descripcion TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<h4>3.2 Función de Cálculo de SLA</h4>
+</p><div class="code-block">-- Vista para calcular SLA y semáforo en tiempo real
+CREATE OR REPLACE VIEW tickets_con_sla AS
+SELECT
+  t.*,
+  COALESCE(
+    (SELECT tiempo_objetivo_minutos
+     FROM sla_config
+     WHERE (prioridad = t.prioridad OR prioridad IS NULL)
+       AND (categoria_id = t.categoria_id OR categoria_id IS NULL)
+       AND (cliente_id = t.cliente_id OR cliente_id IS NULL)
+     ORDER BY cliente_id NULLS LAST, categoria_id NULLS LAST, prioridad NULLS LAST
+     LIMIT 1),
+    t.sla_objetivo_minutos
+  ) as sla_calculado,
+  EXTRACT(EPOCH FROM (NOW() - t.fecha_creacion))/60 - t.tiempo_pausado_minutos as minutos_transcurridos,
+  CASE
+    WHEN EXTRACT(EPOCH FROM (NOW() - t.fecha_creacion))/60 - t.tiempo_pausado_minutos < t.sla_objetivo_minutos * 0.7
+      THEN 'verde'
+    WHEN EXTRACT(EPOCH FROM (NOW() - t.fecha_creacion))/60 - t.tiempo_pausado_minutos <= t.sla_objetivo_minutos
+      THEN 'amarillo'
+    ELSE 'rojo'
+  END as semaforo,
+  ROUND(
+    ((EXTRACT(EPOCH FROM (NOW() - t.fecha_creacion))/60 - t.tiempo_pausado_minutos) / t.sla_objetivo_minutos * 100)::NUMERIC,
+    2
+  ) as porcentaje_sla
+FROM tickets t;</div>
+
+
+<h4>3.3 Función para Pausar/Reanudar SLA</h4>
+</p><div class="code-block">-- Trigger para pausar SLA cuando estatus es "En espera de cliente"
+CREATE OR REPLACE FUNCTION manejar_pausa_sla()
+RETURNS TRIGGER AS $
+DECLARE
+  estatus_pausa BOOLEAN;
+  estatus_anterior_pausa BOOLEAN;
+BEGIN
+  -- Verificar si el nuevo estatus pausa el SLA
+  SELECT pausa_sla INTO estatus_pausa
+  FROM estatus_tickets
+  WHERE id = NEW.estatus_id;
+
+  -- Verificar si el estatus anterior pausaba el SLA
+  IF TG_OP = 'UPDATE' THEN
+    SELECT pausa_sla INTO estatus_anterior_pausa
+    FROM estatus_tickets
+    WHERE id = OLD.estatus_id;
+
+    -- Si cambió de pausado a activo o viceversa, registrar
+    IF estatus_pausa != estatus_anterior_pausa THEN
+      INSERT INTO ticket_bitacora (ticket_id, usuario_id, tipo, mensaje)
+      VALUES (
+        NEW.id,
+        auth.uid(),
+        'cambio_estatus',
+        CASE WHEN estatus_pausa THEN 'SLA pausado' ELSE 'SLA reanudado' END
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_pausa_sla
+  AFTER INSERT OR UPDATE OF estatus_id ON tickets
+  FOR EACH ROW EXECUTE FUNCTION manejar_pausa_sla();</div>
+
+
+<h3>4. Row Level Security (RLS) para Tickets</h3>
+</p><div class="code-block">ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
+
+-- Técnicos pueden ver tickets asignados a ellos o a su equipo
+CREATE POLICY "Técnicos ven tickets de su equipo"
+  ON tickets FOR SELECT
+  USING (
+    responsable_id = auth.uid() OR
+    equipo_id IN (
+      SELECT area_equipo_id FROM profiles WHERE id = auth.uid()
+    )
+  );
+
+-- Coordinadores y Admins ven todos los tickets
+CREATE POLICY "Coordinadores y Admins ven todos"
+  ON tickets FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN roles r ON p.rol_id = r.id
+      WHERE p.id = auth.uid()
+        AND r.nombre IN ('Coordinador', 'Admin')
+    )
+  );
+
+-- Todos los autenticados pueden crear tickets
+CREATE POLICY "Usuarios pueden crear tickets"
+  ON tickets FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Solo el responsable o coordinadores pueden actualizar
+CREATE POLICY "Responsable o Coordinador puede actualizar"
+  ON tickets FOR UPDATE
+  USING (
+    responsable_id = auth.uid() OR
+    EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN roles r ON p.rol_id = r.id
+      WHERE p.id = auth.uid()
+        AND r.nombre IN ('Coordinador', 'Admin')
+    )
+  );</div>
+
+
+<h3>5. Backend - Servicio Angular</h3>
+
+<h4>5.1 TicketService</h4>
+</p><div class="code-block">export interface Ticket {
+  id: string;
+  folio: string;
+  cliente_id: string;
+  sucursal_id?: string;
+  categoria_id: string;
+  prioridad: 'Crítica' | 'Alta' | 'Media' | 'Baja';
+  canal: 'Teléfono' | 'WhatsApp' | 'Correo' | 'Portal';
+  responsable_id?: string;
+  equipo_id?: string;
+  descripcion: string;
+  estatus_id: string;
+  sla_objetivo_minutos: number;
+  fecha_creacion: string;
+  fecha_primera_respuesta?: string;
+  fecha_resolucion?: string;
+  fecha_cierre?: string;
+  tiempo_pausado_minutos: number;
+  creado_por: string;
+  cerrado_por?: string;
+
+  // Campos calculados de la vista
+  semaforo?: 'verde' | 'amarillo' | 'rojo';
+  porcentaje_sla?: number;
+  minutos_transcurridos?: number;
+}</div>
+
+
+<li>⚪ Crear TicketService</li>
+<li>⚪ Implementar createTicket(ticket)</li>
+<li>⚪ Implementar getTickets(filtros) con paginación</li>
+<li>⚪ Implementar getTicketById(id)</li>
+<li>⚪ Implementar updateTicket(id, data)</li>
+<li>⚪ Implementar deleteTicket(id)</li>
+<li>⚪ Implementar cambiarEstatus(id, estatusId, nota)</li>
+<li>⚪ Implementar asignarTicket(id, usuarioId, motivo)</li>
+<li>⚪ Implementar escalarACaso(ticketId, datos)</li>
+<li>⚪ Implementar getTicketTimeline(id)</li>
+<li>⚪ Implementar agregarNota(ticketId, nota)</li>
+<li>⚪ Implementar subirAdjunto(ticketId, file)</li>
+<li>⚪ Implementar getTicketsPorSemaforo()</li>
+<li>⚪ Usar Supabase Realtime para actualizaciones en vivo</li>
+
+<h3>6. Frontend - Módulo de Tickets</h3>
+
+<h4>6.1 Dashboard de Tickets</h4>
+
+<li>⚪ Crear módulo features/tickets</li>
+<li>⚪ Crear componente dashboard:</li>
+  - ⚪ Widgets de resumen:
+    - Total tickets activos
+    - Mis tickets
+    - Tickets sin asignar
+    - Por semáforo (verde/amarillo/rojo)
+  - ⚪ Gráfica de tickets por categoría (ApexCharts)
+  - ⚪ Gráfica de cumplimiento SLA
+  - ⚪ Lista de alertas (SLA en rojo)
+<li>⚪ Usar colores iGAS para widgets principales</li>
+
+<h4>6.2 Listado de Tickets</h4>
+
+<li>⚪ Crear componente de listado:</li>
+  - ⚪ Tabla responsive con Bootstrap
+  - ⚪ Columnas: Folio, Cliente, Categoría, Prioridad, Responsable, Estatus, Semáforo, SLA %
+  - ⚪ Badges de prioridad con colores
+  - ⚪ Badges de estatus personalizados
+  - ⚪ Semáforo visual: 🟢 🟡 🔴
+  - ⚪ Barra de progreso SLA con colores (#4CAF50, #FFC107, #F44336)
+  - ⚪ Filtros:
+    - Por estatus (multiselect)
+    - Por prioridad
+    - Por semáforo
+    - Por responsable
+    - Por cliente
+    - Por rango de fechas
+  - ⚪ Búsqueda por folio/descripción
+  - ⚪ Ordenamiento por columnas
+  - ⚪ Paginación con Supabase
+
+<h4>6.3 Creación de Ticket</h4>
+
+<li>⚪ Crear componente modal de creación:</li>
+  - ⚪ Formulario reactivo con validaciones
+  - ⚪ Selector de cliente (autocomplete)
+  - ⚪ Selector de sucursal (filtrado por cliente)
+  - ⚪ Selector de categoría (con iconos)
+  - ⚪ Selector de prioridad (radio buttons con badges)
+  - ⚪ Selector de canal
+  - ⚪ Textarea de descripción (mínimo 20 caracteres)
+  - ⚪ Upload múltiple de adjuntos:
+    - Drag & drop
+    - Validar tipo (imagen, PDF, .txt, .log)
+    - Validar tamaño (max 5MB por archivo)
+    - Preview de imágenes
+  - ⚪ Vista previa antes de crear
+  - ⚪ Loading state al crear
+
+<h4>6.4 Detalle de Ticket</h4>
+
+<li>⚪ Crear componente de detalle:</li>
+  - ⚪ Header con folio prominente (amarillo iGAS)
+  - ⚪ Badge grande de semáforo
+  - ⚪ Barra de progreso SLA horizontal
+  - ⚪ Card de información:
+    - Cliente y sucursal
+    - Categoría y prioridad
+    - Canal de contacto
+    - Responsable y equipo
+    - Estatus actual
+    - Fechas importantes
+  - ⚪ Timeline vertical de bitácora:
+    - Ordenado cronológicamente (más reciente arriba)
+    - Iconos por tipo de evento
+    - Avatar del usuario
+    - Timestamp relativo ("hace 2 horas")
+    - Notas de usuarios
+    - Cambios de estatus
+    - Asignaciones/reasignaciones
+    - Adjuntos
+  - ⚪ Sección de adjuntos:
+    - Grid de thumbnails
+    - Click para ver fullscreen
+    - Botón de descarga
+  - ⚪ Área de acciones rápidas:
+    - Cambiar estatus (dropdown)
+    - Asignar/Reasignar
+    - Escalar a caso
+    - Agregar nota
+    - Subir adjunto
+  - ⚪ Comentarios en tiempo real (Supabase Realtime)
+
+<h4>6.5 Acciones sobre Tickets</h4>
+
+<li>⚪ Implementar cambio de estatus:</li>
+  - ⚪ Modal con selector de estatus
+  - ⚪ Campo de nota obligatoria
+  - ⚪ Validar transiciones permitidas
+  - ⚪ Actualizar automáticamente fecha_primera_respuesta
+  - ⚪ Actualizar fecha_resolucion si estatus es "Resuelto"
+<li>⚪ Implementar asignación/reasignación:</li>
+  - ⚪ Modal con selector de usuario
+  - ⚪ Filtrar por equipo/rol
+  - ⚪ Campo de motivo
+  - ⚪ Registrar en historial
+  - ⚪ Notificar al nuevo responsable
+<li>⚪ Implementar escalamiento a caso:</li>
+  - ⚪ Modal de escalamiento
+  - ⚪ Selector de área destino
+  - ⚪ Selector de motivo
+  - ⚪ Descripción adicional
+  - ⚪ Crear caso y vincular
+  - ⚪ Cambiar estatus del ticket a "Escalado"
+<li>⚪ Implementar cierre de ticket:</li>
+  - ⚪ Validar que esté en estatus "Resuelto"
+  - ⚪ Nota de cierre obligatoria
+  - ⚪ Confirmación
+  - ⚪ Actualizar fecha_cierre
+
+<h4>6.6 Componentes Reutilizables</h4>
+
+<li>⚪ Crear componente SemaforoBadge:</li>
+  - Input: porcentaje SLA
+  - Output: badge con color (#4CAF50, #FFC107, #F44336)
+<li>⚪ Crear componente PrioridadBadge:</li>
+  - Colores diferenciados
+<li>⚪ Crear componente EstatusBadge:</li>
+  - Usar colores de BD
+<li>⚪ Crear componente ProgressBarSLA:</li>
+  - Colores según semáforo
+  - Mostrar porcentaje
+
+<h3>7. Storage de Supabase para Adjuntos</h3>
+
+<h4>7.1 Configuración de Bucket</h4>
+</p><div class="code-block">-- Crear bucket para adjuntos de tickets
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('ticket-attachments', 'ticket-attachments', false);
+
+-- Policy para subir archivos
+CREATE POLICY "Usuarios autenticados pueden subir"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'ticket-attachments' AND
+    auth.uid() IS NOT NULL
+  );
+
+-- Policy para descargar archivos
+CREATE POLICY "Usuarios pueden descargar adjuntos de tickets que pueden ver"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'ticket-attachments' AND
+    auth.uid() IS NOT NULL
+  );</div>
+
+
+<li>⚪ Crear bucket en Supabase Dashboard</li>
+<li>⚪ Configurar RLS policies</li>
+<li>⚪ Implementar servicio de upload en Angular</li>
+<li>⚪ Generar URLs firmadas para descarga</li>
+
+<h3>8. Notificaciones Básicas</h3>
+
+<h4>8.1 Triggers para Notificaciones</h4>
+</p><div class="code-block">-- Tabla de notificaciones
+CREATE TABLE public.notificaciones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  usuario_id UUID REFERENCES profiles(id),
+  tipo TEXT,
+  titulo TEXT,
+  mensaje TEXT,
+  leida BOOLEAN DEFAULT false,
+  datos JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Notificar al asignar ticket
+CREATE OR REPLACE FUNCTION notificar_asignacion()
+RETURNS TRIGGER AS $
+BEGIN
+  IF NEW.responsable_id IS NOT NULL AND (
+    OLD.responsable_id IS NULL OR
+    OLD.responsable_id != NEW.responsable_id
+  ) THEN
+    INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje, datos)
+    VALUES (
+      NEW.responsable_id,
+      'ticket_asignado',
+      'Ticket asignado',
+      'Se te ha asignado el ticket ' || NEW.folio,
+      jsonb_build_object('ticket_id', NEW.id, 'folio', NEW.folio)
+    );
+  END IF;
+  RETURN NEW;
+END;
+$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_notificar_asignacion
+  AFTER INSERT OR UPDATE OF responsable_id ON tickets
+  FOR EACH ROW EXECUTE FUNCTION notificar_asignacion();</div>
+
+
+<li>⚪ Implementar notificaciones en app</li>
+<li>⚪ Badge de notificaciones no leídas en navbar</li>
+<li>⚪ Panel de notificaciones</li>
+
+---
+
+<div class="content-section"><h2>Entregables</h2>
+
+<li>⚪ Módulo de tickets completamente funcional</li>
+<li>⚪ Sistema de SLA con semáforos operativo</li>
+<li>⚪ Bitácora y evidencias funcionando</li>
+<li>⚪ Dashboard de tickets</li>
+<li>⚪ Upload y visualización de adjuntos</li>
+<li>⚪ Panel de configuración de SLA</li>
+<li>⚪ RLS policies implementadas</li>
+<li>⚪ Notificaciones básicas</li>
+
+<div class="content-section"><h2>Dependencias</h2>
+
+<li>Fase 0: Configuración inicial</li>
+<li>Fase 1: Sistema de usuarios</li>
+<li>Módulo de Clientes (básico) - en paralelo en Fase 4</li>
+
+<div class="content-section"><h2>Criterios de Aceptación</h2>
+
+<li>⚪ Usuarios pueden crear tickets con todos los campos</li>
+<li>⚪ SLA se calcula correctamente (horarios hábiles)</li>
+<li>⚪ Semáforos se muestran en verde/amarillo/rojo</li>
+<li>⚪ Bitácora registra todas las acciones</li>
+<li>⚪ Asignaciones funcionan con notificaciones</li>
+<li>⚪ Adjuntos se suben a Supabase Storage</li>
+<li>⚪ Dashboard muestra información en tiempo real</li>
+<li>⚪ RLS protege acceso a datos</li>
+
+<div class="content-section"><h2>Notas Técnicas Supabase</h2>
+
+<li>Usar **Supabase Realtime** para actualizaciones de tickets en vivo</li>
+<li>**Storage** para adjuntos con políticas de seguridad</li>
+<li>**Views** para cálculos de SLA (mejor performance)</li>
+<li>**Triggers** para automatizar folio, bitácora, notificaciones</li>
+<li>**RLS** para seguridad real a nivel de BD</li>
+<li>Considerar **Edge Functions** para envío de emails</li>
+<li>**Índices** en campos de búsqueda frecuente</li>
+</p></div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Última actualización: 11 de enero de 2026
+        </p>
+    </div>
+</body>
+</html>

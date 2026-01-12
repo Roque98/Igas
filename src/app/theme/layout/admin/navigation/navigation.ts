@@ -13,6 +13,20 @@ export interface NavigationItem {
   breadcrumbs?: boolean;
   children?: NavigationItem[];
 }
+
+/**
+ * Navigation configuration for iGAS application
+ *
+ * NOTE: Demo components from Datta-Able template are kept in code but hidden from navigation
+ * using the 'hidden: true' property. This allows them to be used as reference for development.
+ * To show demo components, simply set 'hidden: false' or remove the property.
+ *
+ * Hidden demo groups:
+ * - UI ELEMENT: Basic components (buttons, badges, typography, etc.)
+ * - Forms & Tables: Form elements and table examples
+ * - Chart: ApexChart examples
+ * - Pages: Authentication pages, sample pages, etc.
+ */
 export const NavigationItems: NavigationItem[] = [
   {
     id: 'navigation',
@@ -35,6 +49,7 @@ export const NavigationItems: NavigationItem[] = [
     title: 'UI ELEMENT',
     type: 'group',
     icon: 'icon-ui',
+    hidden: true, // Demo components - hidden for reference
     children: [
       {
         id: 'basic',
@@ -87,6 +102,7 @@ export const NavigationItems: NavigationItem[] = [
     title: 'Forms & Tables',
     type: 'group',
     icon: 'icon-group',
+    hidden: true, // Demo components - hidden for reference
     children: [
       {
         id: 'forms-element',
@@ -111,6 +127,7 @@ export const NavigationItems: NavigationItem[] = [
     title: 'Chart',
     type: 'group',
     icon: 'icon-charts',
+    hidden: true, // Demo components - hidden for reference
     children: [
       {
         id: 'apexChart',
@@ -127,6 +144,7 @@ export const NavigationItems: NavigationItem[] = [
     title: 'Pages',
     type: 'group',
     icon: 'icon-pages',
+    hidden: true, // Demo pages - hidden for reference
     children: [
       {
         id: 'auth',

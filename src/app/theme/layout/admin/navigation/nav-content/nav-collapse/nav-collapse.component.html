@@ -11,11 +11,13 @@
   </a>
   <ul class="pcoded-submenu" [routerLinkActive]="['active']">
     @for (items of item().children; track items) {
-      @if (items.type === 'item') {
-        <app-nav-item [item]="items" />
-      }
-      @if (items.type === 'collapse') {
-        <app-nav-collapse [item]="items" />
+      @if (!items.hidden) {
+        @if (items.type === 'item') {
+          <app-nav-item [item]="items" />
+        }
+        @if (items.type === 'collapse') {
+          <app-nav-collapse [item]="items" />
+        }
       }
     }
   </ul>

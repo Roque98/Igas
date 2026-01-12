@@ -1,0 +1,18 @@
+# Node modules (si instalas paquetes npm)
+node_modules/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+
+# Archivos de respaldo
+*.bak
+*~
+
+# No subir el script generador (opcional - descomenta si no quieres subirlo)
+# generar-fases.js

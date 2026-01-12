@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Desarrollo - APP Mesa de Ayuda iGAS v1.0</title>
+    <style>
+        @page {
+            margin: 2cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            page-break-after: avoid;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #F9B000;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .info-box strong {
+            color: #F9B000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-completado {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .status-proceso {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .status-pendiente {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .phase-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+
+        .phase-card h3 {
+            color: #F9B000;
+            margin-bottom: 10px;
+        }
+
+        .phase-card .progress {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tech-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #F9B000;
+        }
+
+        .tech-item strong {
+            color: #F9B000;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #F9B000;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #F9B000;
+            border: 4px solid white;
+            box-shadow: 0 0 0 2px #F9B000;
+        }
+
+        .timeline-item h4 {
+            color: #F9B000;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding: 30px;
+            background: #3E3E3E;
+            color: white;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-box {
+            width: 100px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #FFC107;
+            margin: 15px 0;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        ul li {
+            margin: 8px 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .metric-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #F9B000;
+            margin: 10px 0;
+        }
+
+        .metric-card .label {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" class="active">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>📋 Plan de Desarrollo</h1>
+            <h2>APP Mesa de Ayuda iGAS v1.0</h2>
+            <p>Sistema Integral de Gestión de Soporte Técnico, Casos y Clientes</p>
+            <p style="margin-top: 15px;">Morelia, Michoacán - 11 de enero de 2026</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Información del Proyecto -->
+        <div class="section">
+            <div class="info-box">
+                <p><strong>Cliente:</strong> ING. RAFAEL ROQUE ROMÁN - Gerente iGas Morelia</p>
+                <p><strong>Desarrollador:</strong> ING. ANGEL DAVID ROQUE AYALA</p>
+                <p><strong>Contacto:</strong> rroque.mor@igas.mx | Tel: 443 227 2217</p>
+                <p><strong>Documento de referencia:</strong> iGAs v1.0_1101226.pdf</p>
+            </div>
+        </div>
+
+        <!-- Progreso General -->
+        <div class="section">
+            <h2 class="section-title">📊 Estado General del Proyecto</h2>
+
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 12.5%;"></div>
+                <div class="progress-text">12.5% Completado</div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="label">Fases Completadas</div>
+                    <div class="number">0/8</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Fases en Proceso</div>
+                    <div class="number">2</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Fases Pendientes</div>
+                    <div class="number">6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de Fases -->
+        <div class="section">
+            <h2 class="section-title">📑 Resumen de Fases del Proyecto</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 40%;">Fase</th>
+                        <th style="width: 15%;">Progreso</th>
+                        <th style="width: 15%;">Estado</th>
+                        <th style="width: 25%;">Estimación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td><strong>Configuración Inicial y Base</strong></td>
+                        <td>60%</td>
+                        <td><span class="status-badge status-proceso">En Proceso</span></td>
+                        <td>1 semana</td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td><strong>Autenticación y Gestión de Usuarios</strong></td>
+                        <td>40%</td>
+                        <td><span class="status-badge status-proceso">En Proceso</span></td>
+                        <td>1-2 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><strong>Módulo Core - Tickets de Soporte</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>3-4 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><strong>Escalamiento - Módulo de Casos</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>2-3 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td><strong>Gestión de Clientes</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>2 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td><strong>Mantenimientos e Instalaciones</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>2-3 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td><strong>Notificaciones, Alertas y Reportes</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>2 semanas</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td><strong>Testing, Optimización y Despliegue</strong></td>
+                        <td>0%</td>
+                        <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                        <td>2 semanas</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight">
+                <strong>⏱️ Tiempo Total Estimado:</strong> 15-19 semanas (3.5-4.5 meses)<br>
+                <strong>📅 Con desarrollo en paralelo:</strong> 12-15 semanas (3-3.5 meses)
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Stack Tecnológico -->
+        <div class="section">
+            <h2 class="section-title">🛠️ Stack Tecnológico</h2>
+
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <strong>Frontend</strong>
+                    <p>Angular 21 con TypeScript<br>Bootstrap 5.3.8<br>ApexCharts</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Backend/BaaS</strong>
+                    <p>Supabase<br>PostgreSQL<br>Edge Functions</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Autenticación</strong>
+                    <p>Supabase Auth<br>JWT Tokens<br>Row Level Security</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Storage</strong>
+                    <p>Supabase Storage<br>Adjuntos de tickets<br>Firmas digitales</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Realtime</strong>
+                    <p>Supabase Realtime<br>Notificaciones push<br>Actualizaciones en vivo</p>
+                </div>
+                <div class="tech-item">
+                    <strong>UI Framework</strong>
+                    <p>Template Datta-Able<br>Responsive Design<br>SCSS personalizado</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paleta de Colores -->
+        <div class="section">
+            <h2 class="section-title">🎨 Paleta de Colores Corporativa iGAS</h2>
+
+            <h4 style="margin: 20px 0 10px 0;">Colores Corporativos</h4>
+            <div class="color-palette">
+                <div class="color-box" style="background: #F9B000;">
+                    Amarillo<br>#F9B000
+                </div>
+                <div class="color-box" style="background: #FDB913;">
+                    Amarillo Alt<br>#FDB913
+                </div>
+                <div class="color-box" style="background: #58585A;">
+                    Gris Oscuro<br>#58585A
+                </div>
+                <div class="color-box" style="background: #000000;">
+                    Negro<br>#000000
+                </div>
+            </div>
+
+            <h4 style="margin: 20px 0 10px 0;">Semáforo SLA (Funcional)</h4>
+            <div class="color-palette">
+                <div class="color-box" style="background: #4CAF50;">
+                    Verde 0-70%<br>#4CAF50
+                </div>
+                <div class="color-box" style="background: #FFC107;">
+                    Amarillo 70-100%<br>#FFC107
+                </div>
+                <div class="color-box" style="background: #F44336;">
+                    Rojo >100%<br>#F44336
+                </div>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Detalle de Fases -->
+        <div class="section">
+            <h2 class="section-title">📋 Detalle de Fases</h2>
+
+            <div class="phase-card">
+                <h3>Fase 0: Configuración Inicial y Base</h3>
+                <div class="progress">✅ 60% Completado</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-proceso">En Proceso</span></p>
+                <p><strong>Objetivo:</strong> Establecer la infraestructura base del proyecto.</p>
+
+                <h4 style="margin-top: 15px;">Completado:</h4>
+                <ul>
+                    <li>✅ Proyecto Angular 21 inicializado</li>
+                    <li>✅ Supabase integrado y funcionando</li>
+                    <li>✅ Template Datta-Able instalado</li>
+                    <li>✅ Sistema de autenticación básico</li>
+                    <li>✅ Routing con guards configurado</li>
+                </ul>
+
+                <h4>Pendiente:</h4>
+                <ul>
+                    <li>⏳ Aplicar paleta de colores iGAS</li>
+                    <li>⏳ Personalizar logo y branding</li>
+                    <li>⏳ Crear esquema completo de base de datos</li>
+                    <li>⏳ Configurar Storage buckets</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 1: Autenticación y Gestión de Usuarios</h3>
+                <div class="progress">⏳ 40% Completado</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-proceso">En Proceso</span></p>
+                <p><strong>Objetivo:</strong> Sistema completo de usuarios, roles y permisos.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>Gestión de usuarios/agentes de soporte</li>
+                    <li>Sistema de roles (Admin, Coordinador, Técnico, Dev, etc.)</li>
+                    <li>Permisos granulares por módulo</li>
+                    <li>Gestión de equipos/áreas</li>
+                    <li>Horarios y turnos para SLA</li>
+                    <li>Auditoría completa de acciones</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 2: Módulo Core - Tickets de Soporte ⭐ CRÍTICA</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Módulo principal del sistema de soporte.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>Creación y gestión de tickets con folio automático</li>
+                    <li>Sistema de SLA con horarios hábiles</li>
+                    <li>Semáforos visuales (🟢🟡🔴)</li>
+                    <li>Bitácora tipo timeline</li>
+                    <li>Adjuntos (fotos, PDFs, logs)</li>
+                    <li>Asignación y reasignación</li>
+                    <li>Dashboard con métricas</li>
+                    <li>Filtros avanzados</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>Nota Importante:</strong> Esta es la fase más crítica del proyecto. Es el corazón del sistema y debe completarse antes de continuar con las siguientes fases.
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 3: Escalamiento - Módulo de Casos</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Sistema de escalamiento a otras áreas.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>Escalamiento de tickets a casos</li>
+                    <li>Envío automático de email a área correspondiente</li>
+                    <li>Control de número de caso externo</li>
+                    <li>Sistema de SLA para casos</li>
+                    <li>Flujo de "Listo para validar"</li>
+                    <li>Flujo de regreso a soporte</li>
+                    <li>Dashboard por área</li>
+                </ul>
+            </div>
+
+            <div class="page-break"></div>
+
+            <div class="phase-card">
+                <h3>Fase 4: Gestión de Clientes</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Maestro completo de clientes y sucursales.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>CRUD de clientes y sucursales</li>
+                    <li>Gestión de contactos por tipo</li>
+                    <li>Datos fiscales (RFC, Régimen, Uso CFDI)</li>
+                    <li>Control de licencias HASP</li>
+                    <li>Control de pólizas de soporte</li>
+                    <li>Alertas automáticas de vencimiento (45/30/15 días)</li>
+                    <li>Historial de renovaciones</li>
+                    <li>Dashboard de vencimientos</li>
+                </ul>
+
+                <div class="highlight">
+                    <strong>Ventaja:</strong> Este módulo puede desarrollarse en paralelo con Fase 2-3, reduciendo el tiempo total.
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 5: Mantenimientos e Instalaciones</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Control de mantenimientos mensuales e instalaciones.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>Calendario de mantenimientos</li>
+                    <li>Checklist personalizable de BD</li>
+                    <li>Pipeline de instalaciones (Kanban)</li>
+                    <li>Checklist por módulo instalado</li>
+                    <li>Firma digital del cliente</li>
+                    <li>Control de pendientes</li>
+                    <li>Generación automática de tickets desde pendientes</li>
+                    <li>Evidencias fotográficas</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 6: Notificaciones, Alertas y Reportes</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Sistema completo de notificaciones y reportes.</p>
+
+                <h4 style="margin-top: 15px;">Funcionalidades Clave:</h4>
+                <ul>
+                    <li>Notificaciones push en tiempo real</li>
+                    <li>Notificaciones por email</li>
+                    <li>Centro de notificaciones</li>
+                    <li>Recordatorios automáticos</li>
+                    <li>Dashboard principal con métricas</li>
+                    <li>Reportes de tickets, casos y productividad</li>
+                    <li>Gráficas interactivas (ApexCharts)</li>
+                    <li>Exportación a PDF y Excel</li>
+                </ul>
+            </div>
+
+            <div class="phase-card">
+                <h3>Fase 7: Testing, Optimización y Despliegue</h3>
+                <div class="progress" style="color: #F44336;">⏳ 0% - Por Iniciar</div>
+                <p><strong>Estado:</strong> <span class="status-badge status-pendiente">Pendiente</span></p>
+                <p><strong>Objetivo:</strong> Pruebas, optimización y puesta en producción.</p>
+
+                <h4 style="margin-top: 15px;">Actividades:</h4>
+                <ul>
+                    <li>Tests unitarios y de integración</li>
+                    <li>Optimización de performance</li>
+                    <li>Documentación técnica completa</li>
+                    <li>Manual de usuario</li>
+                    <li>Configuración de producción</li>
+                    <li>Despliegue en servidor</li>
+                    <li>Capacitación a usuarios</li>
+                    <li>Período de soporte post-lanzamiento</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Cronograma -->
+        <div class="section">
+            <h2 class="section-title">📅 Cronograma del Proyecto</h2>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h4>Semanas 1-2: Fases 0 y 1</h4>
+                    <p>Completar configuración inicial y sistema de usuarios</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 3-6: Fase 2 (CRÍTICA)</h4>
+                    <p>Desarrollo del módulo de tickets de soporte</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 3-5: Fase 4 (Paralelo)</h4>
+                    <p>Desarrollo del módulo de gestión de clientes</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 7-9: Fase 3</h4>
+                    <p>Desarrollo del módulo de casos y escalamiento</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 10-12: Fase 5</h4>
+                    <p>Desarrollo de mantenimientos e instalaciones</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 13-14: Fase 6</h4>
+                    <p>Notificaciones, alertas y reportes</p>
+                </div>
+                <div class="timeline-item">
+                    <h4>Semanas 15-16: Fase 7</h4>
+                    <p>Testing, optimización y despliegue a producción</p>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>🎯 Fecha Estimada de Entrega:</strong><br>
+                Con desarrollo secuencial: Abril-Mayo 2026<br>
+                Con desarrollo en paralelo: Marzo-Abril 2026
+            </div>
+        </div>
+
+        <!-- Funcionalidades Destacadas -->
+        <div class="section">
+            <h2 class="section-title">⭐ Funcionalidades Destacadas del Sistema</h2>
+
+            <div class="tech-stack" style="grid-template-columns: 1fr;">
+                <div class="tech-item">
+                    <strong>🎫 Gestión Inteligente de Tickets</strong>
+                    <p>Sistema completo con SLA automático, semáforos visuales, bitácora detallada y adjuntos. Control total del ciclo de vida de cada ticket.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>🚀 Escalamiento Automático a Casos</strong>
+                    <p>Cuando un ticket requiere otra área, se escala automáticamente a caso con envío de email y control de tiempo independiente.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>👥 Maestro Completo de Clientes</strong>
+                    <p>Gestión de clientes con sucursales, contactos, datos fiscales, licencias HASP y pólizas de soporte con alertas automáticas.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>🔧 Mantenimientos con Checklist</strong>
+                    <p>Control de mantenimientos mensuales de BD con checklist personalizable y evidencias fotográficas.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>📝 Instalaciones con Firma Digital</strong>
+                    <p>Gestión de instalaciones con checklist por módulo y firma digital del cliente capturada directamente en el sistema.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>🔔 Notificaciones en Tiempo Real</strong>
+                    <p>Sistema de notificaciones push instantáneas con Supabase Realtime. Notificaciones por email configurables.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>📊 Reportes y Dashboards</strong>
+                    <p>Dashboards interactivos con gráficas ApexCharts. Reportes de tickets, casos, productividad y vencimientos. Exportación a PDF y Excel.</p>
+                </div>
+                <div class="tech-item">
+                    <strong>🔐 Seguridad Avanzada</strong>
+                    <p>Row Level Security (RLS) de Supabase garantiza que cada usuario solo vea lo que debe ver. Auditoría completa de acciones.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beneficios -->
+        <div class="section">
+            <h2 class="section-title">💎 Beneficios del Sistema</h2>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #F9B000; margin-bottom: 15px;">Para el Equipo de Soporte</h4>
+                <ul>
+                    <li>✅ Control total de tickets con semáforos SLA</li>
+                    <li>✅ Bitácora completa de cada interacción</li>
+                    <li>✅ Notificaciones en tiempo real</li>
+                    <li>✅ Dashboard personalizado por técnico</li>
+                    <li>✅ Gestión de mantenimientos e instalaciones</li>
+                </ul>
+
+                <h4 style="color: #F9B000; margin: 20px 0 15px 0;">Para los Coordinadores</h4>
+                <ul>
+                    <li>✅ Visibilidad completa del equipo</li>
+                    <li>✅ Reportes de productividad</li>
+                    <li>✅ Alertas de SLA en riesgo</li>
+                    <li>✅ Gestión de casos escalados</li>
+                    <li>✅ Métricas de cumplimiento</li>
+                </ul>
+
+                <h4 style="color: #F9B000; margin: 20px 0 15px 0;">Para la Administración</h4>
+                <ul>
+                    <li>✅ Control de licencias y pólizas</li>
+                    <li>✅ Alertas automáticas de vencimientos</li>
+                    <li>✅ Gestión completa de clientes</li>
+                    <li>✅ Reportes ejecutivos</li>
+                    <li>✅ Auditoría completa del sistema</li>
+                </ul>
+
+                <h4 style="color: #F9B000; margin: 20px 0 15px 0;">Para los Clientes</h4>
+                <ul>
+                    <li>✅ Seguimiento transparente de tickets</li>
+                    <li>✅ Historial completo de servicios</li>
+                    <li>✅ Evidencias de mantenimientos</li>
+                    <li>✅ Firma digital de conformidad</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Próximos Pasos -->
+        <div class="section">
+            <h2 class="section-title">🎯 Próximos Pasos Inmediatos</h2>
+
+            <div class="info-box">
+                <h4 style="margin-bottom: 10px;">Semana 1-2:</h4>
+                <ol style="margin-left: 20px;">
+                    <li>Completar personalización con colores corporativos iGAS</li>
+                    <li>Actualizar logo en toda la aplicación</li>
+                    <li>Crear esquema completo de base de datos en Supabase</li>
+                    <li>Implementar tablas de usuarios, roles y permisos</li>
+                    <li>Completar CRUD de usuarios</li>
+                </ol>
+
+                <h4 style="margin: 20px 0 10px 0;">Semana 3-6 (CRÍTICO):</h4>
+                <ol style="margin-left: 20px;">
+                    <li>Desarrollar módulo completo de tickets</li>
+                    <li>Implementar sistema de SLA con semáforos</li>
+                    <li>Crear dashboard de tickets</li>
+                    <li>Realizar pruebas exhaustivas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Documento generado el 11 de enero de 2026<br>
+            Plan de Desarrollo - APP Mesa de Ayuda v1.0
+        </p>
+    </div>
+</body>
+</html>
