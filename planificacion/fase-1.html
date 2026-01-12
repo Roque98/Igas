@@ -332,8 +332,8 @@ Completar el sistema de autenticación, implementar gestión de usuarios, roles 
 <li>✅ Cambio de contraseña (ya implementado)</li>
 <li>✅ Mejorar manejo de errores con mensajes en español <a href="#version-1-1-0" style="font-size: 11px; color: #4CAF50;">[v1.1.0]</a></li>
 <li>✅ Implementar refresh token automático <a href="#version-1-8-0" style="font-size: 11px; color: #4CAF50;">[v1.8.0]</a></li>
-<li>⚪ Configurar políticas de contraseña en Supabase</li>
-<li>⚪ Implementar bloqueo de cuenta después de X intentos fallidos</li>
+<li>✅ Configurar políticas de contraseña en Supabase <a href="#version-1-9-0" style="font-size: 11px; color: #4CAF50;">[v1.9.0]</a></li>
+<li>✅ Implementar bloqueo de cuenta después de X intentos fallidos <a href="#version-1-9-0" style="font-size: 11px; color: #4CAF50;">[v1.9.0]</a></li>
 
 **NOTA:** No habrá registro público. Los usuarios serán creados únicamente por administradores desde el panel de gestión de usuarios.
 
@@ -767,7 +767,29 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-8-0"><strong>v1.8.0</strong> - 12 de enero de 2026</p>
+    <p id="version-1-9-0"><strong>v1.9.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Configurar políticas de contraseña en Supabase <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Implementar bloqueo de cuenta después de intentos fallidos <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>📄 Documentación completa creada (PASSWORD_POLICIES.md)</li>
+        <li>🌐 Guía visual HTML creada (documentacion/PASSWORD_SETUP.html)</li>
+        <li>💾 Script SQL completo (09_password_policies.sql) con:</li>
+        <li>  • Tabla password_history - Historial de últimas 5 contraseñas</li>
+        <li>  • Tabla failed_login_attempts - Registro de intentos fallidos</li>
+        <li>  • Columna password_changed_at en profiles para expiración</li>
+        <li>  • Funciones: save_password_to_history(), update_password_changed_at()</li>
+        <li>  • Funciones: cleanup_old_failed_attempts(), is_user_blocked(), is_password_expired()</li>
+        <li>  • Vistas: passwords_expiring_soon, blocked_users, failed_login_stats</li>
+        <li>🔒 Políticas configurables:</li>
+        <li>  • Longitud mínima: 8 caracteres (12 para admins)</li>
+        <li>  • Complejidad: mayúsculas, minúsculas, números, caracteres especiales</li>
+        <li>  • Bloqueo: 5 intentos fallidos = 15 minutos bloqueado</li>
+        <li>  • Expiración: 60 días admins, 90 días otros roles</li>
+        <li>  • Rate limiting configurado para endpoints de auth</li>
+        <li>📊 Sistema de monitoreo y reportes implementado</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-8-0"><strong>v1.8.0</strong> - 12 de enero de 2026</p>
     <ul>
         <li>✅ Implementar refresh token automático <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
         <li>✅ Configuración explícita de autoRefreshToken en cliente Supabase</li>
@@ -875,7 +897,7 @@ CREATE TRIGGER profiles_audit_trigger
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
             Última actualización: 12 de enero de 2026<br>
-            Fase 1: v1.8.0 - 8 tareas completadas
+            Fase 1: v1.9.0 - 10 tareas completadas
         </p>
     </div>
 </body>
