@@ -7,6 +7,7 @@ import { Field, form, minLength, required } from '@angular/forms/signals';
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-auth-reset-password',
@@ -32,9 +33,9 @@ export class AuthResetPasswordComponent implements OnInit {
   });
 
   resetPasswordForm = form(this.resetPasswordModel, (schemaPath) => {
-    required(schemaPath.password, { message: 'La contraseña es obligatoria' });
-    minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
-    required(schemaPath.confirmPassword, { message: 'Debes confirmar la contraseña' });
+    required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
+    minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
+    required(schemaPath.confirmPassword, { message: ErrorMessages.required('Confirmar contraseña') });
   });
 
   async ngOnInit() {
@@ -72,7 +73,7 @@ export class AuthResetPasswordComponent implements OnInit {
     // Check if passwords match
     const { password, confirmPassword } = this.resetPasswordModel();
     if (password !== confirmPassword) {
-      this.error.set('Las contraseñas no coinciden');
+      this.error.set(ErrorMessages.passwordMismatch());
       return;
     }
 
@@ -82,7 +83,7 @@ export class AuthResetPasswordComponent implements OnInit {
       const { error } = await this.supabase.updatePassword(password);
 
       if (error) {
-        this.error.set(error.message);
+        this.error.set(getErrorMessage(error));
         console.error('Password update error:', error);
       } else {
         console.log('Password updated successfully');
@@ -90,7 +91,7 @@ export class AuthResetPasswordComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       }
     } catch (err: any) {
-      this.error.set('Ocurrió un error inesperado. Por favor, intenta de nuevo.');
+      this.error.set(getErrorMessage(err));
       console.error('Unexpected error:', err);
     } finally {
       this.loading.set(false);

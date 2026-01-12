@@ -42,8 +42,8 @@
     }
 
     &:checked + .cr:before {
-      background: #1dd5d2;
-      border-color: #1dd5d2;
+      background: $primary-color;
+      border-color: $primary-color;
       color: #ffffff;
     }
 
@@ -96,7 +96,7 @@
           &:before {
             opacity: 1;
             background: transparent;
-            color: #1dd5d2;
+            color: $primary-color;
             border-color: transparent;
           }
         }
@@ -169,11 +169,11 @@
     &:checked {
       + .cr {
         &:before {
-          border-color: #1dd5d2;
+          border-color: $primary-color;
         }
 
         &:after {
-          background: $theme-color;
+          background: $primary-color;
         }
       }
     }

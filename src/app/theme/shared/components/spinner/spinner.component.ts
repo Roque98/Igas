@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewEncapsulation, inject, input } from '@angular/core';
+import { Component, OnDestroy, ViewEncapsulation, inject, input, ChangeDetectorRef } from '@angular/core';
 import { Spinkit } from './spinkits';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 
@@ -10,6 +10,7 @@ import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationErr
 })
 export class SpinnerComponent implements OnDestroy {
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   isSpinnerVisible = true;
   Spinkit = Spinkit;
@@ -23,9 +24,12 @@ export class SpinnerComponent implements OnDestroy {
         } else if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
           this.isSpinnerVisible = false;
         }
+        // Manually trigger change detection to avoid ExpressionChangedAfterItHasBeenCheckedError
+        this.cdr.detectChanges();
       },
       () => {
         this.isSpinnerVisible = false;
+        this.cdr.detectChanges();
       }
     );
   }

@@ -7,6 +7,7 @@ import { email, Field, form, minLength, required } from '@angular/forms/signals'
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-auth-signin',
@@ -32,10 +33,10 @@ export class AuthSigninComponent implements OnInit {
   });
 
   loginForm = form(this.loginModal, (schemaPath) => {
-    required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
-    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
-    required(schemaPath.password, { message: 'La contraseña es obligatoria' });
-    minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
+    required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
+    email(schemaPath.email, { message: ErrorMessages.email() });
+    required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
+    minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
   });
 
   ngOnInit() {
@@ -67,7 +68,7 @@ export class AuthSigninComponent implements OnInit {
       const { data, error } = await this.supabase.signIn(credentials.email, credentials.password);
 
       if (error) {
-        this.error.set(error.message);
+        this.error.set(getErrorMessage(error));
         console.error('Login error:', error);
       } else if (data.user) {
         console.log('User logged in successfully:', data.user);
@@ -83,7 +84,7 @@ export class AuthSigninComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       }
     } catch (err: any) {
-      this.error.set('Ocurrió un error inesperado. Por favor, intenta de nuevo.');
+      this.error.set(getErrorMessage(err));
       console.error('Unexpected error:', err);
     } finally {
       this.loading.set(false);

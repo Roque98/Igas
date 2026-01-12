@@ -7,6 +7,7 @@ import { email, Field, form, required } from '@angular/forms/signals';
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-auth-forgot-password',
@@ -28,8 +29,8 @@ export class AuthForgotPasswordComponent {
   });
 
   forgotPasswordForm = form(this.forgotPasswordModel, (schemaPath) => {
-    required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
-    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
+    required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
+    email(schemaPath.email, { message: ErrorMessages.email() });
   });
 
   async onSubmit(event: Event) {
@@ -50,14 +51,14 @@ export class AuthForgotPasswordComponent {
       const { error } = await this.supabase.resetPassword(email);
 
       if (error) {
-        this.error.set(error.message);
+        this.error.set(getErrorMessage(error));
         console.error('Password reset error:', error);
       } else {
         this.success.set(true);
         console.log('Password reset email sent successfully');
       }
     } catch (err: any) {
-      this.error.set('Ocurrió un error inesperado. Por favor, intenta de nuevo.');
+      this.error.set(getErrorMessage(err));
       console.error('Unexpected error:', err);
     } finally {
       this.loading.set(false);

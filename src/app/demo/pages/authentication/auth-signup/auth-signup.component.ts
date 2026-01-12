@@ -6,6 +6,7 @@ import { email, Field, form, minLength, required } from '@angular/forms/signals'
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
+import { ErrorMessages } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-auth-signup',
@@ -26,11 +27,11 @@ export class AuthSignupComponent {
   });
 
   registerForm = form(this.registerModel, (schemaPath) => {
-    required(schemaPath.email, { message: 'El correo electrónico es obligatorio' });
-    email(schemaPath.email, { message: 'Ingresa un correo electrónico válido' });
-    required(schemaPath.password, { message: 'La contraseña es obligatoria' });
-    minLength(schemaPath.password, 8, { message: 'La contraseña debe tener al menos 8 caracteres' });
-    required(schemaPath.username, { message: 'El nombre de usuario es obligatorio' });
+    required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
+    email(schemaPath.email, { message: ErrorMessages.email() });
+    required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
+    minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
+    required(schemaPath.username, { message: ErrorMessages.required('Nombre de usuario') });
   });
 
   onSubmit(event: Event) {
