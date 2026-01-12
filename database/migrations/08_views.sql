@@ -30,6 +30,9 @@ LEFT JOIN public.estatus_tickets est ON t.estatus_id = est.id
 LEFT JOIN public.profiles resp ON t.responsable_id = resp.id
 LEFT JOIN public.profiles creador ON t.creado_por = creador.id;
 
+-- Habilitar RLS en la vista
+ALTER VIEW public.tickets_completos SET (security_invoker = true);
+
 -- Verificación
 SELECT
   table_name,
