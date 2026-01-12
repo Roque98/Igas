@@ -2,6 +2,7 @@
 
 import { enableProdMode, importProvidersFrom, ErrorHandler } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 import { environment } from './environments/environment';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
@@ -21,6 +22,7 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(BrowserModule, AppRoutingModule),
     provideAnimations(),
     provideHttpClient(withInterceptors([httpErrorInterceptor])),
-    { provide: ErrorHandler, useClass: GlobalErrorHandler }
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    { provide: LocationStrategy, useClass: HashLocationStrategy }
   ]
 }).catch((err) => console.error(err));
