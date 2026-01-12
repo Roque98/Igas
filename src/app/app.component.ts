@@ -5,6 +5,8 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 // project import
 import { SpinnerComponent } from './theme/shared/components/spinner/spinner.component';
 import { ToastContainerComponent } from './core/components/toast-container/toast-container.component';
+import { InactivityService } from './core/services/inactivity.service';
+import { SupabaseService } from './core/services/supabase.service';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +16,8 @@ import { ToastContainerComponent } from './core/components/toast-container/toast
 })
 export class AppComponent implements OnInit {
   private router = inject(Router);
+  private inactivityService = inject(InactivityService);
+  private supabaseService = inject(SupabaseService);
 
   title = 'datta-able';
 
@@ -24,6 +28,15 @@ export class AppComponent implements OnInit {
         return;
       }
       window.scrollTo(0, 0);
+    });
+
+    // Iniciar monitoreo de inactividad cuando el usuario esté autenticado
+    this.supabaseService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.inactivityService.startWatching();
+      } else {
+        this.inactivityService.stopWatching();
+      }
     });
   }
 }

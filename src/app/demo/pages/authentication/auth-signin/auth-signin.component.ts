@@ -1,7 +1,7 @@
 // angular import
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
 
 // project import
@@ -18,6 +18,7 @@ import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messa
 export class AuthSigninComponent implements OnInit {
   private supabase = inject(SupabaseService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   private readonly REMEMBER_EMAIL_KEY = 'igas_remember_email';
 
@@ -26,6 +27,7 @@ export class AuthSigninComponent implements OnInit {
   showPassword = signal(false);
   loading = signal(false);
   rememberMe = signal(true);
+  inactivityMessage = signal('');
 
   loginModal = signal<{ email: string; password: string }>({
     email: '',
@@ -40,6 +42,20 @@ export class AuthSigninComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Check if session expired due to inactivity
+    this.route.queryParams.subscribe((params) => {
+      if (params['reason'] === 'inactivity') {
+        this.inactivityMessage.set(
+          'Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.'
+        );
+        // Remove query param after reading
+        this.router.navigate([], {
+          queryParams: {},
+          replaceUrl: true
+        });
+      }
+    });
+
     // Load saved email if exists
     const savedEmail = this.getSavedEmail();
     if (savedEmail) {

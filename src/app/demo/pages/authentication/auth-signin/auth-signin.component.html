@@ -15,6 +15,14 @@
           </div>
           <h3 class="mb-2 text-igas-gray">Bienvenido</h3>
           <p class="text-muted mb-4">Sistema de Mesa de Ayuda iGAS</p>
+          @if (inactivityMessage()) {
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+              <i class="feather icon-clock me-2"></i>
+              <div>
+                {{ inactivityMessage() }}
+              </div>
+            </div>
+          }
           @if (error()) {
             <div class="alert alert-danger d-flex align-items-center" role="alert">
               <i class="feather icon-alert-circle me-2"></i>
