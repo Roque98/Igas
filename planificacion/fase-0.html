@@ -264,7 +264,7 @@
         <div class="container">
             <h1>Fase 0: Configuración Inicial y Base</h1>
             <p>Establecer la infraestructura base del proyecto</p>
-            <p style="margin-top: 15px;"><span class="status-badge status-proceso">En Proceso - 71%</span></p>
+            <p style="margin-top: 15px;"><span class="status-badge status-proceso">En Proceso - 73%</span></p>
         </div>
     </div>
 
@@ -273,8 +273,8 @@
         <div class="section">
             <h2 class="section-title">Progreso de la Fase</h2>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 71%;"></div>
-                <div class="progress-text">71% Completado (34/48 tareas)</div>
+                <div class="progress-fill" style="width: 73%;"></div>
+                <div class="progress-text">73% Completado (35/48 tareas)</div>
             </div>
         </div>
 
@@ -326,7 +326,7 @@
                 <li class="done">Diseñar esquema de base de datos inicial <a href="#version-0-3-0" style="font-size: 11px; color: #4CAF50;">[v0.3.0]</a></li>
                 <li class="done">Crear migraciones SQL en Supabase <a href="#version-0-3-1" style="font-size: 11px; color: #4CAF50;">[v0.3.1]</a></li>
                 <li class="done">Configurar Row Level Security (RLS) policies <a href="#version-0-3-3" style="font-size: 11px; color: #4CAF50;">[v0.3.3]</a></li>
-                <li class="pending">Configurar Storage buckets (para adjuntos)</li>
+                <li class="done">Configurar Storage buckets (para adjuntos) <a href="#version-0-4-0" style="font-size: 11px; color: #4CAF50;">[v0.4.0]</a></li>
             </ul>
 
             <h3 class="subsection-title" id="setup-1-4">1.4 Configuración del Routing</h3>
@@ -413,7 +413,19 @@
         <div class="section" id="historial-versiones">
             <h2 class="section-title">Historial de Versiones</h2>
             <div class="info-box">
-                <p id="version-0-3-4"><strong>v0.3.4</strong> - 11 de enero de 2026</p>
+                <p id="version-0-4-0"><strong>v0.4.0</strong> - 11 de enero de 2026</p>
+                <ul>
+                    <li>✅ Storage buckets configurado para adjuntos de tickets <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+                    <li>✅ Bucket privado "ticket-attachments" creado</li>
+                    <li>✅ Políticas de Storage para control de acceso (INSERT, SELECT, UPDATE, DELETE)</li>
+                    <li>✅ Estructura de carpetas organizada por ticket_id/{timestamp}_{filename}</li>
+                    <li>✅ Límites configurados: 10MB por archivo, tipos permitidos definidos</li>
+                    <li>✅ Documentación completa en database/STORAGE_SETUP.html</li>
+                    <li>✅ Script SQL con políticas en database/storage/buckets-setup.sql</li>
+                    <li>✅ Ejemplo de implementación en Angular con servicio de adjuntos</li>
+                </ul>
+
+                <p style="margin-top: 15px;" id="version-0-3-4"><strong>v0.3.4</strong> - 11 de enero de 2026</p>
                 <ul>
                     <li>✅ RLS configurado para la vista tickets_completos <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
                     <li>✅ Agregado security_invoker = true a la vista</li>

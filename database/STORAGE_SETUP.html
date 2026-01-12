@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Storage - iGAS Helpdesk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #e5a100 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #F9B000;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #F9B000;
+        }
+
+        .step h3 {
+            color: #2d2d2d;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .step-number {
+            background: #F9B000;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .info-box {
+            background: #e8f4f8;
+            border: 1px solid #b3d9e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        ul li {
+            margin: 8px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .badge-primary {
+            background: #F9B000;
+            color: white;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Configuración de Storage</h1>
+            <p>Sistema de almacenamiento de adjuntos para tickets - iGAS Helpdesk</p>
+        </div>
+
+        <div class="content">
+            <!-- Resumen -->
+            <div class="section">
+                <h2 class="section-title">📋 Resumen</h2>
+                <p>Esta guía te ayudará a configurar el almacenamiento de archivos adjuntos en Supabase Storage para el sistema de tickets de iGAS Helpdesk.</p>
+
+                <div class="success-box">
+                    <strong>✓ ¿Qué vamos a configurar?</strong>
+                    <ul>
+                        <li>Bucket privado "ticket-attachments" para almacenar archivos</li>
+                        <li>Políticas de seguridad (Storage Policies) para control de acceso</li>
+                        <li>Estructura de carpetas organizada por ticket_id</li>
+                        <li>Límites de tamaño y tipos de archivo permitidos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Paso 1 -->
+            <div class="section">
+                <h2 class="section-title">Paso a Paso</h2>
+
+                <div class="step">
+                    <h3><span class="step-number">1</span> Crear el Bucket en Supabase</h3>
+                    <ol>
+                        <li>Inicia sesión en <strong>Supabase Dashboard</strong></li>
+                        <li>Ve a la sección <strong>Storage</strong> en el menú lateral</li>
+                        <li>Haz clic en <strong>"New bucket"</strong></li>
+                        <li>Configura el bucket con los siguientes valores:</li>
+                    </ol>
+
+                    <table>
+                        <tr>
+                            <th>Configuración</th>
+                            <th>Valor</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Nombre</strong></td>
+                            <td><code>ticket-attachments</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Public</strong></td>
+                            <td>❌ <strong>No</strong> (privado)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>File size limit</strong></td>
+                            <td>10 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Allowed MIME types</strong></td>
+                            <td>image/*, application/pdf, application/msword, application/vnd.*, text/plain, application/zip</td>
+                        </tr>
+                    </table>
+
+                    <div class="info-box">
+                        <strong>💡 Nota:</strong> El bucket debe ser privado para que solo usuarios autenticados con los permisos correctos puedan acceder a los archivos.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3><span class="step-number">2</span> Aplicar Políticas de Storage</h3>
+                    <p>Las políticas de Storage controlan quién puede subir, ver, modificar o eliminar archivos.</p>
+
+                    <ol>
+                        <li>En Supabase Dashboard, ve a <strong>Storage > Policies</strong></li>
+                        <li>Selecciona la tabla <code>objects</code></li>
+                        <li>Haz clic en <strong>"New Policy"</strong></li>
+                        <li>Ejecuta las siguientes políticas SQL una por una:</li>
+                    </ol>
+
+                    <h4>🔹 Política 1: Subir archivos</h4>
+                    <pre>CREATE POLICY "Users can upload files to their tickets"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'ticket-attachments'
+  AND auth.uid() IS NOT NULL
+  AND (
+    EXISTS (
+      SELECT 1 FROM public.tickets t
+      WHERE t.id::text = (storage.foldername(name))[1]
+      AND (
+        t.responsable_id = auth.uid()
+        OR t.creado_por = auth.uid()
+        OR EXISTS (
+          SELECT 1 FROM public.ticket_participantes tp
+          WHERE tp.ticket_id = t.id AND tp.usuario_id = auth.uid()
+        )
+      )
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid()
+      AND p.rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
+    )
+  )
+);</pre>
+
+                    <h4>🔹 Política 2: Ver archivos</h4>
+                    <pre>CREATE POLICY "Users can view files from their tickets"
+ON storage.objects FOR SELECT
+USING (
+  bucket_id = 'ticket-attachments'
+  AND auth.uid() IS NOT NULL
+  AND (
+    EXISTS (
+      SELECT 1 FROM public.tickets t
+      WHERE t.id::text = (storage.foldername(name))[1]
+      AND (
+        t.responsable_id = auth.uid()
+        OR t.creado_por = auth.uid()
+        OR EXISTS (
+          SELECT 1 FROM public.ticket_participantes tp
+          WHERE tp.ticket_id = t.id AND tp.usuario_id = auth.uid()
+        )
+      )
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid()
+      AND p.rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
+    )
+  )
+);</pre>
+
+                    <h4>🔹 Política 3: Actualizar archivos</h4>
+                    <pre>CREATE POLICY "Users can update files from their tickets"
+ON storage.objects FOR UPDATE
+USING (
+  bucket_id = 'ticket-attachments'
+  AND auth.uid() IS NOT NULL
+  AND (
+    EXISTS (
+      SELECT 1 FROM public.tickets t
+      WHERE t.id::text = (storage.foldername(name))[1]
+      AND (
+        t.responsable_id = auth.uid()
+        OR t.creado_por = auth.uid()
+      )
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid()
+      AND p.rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
+    )
+  )
+);</pre>
+
+                    <h4>🔹 Política 4: Eliminar archivos</h4>
+                    <pre>CREATE POLICY "Users can delete files from their tickets"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'ticket-attachments'
+  AND auth.uid() IS NOT NULL
+  AND (
+    EXISTS (
+      SELECT 1 FROM public.tickets t
+      WHERE t.id::text = (storage.foldername(name))[1]
+      AND (
+        t.responsable_id = auth.uid()
+        OR t.creado_por = auth.uid()
+      )
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid()
+      AND p.rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
+    )
+  )
+);</pre>
+                </div>
+
+                <div class="step">
+                    <h3><span class="step-number">3</span> Verificar la Configuración</h3>
+                    <p>Ejecuta la siguiente consulta en el SQL Editor de Supabase para verificar que las políticas se crearon correctamente:</p>
+
+                    <pre>SELECT
+  policyname,
+  cmd,
+  qual,
+  with_check
+FROM pg_policies
+WHERE schemaname = 'storage'
+AND tablename = 'objects'
+ORDER BY policyname;</pre>
+
+                    <div class="success-box">
+                        <strong>✓ Deberías ver 4 políticas:</strong>
+                        <ul>
+                            <li>Users can upload files to their tickets (INSERT)</li>
+                            <li>Users can view files from their tickets (SELECT)</li>
+                            <li>Users can update files from their tickets (UPDATE)</li>
+                            <li>Users can delete files from their tickets (DELETE)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estructura de Archivos -->
+            <div class="section">
+                <h2 class="section-title">📂 Estructura de Archivos</h2>
+                <p>Los archivos se organizan de la siguiente manera:</p>
+
+                <pre>ticket-attachments/
+  └── {ticket_id}/
+      ├── {timestamp}_{filename}.pdf
+      ├── {timestamp}_{filename}.jpg
+      └── ...</pre>
+
+                <div class="info-box">
+                    <strong>Ejemplo de ruta completa:</strong><br>
+                    <code>ticket-attachments/a1b2c3d4-e5f6-7890-abcd-ef1234567890/1736611200_cotizacion.pdf</code>
+                </div>
+
+                <h3>Ventajas de esta estructura:</h3>
+                <ul>
+                    <li>✓ Fácil de organizar por ticket</li>
+                    <li>✓ El timestamp evita colisiones de nombres</li>
+                    <li>✓ Facilita la limpieza cuando se elimina un ticket</li>
+                    <li>✓ Compatible con las políticas de seguridad</li>
+                </ul>
+            </div>
+
+            <!-- Tipos de Archivo -->
+            <div class="section">
+                <h2 class="section-title">📄 Tipos de Archivo Permitidos</h2>
+
+                <table>
+                    <tr>
+                        <th>Categoría</th>
+                        <th>Extensiones</th>
+                        <th>MIME Type</th>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Imágenes</span></td>
+                        <td>.jpg, .jpeg, .png, .gif, .webp</td>
+                        <td>image/*</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">PDF</span></td>
+                        <td>.pdf</td>
+                        <td>application/pdf</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Word</span></td>
+                        <td>.doc, .docx</td>
+                        <td>application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Excel</span></td>
+                        <td>.xls, .xlsx</td>
+                        <td>application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Texto</span></td>
+                        <td>.txt</td>
+                        <td>text/plain</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-info">Comprimidos</span></td>
+                        <td>.zip</td>
+                        <td>application/zip</td>
+                    </tr>
+                </table>
+
+                <div class="warning-box">
+                    <strong>⚠️ Límites:</strong>
+                    <ul>
+                        <li>Tamaño máximo por archivo: <strong>10 MB</strong></li>
+                        <li>Total de almacenamiento: Según el plan de Supabase</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Implementación en Angular -->
+            <div class="section">
+                <h2 class="section-title">💻 Implementación en Angular</h2>
+
+                <h3>Ejemplo de servicio para subir archivos:</h3>
+                <pre>// ticket-attachment.service.ts
+import { Injectable } from '@angular/core';
+import { SupabaseService } from './supabase.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TicketAttachmentService {
+  constructor(private supabase: SupabaseService) {}
+
+  async uploadAttachment(ticketId: string, file: File): Promise&lt;string&gt; {
+    // Generar nombre único con timestamp
+    const timestamp = Date.now();
+    const fileName = `${timestamp}_${file.name}`;
+    const filePath = `${ticketId}/${fileName}`;
+
+    // Subir archivo a Storage
+    const { data, error } = await this.supabase.client.storage
+      .from('ticket-attachments')
+      .upload(filePath, file);
+
+    if (error) {
+      throw new Error(`Error al subir archivo: ${error.message}`);
+    }
+
+    // Registrar en la tabla ticket_adjuntos
+    const { error: dbError } = await this.supabase.client
+      .from('ticket_adjuntos')
+      .insert({
+        ticket_id: ticketId,
+        nombre_archivo: file.name,
+        ruta_storage: filePath,
+        tipo_archivo: file.type,
+        tamanio_bytes: file.size
+      });
+
+    if (dbError) {
+      throw new Error(`Error al registrar adjunto: ${dbError.message}`);
+    }
+
+    return data.path;
+  }
+
+  async downloadAttachment(filePath: string): Promise&lt;Blob&gt; {
+    const { data, error } = await this.supabase.client.storage
+      .from('ticket-attachments')
+      .download(filePath);
+
+    if (error) {
+      throw new Error(`Error al descargar archivo: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async deleteAttachment(filePath: string, adjuntoId: string): Promise&lt;void&gt; {
+    // Eliminar de Storage
+    const { error: storageError } = await this.supabase.client.storage
+      .from('ticket-attachments')
+      .remove([filePath]);
+
+    if (storageError) {
+      throw new Error(`Error al eliminar archivo: ${storageError.message}`);
+    }
+
+    // Eliminar registro de la base de datos
+    const { error: dbError } = await this.supabase.client
+      .from('ticket_adjuntos')
+      .delete()
+      .eq('id', adjuntoId);
+
+    if (dbError) {
+      throw new Error(`Error al eliminar registro: ${dbError.message}`);
+    }
+  }
+
+  async getAttachmentUrl(filePath: string): Promise&lt;string&gt; {
+    const { data } = await this.supabase.client.storage
+      .from('ticket-attachments')
+      .createSignedUrl(filePath, 3600); // URL válida por 1 hora
+
+    return data?.signedUrl || '';
+  }
+}</pre>
+            </div>
+
+            <!-- Seguridad -->
+            <div class="section">
+                <h2 class="section-title">🔒 Seguridad y Permisos</h2>
+
+                <h3>¿Quién puede hacer qué?</h3>
+
+                <table>
+                    <tr>
+                        <th>Acción</th>
+                        <th>Administrador</th>
+                        <th>Responsable</th>
+                        <th>Creador</th>
+                        <th>Participante</th>
+                    </tr>
+                    <tr>
+                        <td>Subir archivos</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Ver archivos</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>Actualizar archivos</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>❌</td>
+                    </tr>
+                    <tr>
+                        <td>Eliminar archivos</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>✅</td>
+                        <td>❌</td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>💡 Importante:</strong> Las políticas de Storage se evalúan automáticamente en cada operación. No es necesario implementar lógica adicional de seguridad en el frontend.
+                </div>
+            </div>
+
+            <!-- Conclusión -->
+            <div class="section">
+                <div class="success-box">
+                    <h3>✅ ¡Configuración Completada!</h3>
+                    <p>Una vez completados todos los pasos, el sistema de almacenamiento de adjuntos estará listo para usar. Los usuarios podrán:</p>
+                    <ul>
+                        <li>Subir archivos adjuntos a sus tickets</li>
+                        <li>Ver y descargar archivos de tickets donde tengan acceso</li>
+                        <li>Los archivos estarán protegidos por políticas de seguridad</li>
+                        <li>Solo usuarios autorizados tendrán acceso a cada archivo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

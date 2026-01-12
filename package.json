@@ -1,6 +1,6 @@
 {
   "name": "igas-helpdesk",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "author": "iGAS Control Volumétrico",
   "private": true,
   "scripts": {
