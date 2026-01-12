@@ -46,3 +46,7 @@ Thumbs.db
 # Environment variables
 .env
 .env.local
+
+# Claude Code temporary files
+tmpclaude-*
+claude/
