@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Toast } from '../../services/notification.service';
 
@@ -11,18 +11,23 @@ import { NotificationService, Toast } from '../../services/notification.service'
 })
 export class ToastContainerComponent implements OnInit {
   private notificationService = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
   toasts: Toast[] = [];
 
   ngOnInit(): void {
     this.notificationService.toast$.subscribe((toast) => {
-      this.toasts.push(toast);
+      // Use setTimeout to avoid ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.toasts.push(toast);
+        this.cdr.detectChanges();
 
-      // Auto-remove toast after duration
-      if (toast.duration) {
-        setTimeout(() => {
-          this.remove(toast);
-        }, toast.duration);
-      }
+        // Auto-remove toast after duration
+        if (toast.duration) {
+          setTimeout(() => {
+            this.remove(toast);
+          }, toast.duration);
+        }
+      }, 0);
     });
   }
 

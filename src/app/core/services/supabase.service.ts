@@ -35,8 +35,23 @@ export class SupabaseService {
    * Load the current user from session
    */
   private async loadUser() {
-    const { data } = await this.supabase.auth.getSession();
-    this.currentUser.next(data.session?.user ?? null);
+    try {
+      const { data, error } = await this.supabase.auth.getSession();
+
+      if (error) {
+        // If there's an error getting the session (e.g., invalid refresh token),
+        // clear the session to avoid repeated errors
+        console.error('Error loading session:', error);
+        await this.supabase.auth.signOut();
+        this.currentUser.next(null);
+        return;
+      }
+
+      this.currentUser.next(data.session?.user ?? null);
+    } catch (error) {
+      console.error('Unexpected error loading user:', error);
+      this.currentUser.next(null);
+    }
   }
 
   /**
@@ -44,6 +59,13 @@ export class SupabaseService {
    */
   private authChanges() {
     this.supabase.auth.onAuthStateChange((event, session) => {
+      // Handle token refresh errors
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
+      }
+
       this.currentUser.next(session?.user ?? null);
     });
   }
@@ -82,8 +104,10 @@ export class SupabaseService {
    * Reset password - Send recovery email
    */
   async resetPassword(email: string) {
+    // Use hash routing format for GitHub Pages
+    const redirectUrl = `${window.location.origin}/#/reset-password`;
     const { data, error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
+      redirectTo: redirectUrl
     });
     return { data, error };
   }
