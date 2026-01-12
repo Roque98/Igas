@@ -1,0 +1,54 @@
+// ============================================================================
+// Logo iGAS Component Styles
+// ============================================================================
+
+.b-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  text-decoration: none;
+
+  .logo-igas {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .b-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #58585A;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+  }
+}
+
+// Cuando el sidebar está colapsado
+:host-context(.navbar-collapsed) {
+  .b-brand {
+    .b-title {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 991px) {
+  .b-brand {
+    .logo-igas {
+      height: 35px;
+    }
+
+    .b-title {
+      font-size: 16px;
+    }
+  }
+}
