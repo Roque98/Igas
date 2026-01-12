@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación de Base de Datos - iGAS Helpdesk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #F9B000;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #F9B000;
+        }
+
+        h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 20px 0 10px 0;
+        }
+
+        h4 {
+            color: #58585A;
+            font-size: 16px;
+            margin: 15px 0 8px 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #F9B000;
+            padding: 15px 20px;
+            margin: 15px 0;
+        }
+
+        .info-box strong {
+            color: #F9B000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #F9B000;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #d63384;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            margin: 15px 0;
+        }
+
+        ul {
+            margin: 10px 0 10px 30px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .badge-primary { background: #007bff; color: white; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-warning { background: #ffc107; color: #333; }
+        .badge-info { background: #17a2b8; color: white; }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Documentación de Base de Datos</h1>
+        <p style="color: #6c757d; margin-bottom: 30px;">Sistema de Mesa de Ayuda iGAS - Esquema de Base de Datos v1.0.0</p>
+
+        <div class="info-box">
+            <strong>Archivo SQL:</strong> database/schema.sql<br>
+            <strong>Motor:</strong> PostgreSQL (Supabase)<br>
+            <strong>Versión:</strong> 1.0.0<br>
+            <strong>Última actualización:</strong> 11 de enero de 2026
+        </div>
+
+        <h2>🎯 Descripción General</h2>
+        <p>Este esquema de base de datos proporciona la estructura completa para el sistema de Mesa de Ayuda iGAS, incluyendo gestión de usuarios, clientes, tickets de soporte, y control de SLA.</p>
+
+        <h2>📋 Estructura de Tablas</h2>
+
+        <h3>1. Catálogos Base</h3>
+
+        <h4>roles</h4>
+        <p>Define los roles de usuario en el sistema.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nombre del rol (Administrador, Supervisor, Agente, Cliente)</td></tr>
+                <tr><td><code>descripcion</code></td><td>TEXT</td><td>Descripción del rol</td></tr>
+                <tr><td><code>permisos</code></td><td>JSONB</td><td>Objeto JSON con permisos del rol</td></tr>
+            </tbody>
+        </table>
+        <div class="info-box">
+            <strong>Valores por defecto:</strong> Administrador, Supervisor, Agente, Cliente
+        </div>
+
+        <h4>equipos</h4>
+        <p>Equipos de trabajo o áreas.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nombre del equipo</td></tr>
+                <tr><td><code>descripcion</code></td><td>TEXT</td><td>Descripción</td></tr>
+                <tr><td><code>supervisor_id</code></td><td>UUID</td><td>ID del supervisor (FK profiles)</td></tr>
+                <tr><td><code>estatus</code></td><td>TEXT</td><td>Activo/Inactivo</td></tr>
+            </tbody>
+        </table>
+
+        <h4>horarios</h4>
+        <p>Horarios/turnos de trabajo.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nombre del horario</td></tr>
+                <tr><td><code>hora_inicio</code></td><td>TIME</td><td>Hora de inicio</td></tr>
+                <tr><td><code>hora_fin</code></td><td>TIME</td><td>Hora de fin</td></tr>
+                <tr><td><code>dias_semana</code></td><td>TEXT[]</td><td>Array de días laborales</td></tr>
+            </tbody>
+        </table>
+
+        <h4>categorias_servicio</h4>
+        <p>Categorías para clasificar tickets.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nombre de la categoría</td></tr>
+                <tr><td><code>descripcion</code></td><td>TEXT</td><td>Descripción</td></tr>
+                <tr><td><code>sla_minutos</code></td><td>INTEGER</td><td>Tiempo SLA en minutos</td></tr>
+                <tr><td><code>color</code></td><td>TEXT</td><td>Color hexadecimal para UI</td></tr>
+                <tr><td><code>parent_id</code></td><td>UUID</td><td>Para categorías jerárquicas (FK self)</td></tr>
+            </tbody>
+        </table>
+
+        <h4>estatus_tickets</h4>
+        <p>Estados posibles de un ticket.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nuevo, Abierto, En Progreso, Pausado, Resuelto, Cerrado, Cancelado</td></tr>
+                <tr><td><code>color</code></td><td>TEXT</td><td>Color para UI</td></tr>
+                <tr><td><code>orden</code></td><td>INTEGER</td><td>Orden de visualización</td></tr>
+                <tr><td><code>es_final</code></td><td>BOOLEAN</td><td>Indica si es un estado final</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2. Usuarios y Autenticación</h3>
+
+        <h4>profiles</h4>
+        <p>Extensión de <code>auth.users</code> de Supabase con información adicional del usuario.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>PK, FK a auth.users(id)</td></tr>
+                <tr><td><code>nombre_completo</code></td><td>TEXT</td><td>Nombre completo del usuario</td></tr>
+                <tr><td><code>email</code></td><td>TEXT</td><td>Email (duplicado de auth.users)</td></tr>
+                <tr><td><code>rol_id</code></td><td>UUID</td><td>FK a roles</td></tr>
+                <tr><td><code>area_equipo_id</code></td><td>UUID</td><td>FK a equipos</td></tr>
+                <tr><td><code>telefono</code></td><td>TEXT</td><td>Teléfono de contacto</td></tr>
+                <tr><td><code>estatus</code></td><td>TEXT</td><td>Activo/Inactivo</td></tr>
+                <tr><td><code>turno_horario_id</code></td><td>UUID</td><td>FK a horarios</td></tr>
+                <tr><td><code>avatar_url</code></td><td>TEXT</td><td>URL del avatar en Storage</td></tr>
+                <tr><td><code>disponibilidad</code></td><td>TEXT</td><td>En línea, Ocupado, Fuera de turno</td></tr>
+                <tr><td><code>configuracion</code></td><td>JSONB</td><td>Preferencias del usuario</td></tr>
+            </tbody>
+        </table>
+        <div class="info-box">
+            <strong>Importante:</strong> Se crea automáticamente mediante trigger cuando se crea un usuario en auth.users
+        </div>
+
+        <h3>3. Clientes y Sucursales</h3>
+
+        <h4>clientes</h4>
+        <p>Información de empresas/clientes.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>razon_social</code></td><td>TEXT</td><td>Razón social</td></tr>
+                <tr><td><code>nombre_comercial</code></td><td>TEXT</td><td>Nombre comercial</td></tr>
+                <tr><td><code>rfc</code></td><td>TEXT</td><td>RFC (único)</td></tr>
+                <tr><td><code>telefono</code></td><td>TEXT</td><td>Teléfono</td></tr>
+                <tr><td><code>email</code></td><td>TEXT</td><td>Email de contacto</td></tr>
+                <tr><td><code>tipo_servicio</code></td><td>TEXT</td><td>Tipo de servicio contratado</td></tr>
+                <tr><td><code>estatus</code></td><td>TEXT</td><td>Activo, Inactivo, Suspendido</td></tr>
+            </tbody>
+        </table>
+
+        <h4>sucursales</h4>
+        <p>Sucursales de los clientes.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>cliente_id</code></td><td>UUID</td><td>FK a clientes</td></tr>
+                <tr><td><code>nombre</code></td><td>TEXT</td><td>Nombre de la sucursal</td></tr>
+                <tr><td><code>direccion</code></td><td>TEXT</td><td>Dirección completa</td></tr>
+                <tr><td><code>ciudad</code></td><td>TEXT</td><td>Ciudad</td></tr>
+                <tr><td><code>estado</code></td><td>TEXT</td><td>Estado</td></tr>
+                <tr><td><code>coordenadas</code></td><td>POINT</td><td>Coordenadas GPS</td></tr>
+            </tbody>
+        </table>
+
+        <h3>4. Tickets y Soporte</h3>
+
+        <h4>tickets</h4>
+        <p>Tabla principal de tickets de soporte.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>folio</code></td><td>TEXT</td><td>Folio único (IGAS-YYYYMMDD-XXXX)</td></tr>
+                <tr><td><code>cliente_id</code></td><td>UUID</td><td>FK a clientes</td></tr>
+                <tr><td><code>sucursal_id</code></td><td>UUID</td><td>FK a sucursales (opcional)</td></tr>
+                <tr><td><code>categoria_id</code></td><td>UUID</td><td>FK a categorias_servicio</td></tr>
+                <tr><td><code>prioridad</code></td><td>TEXT</td><td>Crítica, Alta, Media, Baja</td></tr>
+                <tr><td><code>canal</code></td><td>TEXT</td><td>Teléfono, WhatsApp, Correo, Portal, Presencial</td></tr>
+                <tr><td><code>responsable_id</code></td><td>UUID</td><td>FK a profiles (agente asignado)</td></tr>
+                <tr><td><code>equipo_id</code></td><td>UUID</td><td>FK a equipos</td></tr>
+                <tr><td><code>titulo</code></td><td>TEXT</td><td>Título del ticket</td></tr>
+                <tr><td><code>descripcion</code></td><td>TEXT</td><td>Descripción detallada</td></tr>
+                <tr><td><code>estatus_id</code></td><td>UUID</td><td>FK a estatus_tickets</td></tr>
+                <tr><td><code>sla_objetivo_minutos</code></td><td>INTEGER</td><td>Tiempo objetivo de resolución</td></tr>
+                <tr><td><code>fecha_creacion</code></td><td>TIMESTAMPTZ</td><td>Fecha de creación</td></tr>
+                <tr><td><code>fecha_primera_respuesta</code></td><td>TIMESTAMPTZ</td><td>Primera respuesta del agente</td></tr>
+                <tr><td><code>fecha_resolucion</code></td><td>TIMESTAMPTZ</td><td>Fecha de resolución</td></tr>
+                <tr><td><code>fecha_cierre</code></td><td>TIMESTAMPTZ</td><td>Fecha de cierre</td></tr>
+                <tr><td><code>tiempo_pausado_minutos</code></td><td>INTEGER</td><td>Tiempo acumulado en pausa</td></tr>
+                <tr><td><code>creado_por</code></td><td>UUID</td><td>FK a profiles (quien creó)</td></tr>
+                <tr><td><code>metadata</code></td><td>JSONB</td><td>Datos adicionales flexibles</td></tr>
+            </tbody>
+        </table>
+
+        <h4>ticket_participantes</h4>
+        <p>Usuarios relacionados con un ticket.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>ticket_id</code></td><td>UUID</td><td>FK a tickets (PK compuesta)</td></tr>
+                <tr><td><code>usuario_id</code></td><td>UUID</td><td>FK a profiles (PK compuesta)</td></tr>
+                <tr><td><code>rol_participacion</code></td><td>TEXT</td><td>Responsable, Observador, Colaborador</td></tr>
+            </tbody>
+        </table>
+
+        <h4>ticket_adjuntos</h4>
+        <p>Archivos adjuntos de tickets.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>ticket_id</code></td><td>UUID</td><td>FK a tickets</td></tr>
+                <tr><td><code>nombre_archivo</code></td><td>TEXT</td><td>Nombre original del archivo</td></tr>
+                <tr><td><code>ruta_storage</code></td><td>TEXT</td><td>Ruta en Supabase Storage</td></tr>
+                <tr><td><code>tipo_archivo</code></td><td>TEXT</td><td>MIME type</td></tr>
+                <tr><td><code>tamanio_bytes</code></td><td>BIGINT</td><td>Tamaño en bytes</td></tr>
+                <tr><td><code>subido_por</code></td><td>UUID</td><td>FK a profiles</td></tr>
+            </tbody>
+        </table>
+
+        <h4>ticket_bitacora</h4>
+        <p>Timeline/historial de eventos del ticket.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><code>id</code></td><td>UUID</td><td>Identificador único (PK)</td></tr>
+                <tr><td><code>ticket_id</code></td><td>UUID</td><td>FK a tickets</td></tr>
+                <tr><td><code>usuario_id</code></td><td>UUID</td><td>FK a profiles</td></tr>
+                <tr><td><code>tipo</code></td><td>TEXT</td><td>nota, cambio_estatus, asignacion, adjunto, escalamiento, pausa, reanudacion</td></tr>
+                <tr><td><code>mensaje</code></td><td>TEXT</td><td>Descripción del evento</td></tr>
+                <tr><td><code>datos_adicionales</code></td><td>JSONB</td><td>Información extra</td></tr>
+                <tr><td><code>es_publico</code></td><td>BOOLEAN</td><td>Visible para cliente</td></tr>
+            </tbody>
+        </table>
+
+        <h4>ticket_historial_asignaciones</h4>
+        <p>Historial de reasignaciones de tickets.</p>
+
+        <h2>⚙️ Funciones y Triggers</h2>
+
+        <h3>handle_new_user()</h3>
+        <p>Crea automáticamente un perfil en <code>profiles</code> cuando se registra un usuario en <code>auth.users</code>.</p>
+        <span class="badge badge-info">TRIGGER</span>
+        <span class="badge badge-success">AFTER INSERT</span>
+
+        <h3>update_updated_at_column()</h3>
+        <p>Actualiza automáticamente el campo <code>updated_at</code> en tablas relevantes.</p>
+        <span class="badge badge-info">TRIGGER</span>
+        <span class="badge badge-warning">BEFORE UPDATE</span>
+
+        <h3>generar_folio_ticket()</h3>
+        <p>Genera automáticamente el folio del ticket con formato <code>IGAS-YYYYMMDD-XXXX</code>.</p>
+        <span class="badge badge-info">TRIGGER</span>
+        <span class="badge badge-success">BEFORE INSERT</span>
+
+        <h2>🔒 Row Level Security (RLS)</h2>
+
+        <p>Todas las tablas principales tienen RLS habilitado. Políticas implementadas:</p>
+        <ul>
+            <li>Los usuarios pueden ver y editar su propio perfil</li>
+            <li>Los administradores pueden ver todos los perfiles</li>
+            <li>Los usuarios pueden ver tickets donde son responsables, creadores o participantes</li>
+            <li>Los administradores pueden ver todos los tickets</li>
+        </ul>
+
+        <h2>📊 Vistas</h2>
+
+        <h3>tickets_completos</h3>
+        <p>Vista que une información de múltiples tablas para facilitar consultas:</p>
+        <ul>
+            <li>Información completa del ticket</li>
+            <li>Datos del cliente y sucursal</li>
+            <li>Información de categoría y estatus</li>
+            <li>Datos del responsable y creador</li>
+            <li>Cálculo de tiempo transcurrido</li>
+            <li>Cálculo de porcentaje de SLA usado</li>
+        </ul>
+
+        <h2>🚀 Cómo Aplicar el Schema</h2>
+
+        <div class="info-box">
+            <strong>Opción 1: Supabase Dashboard</strong><br>
+            1. Ir a SQL Editor en Supabase<br>
+            2. Copiar el contenido de <code>database/schema.sql</code><br>
+            3. Ejecutar el script
+        </div>
+
+        <div class="info-box">
+            <strong>Opción 2: CLI de Supabase</strong><br>
+            <pre>supabase db reset
+supabase db push</pre>
+        </div>
+
+        <h2>📝 Notas Importantes</h2>
+
+        <ul>
+            <li><span class="badge badge-warning">IMPORTANTE</span> El esquema asume que ya existe la tabla <code>auth.users</code> de Supabase</li>
+            <li><span class="badge badge-info">INFO</span> Los folios de tickets se generan automáticamente</li>
+            <li><span class="badge badge-success">TIP</span> Los perfiles de usuario se crean automáticamente al registrar un usuario</li>
+            <li><span class="badge badge-warning">SEGURIDAD</span> Todas las tablas críticas tienen RLS habilitado</li>
+        </ul>
+
+        <div class="footer">
+            <p><strong>iGAS Control Volumétrico</strong></p>
+            <p>Sistema de Mesa de Ayuda v1.0</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Documentación generada el 11 de enero de 2026
+            </p>
+        </div>
+    </div>
+</body>
+</html>
