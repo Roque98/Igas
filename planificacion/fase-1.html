@@ -330,7 +330,7 @@ Completar el sistema de autenticación, implementar gestión de usuarios, roles 
 <li>✅ Login con email/password (ya implementado)</li>
 <li>✅ Recuperación de contraseña (ya implementado)</li>
 <li>✅ Cambio de contraseña (ya implementado)</li>
-<li>✅ Mejorar manejo de errores con mensajes en español (Completado - 12/01/2026)</li>
+<li>✅ Mejorar manejo de errores con mensajes en español <a href="#version-1-1-0" style="font-size: 11px; color: #4CAF50;">[v1.1.0]</a></li>
 <li>⚪ Implementar refresh token automático</li>
 <li>⚪ Configurar políticas de contraseña en Supabase</li>
 <li>⚪ Implementar bloqueo de cuenta después de X intentos fallidos</li>
@@ -339,13 +339,13 @@ Completar el sistema de autenticación, implementar gestión de usuarios, roles 
 
 <h4>1.2 Frontend - Auth (Mejoras)</h4>
 <li>✅ Páginas de login, forgot-password, reset-password</li>
-<li>✅ Personalizar páginas con branding iGAS (amarillo #F9B000) - Completado 12/01/2026</li>
-<li>✅ Agregar loading states con spinner (Completado - 12/01/2026)</li>
+<li>✅ Personalizar páginas con branding iGAS (amarillo #F9B000) <a href="#version-1-2-0" style="font-size: 11px; color: #4CAF50;">[v1.2.0]</a></li>
+<li>✅ Agregar loading states con spinner <a href="#version-1-3-0" style="font-size: 11px; color: #4CAF50;">[v1.3.0]</a></li>
 <li>⚪ Implementar validaciones de formulario mejoradas</li>
-<li>✅ Agregar "Remember me" en login (Completado - 12/01/2026)</li>
-<li>✅ Implementar auto-logout por inactividad (30 min) - Completado 12/01/2026 (Excluido dashboard)</li>
-<li>✅ Agregar confirmación visual de acciones (Completado - 12/01/2026)</li>
-<li>✅ Eliminar links y referencias a "registro" en página de login (Completado - 12/01/2026)</li>
+<li>✅ Agregar "Remember me" en login <a href="#version-1-4-0" style="font-size: 11px; color: #4CAF50;">[v1.4.0]</a></li>
+<li>✅ Implementar auto-logout por inactividad (30 min) - Excluido dashboard <a href="#version-1-5-0" style="font-size: 11px; color: #4CAF50;">[v1.5.0]</a></li>
+<li>✅ Agregar confirmación visual de acciones <a href="#version-1-6-0" style="font-size: 11px; color: #4CAF50;">[v1.6.0]</a></li>
+<li>✅ Eliminar links y referencias a "registro" en página de login <a href="#version-1-7-0" style="font-size: 11px; color: #4CAF50;">[v1.7.0]</a></li>
 
 <h4>1.3 Seguridad</h4>
 <li>⚪ Implementar rate limiting en Supabase (configuración)</li>
@@ -761,13 +761,107 @@ CREATE TRIGGER profiles_audit_trigger
 <li>Considerar **Supabase Edge Functions** para lógica compleja</li>
 <li>Usar **Realtime** para actualización de disponibilidad en tiempo real</li>
 </p></div>
+
+<!-- Historial de Versiones -->
+<div class="content-section" id="historial-versiones" style="margin-top: 60px;">
+<h2>Historial de Versiones - Fase 1</h2>
+
+<div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
+    <p id="version-1-7-0"><strong>v1.7.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Eliminar links y referencias a "registro" en página de login <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Comentado signup menu item en navigation.ts</li>
+        <li>✅ Register route ya estaba comentado en routing</li>
+        <li>✅ Sistema confirma que no hay registro público - solo admins crean usuarios</li>
+        <li>✅ Build y deploy exitoso a GitHub Pages</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-6-0"><strong>v1.6.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar confirmación visual de acciones <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Toast de éxito en login: "¡Bienvenido! Has iniciado sesión correctamente."</li>
+        <li>✅ Toast de éxito en reset password: "Tu contraseña ha sido actualizada correctamente."</li>
+        <li>✅ Toast de info en logout: "Has cerrado sesión correctamente."</li>
+        <li>✅ Toast de error en logout fallido con mensaje descriptivo</li>
+        <li>✅ Integración con NotificationService existente</li>
+        <li>✅ UX mejorada con feedback visual consistente</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-5-0"><strong>v1.5.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar auto-logout por inactividad (30 min) <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ InactivityService creado con timeout de 30 minutos</li>
+        <li>✅ Dashboard excluido de auto-logout por requerimiento del usuario</li>
+        <li>✅ Sistema detecta actividad: mouse, teclado, touch, scroll</li>
+        <li>✅ Monitoreo automático basado en rutas (route-aware)</li>
+        <li>✅ Mensaje de sesión expirada en login page</li>
+        <li>✅ Optimización con NgZone para performance</li>
+        <li>✅ Integración en AppComponent con subscriber de usuario</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-4-0"><strong>v1.4.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar "Remember me" en login <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Checkbox "Recordar datos" implementado en login</li>
+        <li>✅ Email guardado en localStorage cuando activado</li>
+        <li>✅ Auto-carga de email en login si existe</li>
+        <li>✅ Limpieza de localStorage si se desmarca</li>
+        <li>✅ Manejo seguro de errores en localStorage</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-3-0"><strong>v1.3.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar loading states con spinner <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Spinner en botón de login durante autenticación</li>
+        <li>✅ Texto "Iniciando sesión..." mientras carga</li>
+        <li>✅ Deshabilitación de botón durante proceso</li>
+        <li>✅ Estados de loading en forgot-password y reset-password</li>
+        <li>✅ Feedback visual consistente en todas las páginas auth</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-2-0"><strong>v1.2.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Personalizar páginas con branding iGAS <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Círculos de fondo con colores corporativos (amarillo #F9B000 y gris #3E3E3E)</li>
+        <li>✅ Checkbox con color primario iGAS amarillo</li>
+        <li>✅ Logo con fondo blanco y padding en sidebar</li>
+        <li>✅ HashLocationStrategy para GitHub Pages (fix 404 en reload)</li>
+        <li>✅ URLs ahora usan formato /#/ruta</li>
+        <li>✅ Limpieza de archivos temporales tmpclaude-*</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-1-0"><strong>v1.1.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Mejorar manejo de errores con mensajes en español <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Helper error-messages.ts con mensajes amigables</li>
+        <li>✅ Mapper de errores de Supabase a español</li>
+        <li>✅ Mensajes específicos para cada tipo de error auth</li>
+        <li>✅ Validaciones con feedback claro en formularios</li>
+        <li>✅ Errores HTTP interceptados y formateados</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-0-0"><strong>v1.0.0</strong> - 11 de enero de 2026</p>
+    <ul>
+        <li>🎉 <strong>FASE 0 COMPLETADA - Inicio de Fase 1</strong></li>
+        <li>✅ Sistema de autenticación base funcional (login, recovery, reset)</li>
+        <li>✅ Supabase Auth integrado con guards</li>
+        <li>✅ Páginas de autenticación con template Datta-Able</li>
+        <li>✅ Branding iGAS aplicado (logo, colores corporativos)</li>
+        <li>✅ Routing configurado con lazy loading</li>
+        <li>✅ Sistema de notificaciones (toasts) implementado</li>
+        <li>✅ Base de datos con RLS policies configuradas</li>
+    </ul>
+</div>
+</div>
+
     </div>
 
     <div class="footer">
         <p><strong>iGAS Control Volumétrico</strong></p>
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
-            Última actualización: 11 de enero de 2026
+            Última actualización: 12 de enero de 2026<br>
+            Fase 1: v1.7.0 - 7 tareas completadas
         </p>
     </div>
 </body>
