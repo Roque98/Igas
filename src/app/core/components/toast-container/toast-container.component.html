@@ -1,0 +1,14 @@
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+  @for (toast of toasts; track toast.timestamp) {
+    <div [class]="getToastClass(toast.type)" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i [class]="getToastIcon(toast.type)" class="me-2"></i>
+        <strong class="me-auto">{{ getToastTitle(toast.type) }}</strong>
+        <button type="button" class="btn-close" (click)="remove(toast)" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {{ toast.message }}
+      </div>
+    </div>
+  }
+</div>
