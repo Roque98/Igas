@@ -152,14 +152,15 @@ export const NavigationItems: NavigationItem[] = [
         type: 'collapse',
         icon: 'feather icon-lock',
         children: [
-          {
-            id: 'signup',
-            title: 'Sign up',
-            type: 'item',
-            url: '/register',
-            target: true,
-            breadcrumbs: false
-          },
+          // Registro deshabilitado - Los usuarios son creados por administradores
+          // {
+          //   id: 'signup',
+          //   title: 'Sign up',
+          //   type: 'item',
+          //   url: '/register',
+          //   target: true,
+          //   breadcrumbs: false
+          // },
           {
             id: 'signin',
             title: 'Sign in',
