@@ -440,7 +440,10 @@ CREATE POLICY "Admins can manage all profiles"
   );</div>
 
 
-<h4>2.3 Servicio Angular - UserService</h4>
+<h4>2.3 Servicio Angular - UserService ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivo: <code>src/app/core/services/user.service.ts</code>
+</div>
 <div class="code-block">export interface Profile {
   id: string;
   nombre_completo: string;
@@ -457,15 +460,15 @@ CREATE POLICY "Admins can manage all profiles"
 }</div>
 
 
-<li>⚪ Crear UserService con métodos CRUD</li>
-<li>⚪ Implementar getUsers() con filtros</li>
-<li>⚪ Implementar getUserById(id)</li>
-<li>⚪ Implementar createUser(user)</li>
-<li>⚪ Implementar updateUser(id, user)</li>
-<li>⚪ Implementar deleteUser(id) - soft delete</li>
-<li>⚪ Implementar getCurrentUserProfile()</li>
-<li>⚪ Implementar updateCurrentUserProfile(data)</li>
-<li>⚪ Implementar uploadAvatar(file)</li>
+<li>✅ Crear UserService con métodos CRUD <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getUsers() con filtros y paginación <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getUserById(id) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar createUser(user) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar updateUser(id, user) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar deleteUser(id) - soft delete <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getCurrentUserProfile() <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar updateCurrentUserProfile(data) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar uploadAvatar(file) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
 
 <h4>2.4 Frontend - Módulo de Usuarios</h4>
 
@@ -785,7 +788,27 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-11-0"><strong>v1.11.0</strong> - 17 de enero de 2026</p>
+    <p id="version-1-12-0"><strong>v1.12.0</strong> - 17 de enero de 2026</p>
+    <ul>
+        <li>✅ Crear UserService con métodos CRUD completos</li>
+        <li>📁 Modelos creados en <code>src/app/core/models/</code>:</li>
+        <li>  • profile.model.ts - Profile, DTOs, filtros, paginación</li>
+        <li>  • role.model.ts - Role, RoleName, RolePermissions</li>
+        <li>  • equipo.model.ts - Equipo, EquipoWithSupervisor</li>
+        <li>  • horario.model.ts - Horario</li>
+        <li>✅ UserService implementado con:</li>
+        <li>  • getUsers() - listado con filtros y paginación</li>
+        <li>  • getUserById() - obtener usuario con relaciones</li>
+        <li>  • getCurrentUserProfile() - perfil del usuario actual</li>
+        <li>  • createUser() - crear usuario (admin)</li>
+        <li>  • updateUser/updateCurrentUserProfile() - actualizar</li>
+        <li>  • deactivateUser/activateUser() - soft delete</li>
+        <li>  • uploadAvatar/deleteAvatar() - gestión de avatar</li>
+        <li>  • getRoles/getEquipos/getHorarios() - catálogos</li>
+        <li>  • isAdmin/hasRole() - helpers de permisos</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-11-0"><strong>v1.11.0</strong> - 17 de enero de 2026</p>
     <ul>
         <li>✅ Implementar rate limiting en Supabase <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
         <li>✅ Agregar logs de intentos de login fallidos <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
