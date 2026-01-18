@@ -470,28 +470,31 @@ CREATE POLICY "Admins can manage all profiles"
 <li>✅ Implementar updateCurrentUserProfile(data) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
 <li>✅ Implementar uploadAvatar(file) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
 
-<h4>2.4 Frontend - Módulo de Usuarios</h4>
+<h4>2.4 Frontend - Módulo de Usuarios ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Directorio: <code>src/app/features/users/</code>
+</div>
 
-<li>⚪ Crear módulo features/usuarios</li>
-<li>⚪ Crear componente de listado de usuarios:</li>
-  - ⚪ Tabla con datos de usuarios
-  - ⚪ Filtros por estatus, rol, área
-  - ⚪ Búsqueda por nombre/email
-  - ⚪ Badges de estatus (Activo/Inactivo) con colores
-  - ⚪ Paginación
-  - ⚪ Ordenamiento por columnas
-<li>⚪ Crear componente de formulario de usuario:</li>
-  - ⚪ Campos: nombre, email, rol, área, teléfono, turno
-  - ⚪ Selector de estatus
-  - ⚪ Upload de avatar
-  - ⚪ Validaciones
-<li>⚪ Crear modal de creación/edición</li>
-<li>⚪ Crear confirmación de eliminación</li>
-<li>⚪ Crear página de perfil de usuario:</li>
-  - ⚪ Vista de información completa
-  - ⚪ Edición de perfil propio
-  - ⚪ Cambio de avatar
-  - ⚪ Cambio de contraseña
+<li>✅ Crear módulo features/usuarios <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear componente de listado de usuarios (UserListComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Tabla con datos de usuarios
+  - ✅ Filtros por estatus, rol, área
+  - ✅ Búsqueda por nombre/email
+  - ✅ Badges de estatus (Activo/Inactivo) con colores
+  - ✅ Paginación
+  - ✅ Ordenamiento por columnas
+<li>✅ Crear componente de formulario de usuario (UserFormComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Campos: nombre, email, rol, área, teléfono, turno
+  - ✅ Selector de estatus
+  - ✅ Upload de avatar
+  - ✅ Validaciones con indicador de fortaleza
+<li>✅ Crear modal de creación/edición <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear confirmación de eliminación (desactivación) <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear página de perfil de usuario (UserProfileComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Vista de información completa
+  - ✅ Edición de perfil propio
+  - ✅ Cambio de avatar
+  - ✅ Cambio de contraseña
 
 <h3>3. Sistema de Roles y Permisos</h3>
 
@@ -788,7 +791,33 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-12-0"><strong>v1.12.0</strong> - 17 de enero de 2026</p>
+    <p id="version-1-13-0"><strong>v1.13.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Crear módulo de usuarios completo en <code>src/app/features/users/</code></li>
+        <li>📁 Componentes creados:</li>
+        <li>  • UserListComponent - Lista con tabla, filtros, búsqueda, paginación</li>
+        <li>  • UserFormComponent - Formulario crear/editar con validaciones</li>
+        <li>  • UserProfileComponent - Perfil del usuario actual</li>
+        <li>  • UserDetailComponent - Vista detallada de usuario (admin)</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por rol, equipo, estatus</li>
+        <li>  • Búsqueda por nombre/email</li>
+        <li>  • Badges de estatus y disponibilidad</li>
+        <li>  • Paginación con selector de tamaño</li>
+        <li>  • Modal de confirmación para desactivar</li>
+        <li>  • Upload y eliminación de avatar</li>
+        <li>  • Cambio de contraseña con indicador de fortaleza</li>
+        <li>  • Tabs de información y seguridad en perfil</li>
+        <li>✅ Rutas configuradas en <code>/usuarios</code>:</li>
+        <li>  • /usuarios - Lista de usuarios</li>
+        <li>  • /usuarios/nuevo - Crear usuario</li>
+        <li>  • /usuarios/editar/:id - Editar usuario</li>
+        <li>  • /usuarios/perfil - Mi perfil</li>
+        <li>  • /usuarios/:id - Detalle de usuario</li>
+        <li>✅ Menú de navegación actualizado con sección "Administración"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-12-0"><strong>v1.12.0</strong> - 17 de enero de 2026</p>
     <ul>
         <li>✅ Crear UserService con métodos CRUD completos</li>
         <li>📁 Modelos creados en <code>src/app/core/models/</code>:</li>
