@@ -9,6 +9,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
+import { emailFormat as validateEmailFormat, noWhitespace as validateNoWhitespace } from 'src/app/core/validators/custom-validators';
 
 @Component({
   selector: 'app-auth-signin',
@@ -37,8 +38,11 @@ export class AuthSigninComponent implements OnInit {
   });
 
   loginForm = form(this.loginModal, (schemaPath) => {
+    // Validaciones de email
     required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
     email(schemaPath.email, { message: ErrorMessages.email() });
+
+    // Validaciones de contraseña
     required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
     minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
   });
@@ -79,14 +83,56 @@ export class AuthSigninComponent implements OnInit {
       return;
     }
 
+    const credentials = this.loginModal();
+
+    // Validaciones adicionales de email
+    const emailFormatError = validateEmailFormat()({ value: credentials.email } as any);
+    if (emailFormatError) {
+      this.error.set(ErrorMessages.emailFormat());
+      return;
+    }
+
+    const noWhitespaceError = validateNoWhitespace()({ value: credentials.email } as any);
+    if (noWhitespaceError) {
+      this.error.set(ErrorMessages.whitespace());
+      return;
+    }
+
     this.loading.set(true);
 
     try {
-      const credentials = this.loginModal();
+      // Check if user is blocked before attempting login
+      const blockStatus = await this.supabase.isUserBlocked(credentials.email);
+      if (blockStatus.isBlocked) {
+        const minutes = Math.ceil(blockStatus.secondsUntilUnblock / 60);
+        this.error.set(ErrorMessages.userBlocked(minutes));
+        this.loading.set(false);
+        return;
+      }
+
       const { data, error } = await this.supabase.signIn(credentials.email, credentials.password);
 
       if (error) {
-        this.error.set(getErrorMessage(error));
+        // Record failed attempt
+        await this.supabase.recordFailedAttempt(
+          credentials.email,
+          error.code || 'unknown',
+          error.message || 'Login failed'
+        );
+
+        // Get remaining attempts to show warning
+        const remainingAttempts = await this.supabase.getRemainingAttempts(credentials.email);
+
+        if (remainingAttempts <= 0) {
+          // User just got blocked
+          this.error.set(ErrorMessages.userBlocked(15));
+        } else if (remainingAttempts <= 3) {
+          // Show warning with remaining attempts
+          this.error.set(ErrorMessages.remainingAttempts(remainingAttempts));
+        } else {
+          // Normal error message
+          this.error.set(getErrorMessage(error));
+        }
         console.error('Login error:', error);
       } else if (data.user) {
         console.log('User logged in successfully:', data.user);

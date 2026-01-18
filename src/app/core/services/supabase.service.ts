@@ -219,4 +219,92 @@ export class SupabaseService {
       isExpired: expiresAt ? now > expiresAt : true
     };
   }
+
+  // ============================================================================
+  // Security: Login Attempt Management
+  // ============================================================================
+
+  /**
+   * Check if a user is blocked due to too many failed login attempts
+   * @param email - The email to check
+   * @returns Object with isBlocked status and remaining seconds until unblock
+   */
+  async isUserBlocked(email: string): Promise<{ isBlocked: boolean; secondsUntilUnblock: number }> {
+    try {
+      // Call the database function to check if user is blocked
+      const { data, error } = await this.supabase.rpc('is_user_blocked', {
+        user_email: email
+      });
+
+      if (error) {
+        console.error('Error checking user blocked status:', error);
+        // On error, allow login attempt (fail open for better UX)
+        return { isBlocked: false, secondsUntilUnblock: 0 };
+      }
+
+      if (data === true) {
+        // User is blocked, get time until unblock from blocked_users view
+        const { data: blockInfo } = await this.supabase
+          .from('blocked_users')
+          .select('seconds_until_unblock')
+          .eq('email', email)
+          .single();
+
+        return {
+          isBlocked: true,
+          secondsUntilUnblock: blockInfo?.seconds_until_unblock || 900 // Default 15 min
+        };
+      }
+
+      return { isBlocked: false, secondsUntilUnblock: 0 };
+    } catch (error) {
+      console.error('Unexpected error checking blocked status:', error);
+      return { isBlocked: false, secondsUntilUnblock: 0 };
+    }
+  }
+
+  /**
+   * Record a failed login attempt
+   * @param email - The email that failed
+   * @param errorCode - Error code from Supabase
+   * @param errorMessage - Error message
+   */
+  async recordFailedAttempt(email: string, errorCode: string, errorMessage: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.rpc('record_failed_login_attempt', {
+        attempt_email: email,
+        attempt_error_code: errorCode,
+        attempt_error_message: errorMessage
+      });
+
+      if (error) {
+        console.error('Error recording failed attempt:', error);
+      }
+    } catch (error) {
+      console.error('Unexpected error recording failed attempt:', error);
+    }
+  }
+
+  /**
+   * Get remaining login attempts before block
+   * @param email - The email to check
+   * @returns Number of remaining attempts (0 if blocked)
+   */
+  async getRemainingAttempts(email: string): Promise<number> {
+    try {
+      const { data, error } = await this.supabase.rpc('get_remaining_login_attempts', {
+        user_email: email
+      });
+
+      if (error) {
+        console.error('Error getting remaining attempts:', error);
+        return 5; // Default to max attempts on error
+      }
+
+      return data ?? 5;
+    } catch (error) {
+      console.error('Unexpected error getting remaining attempts:', error);
+      return 5;
+    }
+  }
 }

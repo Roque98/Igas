@@ -8,6 +8,7 @@ import { email, Field, form, required } from '@angular/forms/signals';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
+import { emailFormat as validateEmailFormat, noWhitespace as validateNoWhitespace } from 'src/app/core/validators/custom-validators';
 
 @Component({
   selector: 'app-auth-forgot-password',
@@ -29,6 +30,7 @@ export class AuthForgotPasswordComponent {
   });
 
   forgotPasswordForm = form(this.forgotPasswordModel, (schemaPath) => {
+    // Validaciones de email
     required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
     email(schemaPath.email, { message: ErrorMessages.email() });
   });
@@ -41,6 +43,21 @@ export class AuthForgotPasswordComponent {
 
     // Validate form
     if (this.forgotPasswordForm.email().invalid()) {
+      return;
+    }
+
+    const { email } = this.forgotPasswordModel();
+
+    // Validaciones adicionales de email
+    const emailFormatError = validateEmailFormat()({ value: email } as any);
+    if (emailFormatError) {
+      this.error.set(ErrorMessages.emailFormat());
+      return;
+    }
+
+    const noWhitespaceError = validateNoWhitespace()({ value: email } as any);
+    if (noWhitespaceError) {
+      this.error.set(ErrorMessages.whitespace());
       return;
     }
 

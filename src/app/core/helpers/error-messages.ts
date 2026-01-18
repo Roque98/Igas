@@ -15,6 +15,17 @@ export const ErrorMessages = {
   pattern: (fieldName: string) => `${fieldName} no tiene el formato correcto`,
   passwordMismatch: () => 'Las contraseñas no coinciden',
 
+  // Errores de validación de contraseñas mejorados
+  strongPassword: () => 'La contraseña debe contener al menos una mayúscula, una minúscula y un número',
+  commonPassword: () => 'Esta contraseña es muy común. Por favor, elige una contraseña más segura',
+  specialCharacter: () => 'La contraseña debe contener al menos un carácter especial (!@#$%^&*)',
+
+  // Errores de validación de email mejorados
+  emailFormat: () => 'El formato del correo electrónico no es válido',
+  emailMaxLength: () => 'El correo electrónico es demasiado largo',
+  corporateEmail: (domains: string[]) => `El correo debe pertenecer a uno de estos dominios: ${domains.join(', ')}`,
+  whitespace: () => 'Este campo no puede contener espacios en blanco',
+
   // Errores de autenticación
   invalidCredentials: () => 'Correo o contraseña incorrectos. Por favor, verifica tus datos.',
   userNotFound: () => 'No existe una cuenta con este correo electrónico.',
@@ -22,6 +33,12 @@ export const ErrorMessages = {
   weakPassword: () => 'La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.',
   emailInUse: () => 'Este correo electrónico ya está registrado.',
   tooManyRequests: () => 'Demasiados intentos fallidos. Por favor, intenta de nuevo más tarde.',
+  userBlocked: (minutes: number) =>
+    `Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta de nuevo en ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}.`,
+  remainingAttempts: (attempts: number) =>
+    `Credenciales incorrectas. Te ${attempts === 1 ? 'queda' : 'quedan'} ${attempts} ${attempts === 1 ? 'intento' : 'intentos'} antes de que tu cuenta sea bloqueada temporalmente.`,
+  samePassword: () => 'La nueva contraseña debe ser diferente a la contraseña actual.',
+  passwordReused: () => 'No puedes reutilizar una contraseña reciente. Por favor, elige una contraseña diferente.',
 
   // Errores de red
   networkError: () => 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.',
@@ -73,6 +90,14 @@ export function getErrorMessage(error: any): string {
 
     if (message.includes('password') && message.includes('weak')) {
       return ErrorMessages.weakPassword();
+    }
+
+    if (message.includes('password') && message.includes('different from the old')) {
+      return ErrorMessages.samePassword();
+    }
+
+    if (message.includes('password') && message.includes('reused')) {
+      return ErrorMessages.passwordReused();
     }
 
     if (message.includes('email already in use') || message.includes('user_already_exists')) {
@@ -157,6 +182,20 @@ export function getValidationMessage(fieldName: string, errorType: string, error
       return ErrorMessages.pattern(fieldName);
     case 'passwordMismatch':
       return ErrorMessages.passwordMismatch();
+    case 'strongPassword':
+      return ErrorMessages.strongPassword();
+    case 'commonPassword':
+      return ErrorMessages.commonPassword();
+    case 'specialCharacter':
+      return ErrorMessages.specialCharacter();
+    case 'emailFormat':
+      return ErrorMessages.emailFormat();
+    case 'emailMaxLength':
+      return ErrorMessages.emailMaxLength();
+    case 'whitespace':
+      return ErrorMessages.whitespace();
+    case 'corporateEmail':
+      return ErrorMessages.corporateEmail(errorValue?.allowedDomains || []);
     default:
       return `${fieldName} no es válido`;
   }

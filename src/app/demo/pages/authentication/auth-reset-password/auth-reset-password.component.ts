@@ -1,5 +1,5 @@
 // angular import
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Field, form, minLength, required } from '@angular/forms/signals';
@@ -9,6 +9,12 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
+import {
+  strongPassword as validateStrongPassword,
+  notCommonPassword as validateNotCommonPassword,
+  calculatePasswordStrength,
+  getPasswordStrengthMessage
+} from 'src/app/core/validators/custom-validators';
 
 @Component({
   selector: 'app-auth-reset-password',
@@ -34,9 +40,28 @@ export class AuthResetPasswordComponent implements OnInit {
     confirmPassword: ''
   });
 
+  // Computed para la fortaleza de la contraseña
+  passwordStrength = computed(() => {
+    const password = this.resetPasswordModel().password;
+    return calculatePasswordStrength(password);
+  });
+
+  passwordStrengthInfo = computed(() => {
+    const strength = this.passwordStrength();
+    const info = getPasswordStrengthMessage(strength);
+    return {
+      message: info.message,
+      class: info.class,
+      color: strength < 40 ? '#dc3545' : strength < 70 ? '#ffc107' : '#28a745'
+    };
+  });
+
   resetPasswordForm = form(this.resetPasswordModel, (schemaPath) => {
+    // Validaciones de contraseña
     required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
     minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
+
+    // Validaciones de confirmación de contraseña
     required(schemaPath.confirmPassword, { message: ErrorMessages.required('Confirmar contraseña') });
   });
 
@@ -76,6 +101,19 @@ export class AuthResetPasswordComponent implements OnInit {
     const { password, confirmPassword } = this.resetPasswordModel();
     if (password !== confirmPassword) {
       this.error.set(ErrorMessages.passwordMismatch());
+      return;
+    }
+
+    // Validaciones adicionales de contraseña
+    const strongPasswordError = validateStrongPassword()({ value: password } as any);
+    if (strongPasswordError) {
+      this.error.set(ErrorMessages.strongPassword());
+      return;
+    }
+
+    const commonPasswordError = validateNotCommonPassword()({ value: password } as any);
+    if (commonPasswordError) {
+      this.error.set(ErrorMessages.commonPassword());
       return;
     }
 

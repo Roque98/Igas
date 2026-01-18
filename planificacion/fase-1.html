@@ -304,7 +304,7 @@
         <div class="container">
             <h1>Fase 1: Autenticación y Gestión de Usuarios</h1>
             <span class="badge badge-en proceso">En Proceso</span>
-            <span class="badge badge-proceso">40%</span>
+            <span class="badge badge-proceso">50%</span>
         </div>
     </div>
 
@@ -312,8 +312,8 @@
         <div class="progress-card">
             <h3>Progreso de la Fase</h3>
             <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: 40%;"></div>
-                <div class="progress-bar-text">40% Completado</div>
+                <div class="progress-bar-fill" style="width: 50%;"></div>
+                <div class="progress-bar-text">50% Completado</div>
             </div>
         </div>
 
@@ -341,52 +341,70 @@ Completar el sistema de autenticación, implementar gestión de usuarios, roles 
 <li>✅ Páginas de login, forgot-password, reset-password</li>
 <li>✅ Personalizar páginas con branding iGAS (amarillo #F9B000) <a href="#version-1-2-0" style="font-size: 11px; color: #4CAF50;">[v1.2.0]</a></li>
 <li>✅ Agregar loading states con spinner <a href="#version-1-3-0" style="font-size: 11px; color: #4CAF50;">[v1.3.0]</a></li>
-<li>⚪ Implementar validaciones de formulario mejoradas</li>
+<li>✅ Implementar validaciones de formulario mejoradas <a href="#version-1-10-0" style="font-size: 11px; color: #4CAF50;">[v1.10.0]</a></li>
 <li>✅ Agregar "Remember me" en login <a href="#version-1-4-0" style="font-size: 11px; color: #4CAF50;">[v1.4.0]</a></li>
 <li>✅ Implementar auto-logout por inactividad (30 min) - Excluido dashboard <a href="#version-1-5-0" style="font-size: 11px; color: #4CAF50;">[v1.5.0]</a></li>
 <li>✅ Agregar confirmación visual de acciones <a href="#version-1-6-0" style="font-size: 11px; color: #4CAF50;">[v1.6.0]</a></li>
 <li>✅ Eliminar links y referencias a "registro" en página de login <a href="#version-1-7-0" style="font-size: 11px; color: #4CAF50;">[v1.7.0]</a></li>
 
 <h4>1.3 Seguridad</h4>
-<li>⚪ Implementar rate limiting en Supabase (configuración)</li>
+<li>✅ Implementar rate limiting en Supabase (configuración) <a href="#version-1-11-0" style="font-size: 11px; color: #4CAF50;">[v1.11.0]</a></li>
 <li>⚪ Implementar detección de sesión en múltiples dispositivos</li>
-<li>⚪ Agregar logs de intentos de login fallidos</li>
+<li>✅ Agregar logs de intentos de login fallidos <a href="#version-1-11-0" style="font-size: 11px; color: #4CAF50;">[v1.11.0]</a></li>
 
 <h3>2. Gestión de Usuarios / Agentes</h3>
 
-<h4>2.1 Modelo de Datos - Tabla profiles en Supabase</h4>
-</p><div class="code-block">CREATE TABLE public.profiles (
+<h4>2.1 Modelo de Datos - Tabla profiles en Supabase ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivos: <code>database/migrations/03_usuarios.sql</code> y <code>06_functions.sql</code>
+</div>
+<div class="code-block">CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   nombre_completo TEXT NOT NULL,
   email TEXT NOT NULL,
-  rol_id UUID REFERENCES roles(id),
+  rol_id UUID REFERENCES roles(id) NOT NULL,        -- NOT NULL, asigna rol por defecto
   area_equipo_id UUID REFERENCES equipos(id),
   telefono TEXT,
   estatus TEXT CHECK (estatus IN ('Activo', 'Inactivo')) DEFAULT 'Activo',
   turno_horario_id UUID REFERENCES horarios(id),
   avatar_url TEXT,
-  disponibilidad TEXT CHECK (disponibilidad IN ('En línea', 'Ocupado', 'Fuera de turno')),
+  disponibilidad TEXT CHECK (disponibilidad IN ('En línea', 'Ocupado', 'Fuera de turno')) DEFAULT 'En línea',
+  configuracion JSONB DEFAULT '{}',                  -- Campo adicional para preferencias
+  password_changed_at TIMESTAMPTZ DEFAULT NOW(),    -- Para políticas de expiración
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Trigger para crear profile automáticamente cuando un admin crea un usuario
+-- Índices para búsquedas rápidas
+CREATE INDEX idx_profiles_rol ON profiles(rol_id);
+CREATE INDEX idx_profiles_equipo ON profiles(area_equipo_id);
+CREATE INDEX idx_profiles_email ON profiles(email);
+
+-- Trigger para crear profile automáticamente
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, nombre_completo, email)
-  VALUES (NEW.id, NEW.raw_user_meta_data->>'nombre_completo', NEW.email);
+  INSERT INTO public.profiles (id, nombre_completo, email, rol_id)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nombre_completo', 'Usuario'),
+    NEW.email,
+    (SELECT id FROM public.roles WHERE nombre = 'Agente' LIMIT 1)
+  );
   RETURN NEW;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();</div>
 
 
-<h4>2.2 Row Level Security (RLS) Policies</h4>
-</p><div class="code-block">-- Habilitar RLS
+<h4>2.2 Row Level Security (RLS) Policies ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivo: <code>database/migrations/07_rls_policies.sql</code>
+</div>
+<div class="code-block">-- Habilitar RLS
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Los usuarios pueden ver su propio perfil
@@ -423,7 +441,7 @@ CREATE POLICY "Admins can manage all profiles"
 
 
 <h4>2.3 Servicio Angular - UserService</h4>
-</p><div class="code-block">export interface Profile {
+<div class="code-block">export interface Profile {
   id: string;
   nombre_completo: string;
   email: string;
@@ -475,7 +493,7 @@ CREATE POLICY "Admins can manage all profiles"
 <h3>3. Sistema de Roles y Permisos</h3>
 
 <h4>3.1 Modelo de Datos - Roles</h4>
-</p><div class="code-block">CREATE TABLE public.roles (
+<div class="code-block">CREATE TABLE public.roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nombre TEXT UNIQUE NOT NULL,
   descripcion TEXT,
@@ -530,7 +548,7 @@ INSERT INTO public.roles (nombre, descripcion, nivel_acceso) VALUES
 <li>⚪ Implementar hasRole(role): Observable<boolean></li>
 
 <h4>3.4 Guards y Directivas de Permisos</h4>
-</p><div class="code-block">// Permission Guard
+<div class="code-block">// Permission Guard
 export const permissionGuard: CanActivateFn = (route) => {
   const requiredPermission = route.data['permission'];
   // Verificar si usuario tiene el permiso
@@ -552,7 +570,7 @@ export const roleGuard: CanActivateFn = (route) => {
 <h3>4. Gestión de Equipos/Áreas</h3>
 
 <h4>4.1 Modelo de Datos - Equipos</h4>
-</p><div class="code-block">CREATE TABLE public.equipos (
+<div class="code-block">CREATE TABLE public.equipos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nombre TEXT NOT NULL,
   descripcion TEXT,
@@ -587,7 +605,7 @@ INSERT INTO public.equipos (nombre, descripcion) VALUES
 <h3>5. Horarios y Turnos</h3>
 
 <h4>5.1 Modelo de Datos - Horarios</h4>
-</p><div class="code-block">CREATE TABLE public.horarios (
+<div class="code-block">CREATE TABLE public.horarios (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nombre TEXT NOT NULL,
   hora_inicio TIME NOT NULL,
@@ -605,7 +623,7 @@ INSERT INTO public.horarios (nombre, hora_inicio, hora_fin, dias_semana, es_hora
 
 
 <h4>5.2 Funciones Helper para SLA</h4>
-</p><div class="code-block">-- Función para calcular si una hora está en horario hábil
+<div class="code-block">-- Función para calcular si una hora está en horario hábil
 CREATE OR REPLACE FUNCTION es_horario_habil(
   timestamp_check TIMESTAMPTZ,
   horario_id UUID
@@ -638,7 +656,7 @@ $ LANGUAGE plpgsql;</div>
 <h3>6. Auditoría de Usuarios</h3>
 
 <h4>6.1 Sistema de Auditoría</h4>
-</p><div class="code-block">CREATE TABLE public.audit_log (
+<div class="code-block">CREATE TABLE public.audit_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   tabla TEXT NOT NULL,
   accion TEXT NOT NULL, -- INSERT, UPDATE, DELETE
@@ -676,7 +694,7 @@ CREATE TRIGGER profiles_audit_trigger
 
 
 <h4>6.2 Historial de Sesiones</h4>
-</p><div class="code-block">CREATE TABLE public.sesiones_log (
+<div class="code-block">CREATE TABLE public.sesiones_log (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   usuario_id UUID REFERENCES profiles(id),
   accion TEXT, -- 'login', 'logout', 'login_failed'
@@ -767,7 +785,63 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-9-0"><strong>v1.9.0</strong> - 12 de enero de 2026</p>
+    <p id="version-1-11-0"><strong>v1.11.0</strong> - 17 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar rate limiting en Supabase <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Agregar logs de intentos de login fallidos <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Implementar verificación is_user_blocked en frontend</li>
+        <li>✅ Registro automático de intentos fallidos en BD</li>
+        <li>✅ Mensajes de advertencia con intentos restantes</li>
+        <li>✅ Bloqueo temporal después de 5 intentos (15 min)</li>
+        <li>💾 Script SQL: <code>database/migrations/10_login_security_functions.sql</code></li>
+        <li>  • Función record_failed_login_attempt()</li>
+        <li>  • Función get_remaining_login_attempts()</li>
+        <li>  • Permisos para usuarios anónimos (pre-login)</li>
+        <li>✅ Corrección de triggers save_password_to_history y update_password_changed_at</li>
+        <li>✅ Corrección de vistas con SECURITY INVOKER</li>
+        <li>✅ Corrección de funciones con SET search_path = public</li>
+        <li>✅ Nuevos mensajes de error en español:</li>
+        <li>  • userBlocked(): "Tu cuenta ha sido bloqueada temporalmente..."</li>
+        <li>  • remainingAttempts(): "Te quedan X intentos..."</li>
+        <li>  • samePassword(): "La nueva contraseña debe ser diferente..."</li>
+        <li>✅ Plantilla de correo personalizada con colores iGAS</li>
+        <li>✅ Confirmación de tabla profiles ya implementada</li>
+        <li>✅ Confirmación de políticas RLS ya implementadas</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-10-0"><strong>v1.10.0</strong> - 15 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar validaciones de formulario mejoradas <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>📝 Validadores personalizados creados en src/app/core/validators/</li>
+        <li>  • custom-validators.ts - Validadores estándar de Angular</li>
+        <li>  • signal-validators.ts - Validadores para @angular/forms/signals</li>
+        <li>✅ Validación de email mejorada:</li>
+        <li>  • Formato de email con regex mejorado</li>
+        <li>  • Prevención de espacios en blanco</li>
+        <li>  • Validación de dominio con punto</li>
+        <li>✅ Validación de contraseña robusta:</li>
+        <li>  • Requiere al menos una mayúscula</li>
+        <li>  • Requiere al menos una minúscula</li>
+        <li>  • Requiere al menos un número</li>
+        <li>  • Previene contraseñas comunes (password, 123456, etc.)</li>
+        <li>✅ Indicador visual de fortaleza de contraseña:</li>
+        <li>  • Barra de progreso con colores (rojo/amarillo/verde)</li>
+        <li>  • Mensajes descriptivos (Débil/Media/Fuerte)</li>
+        <li>  • Cálculo dinámico basado en múltiples factores</li>
+        <li>  • Implementado en reset-password.component.html</li>
+        <li>✅ Mensajes de error en español actualizados:</li>
+        <li>  • strongPassword(): "La contraseña debe contener al menos una mayúscula, una minúscula y un número"</li>
+        <li>  • commonPassword(): "Esta contraseña es muy común. Por favor, elige una contraseña más segura"</li>
+        <li>  • emailFormat(): "El formato del correo electrónico no es válido"</li>
+        <li>  • whitespace(): "Este campo no puede contener espacios en blanco"</li>
+        <li>✅ Componentes actualizados:</li>
+        <li>  • auth-signin: Validaciones mejoradas de email</li>
+        <li>  • auth-forgot-password: Validaciones mejoradas de email</li>
+        <li>  • auth-reset-password: Validaciones de contraseña + indicador visual</li>
+        <li>✅ Build exitoso sin errores</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-9-0"><strong>v1.9.0</strong> - 12 de enero de 2026</p>
     <ul>
         <li>✅ Configurar políticas de contraseña en Supabase <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
         <li>✅ Implementar bloqueo de cuenta después de intentos fallidos <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
@@ -896,8 +970,8 @@ CREATE TRIGGER profiles_audit_trigger
         <p><strong>iGAS Control Volumétrico</strong></p>
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
-            Última actualización: 12 de enero de 2026<br>
-            Fase 1: v1.9.0 - 10 tareas completadas
+            Última actualización: 17 de enero de 2026<br>
+            Fase 1: v1.11.0 - 15 tareas completadas
         </p>
     </div>
 </body>
