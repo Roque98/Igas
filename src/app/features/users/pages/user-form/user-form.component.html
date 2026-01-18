@@ -1,0 +1,202 @@
+<app-card [options]="false">
+  <div class="card-header-right">
+    <h5>{{ isEditMode() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loadingData()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando datos...</p>
+    </div>
+  } @else {
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Nombre completo -->
+        <div class="col-md-6 mb-3">
+          <label for="nombre_completo" class="form-label">Nombre completo <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            id="nombre_completo"
+            class="form-control"
+            formControlName="nombre_completo"
+            placeholder="Ingrese el nombre completo"
+            [class.is-invalid]="isFieldInvalid('nombre_completo')"
+          />
+          @if (isFieldInvalid('nombre_completo')) {
+            <div class="invalid-feedback">{{ getFieldError('nombre_completo') }}</div>
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-6 mb-3">
+          <label for="email" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            formControlName="email"
+            placeholder="usuario@ejemplo.com"
+            [class.is-invalid]="isFieldInvalid('email')"
+            [readonly]="isEditMode()"
+          />
+          @if (isFieldInvalid('email')) {
+            <div class="invalid-feedback">{{ getFieldError('email') }}</div>
+          }
+          @if (isEditMode()) {
+            <small class="text-muted">El email no se puede modificar</small>
+          }
+        </div>
+
+        <!-- Password (solo para creación) -->
+        @if (!isEditMode()) {
+          <div class="col-md-6 mb-3">
+            <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              formControlName="password"
+              placeholder="Ingrese la contraseña"
+              [class.is-invalid]="isFieldInvalid('password')"
+            />
+            @if (isFieldInvalid('password')) {
+              <div class="invalid-feedback">{{ getFieldError('password') }}</div>
+            }
+            <!-- Indicador de fortaleza -->
+            @if (passwordStrength() > 0) {
+              <div class="mt-2">
+                <div class="progress" style="height: 5px;">
+                  <div
+                    class="progress-bar"
+                    [class.bg-danger]="passwordStrength() < 40"
+                    [class.bg-warning]="passwordStrength() >= 40 && passwordStrength() < 70"
+                    [class.bg-success]="passwordStrength() >= 70"
+                    [style.width.%]="passwordStrength()"
+                  ></div>
+                </div>
+                <small [class]="passwordStrengthInfo().class">
+                  Fortaleza: {{ passwordStrengthInfo().message }}
+                </small>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Rol -->
+        <div class="col-md-6 mb-3">
+          <label for="rol_id" class="form-label">Rol <span class="text-danger">*</span></label>
+          <select
+            id="rol_id"
+            class="form-select"
+            formControlName="rol_id"
+            [class.is-invalid]="isFieldInvalid('rol_id')"
+          >
+            <option value="">Seleccione un rol</option>
+            @for (rol of roles(); track rol.id) {
+              <option [value]="rol.id">{{ rol.nombre }}</option>
+            }
+          </select>
+          @if (isFieldInvalid('rol_id')) {
+            <div class="invalid-feedback">{{ getFieldError('rol_id') }}</div>
+          }
+        </div>
+
+        <!-- Equipo -->
+        <div class="col-md-6 mb-3">
+          <label for="area_equipo_id" class="form-label">Equipo/Área</label>
+          <select
+            id="area_equipo_id"
+            class="form-select"
+            formControlName="area_equipo_id"
+          >
+            <option value="">Sin asignar</option>
+            @for (equipo of equipos(); track equipo.id) {
+              <option [value]="equipo.id">{{ equipo.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="col-md-6 mb-3">
+          <label for="telefono" class="form-label">Teléfono</label>
+          <input
+            type="tel"
+            id="telefono"
+            class="form-control"
+            formControlName="telefono"
+            placeholder="+52 1234567890"
+            [class.is-invalid]="isFieldInvalid('telefono')"
+          />
+          @if (isFieldInvalid('telefono')) {
+            <div class="invalid-feedback">{{ getFieldError('telefono') }}</div>
+          }
+        </div>
+
+        <!-- Horario/Turno -->
+        <div class="col-md-6 mb-3">
+          <label for="turno_horario_id" class="form-label">Horario/Turno</label>
+          <select
+            id="turno_horario_id"
+            class="form-select"
+            formControlName="turno_horario_id"
+          >
+            <option value="">Sin asignar</option>
+            @for (horario of horarios(); track horario.id) {
+              <option [value]="horario.id">{{ horario.nombre }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Información adicional en modo edición -->
+      @if (isEditMode() && currentUser()) {
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="alert alert-light">
+              <h6 class="alert-heading">Información adicional</h6>
+              <div class="row">
+                <div class="col-md-4">
+                  <small class="text-muted">Estatus:</small>
+                  <span
+                    class="ms-2 badge"
+                    [class.bg-success]="currentUser()!.estatus === 'Activo'"
+                    [class.bg-secondary]="currentUser()!.estatus === 'Inactivo'"
+                  >
+                    {{ currentUser()!.estatus }}
+                  </span>
+                </div>
+                <div class="col-md-4">
+                  <small class="text-muted">Creado:</small>
+                  <span class="ms-2">{{ currentUser()!.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="col-md-4">
+                  <small class="text-muted">Última actualización:</small>
+                  <span class="ms-2">{{ currentUser()!.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Botones de acción -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-secondary" (click)="cancel()" [disabled]="submitting()">
+          <i class="feather icon-x me-1"></i> Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            {{ isEditMode() ? 'Guardando...' : 'Creando...' }}
+          } @else {
+            <i class="feather icon-save me-1"></i>
+            {{ isEditMode() ? 'Guardar cambios' : 'Crear usuario' }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-card>

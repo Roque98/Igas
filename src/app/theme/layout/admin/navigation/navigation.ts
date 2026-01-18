@@ -45,6 +45,40 @@ export const NavigationItems: NavigationItem[] = [
     ]
   },
   {
+    id: 'administracion',
+    title: 'Administración',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'usuarios',
+        title: 'Usuarios',
+        type: 'collapse',
+        icon: 'feather icon-users',
+        children: [
+          {
+            id: 'usuarios-lista',
+            title: 'Lista de Usuarios',
+            type: 'item',
+            url: '/usuarios'
+          },
+          {
+            id: 'usuarios-nuevo',
+            title: 'Nuevo Usuario',
+            type: 'item',
+            url: '/usuarios/nuevo'
+          },
+          {
+            id: 'mi-perfil',
+            title: 'Mi Perfil',
+            type: 'item',
+            url: '/usuarios/perfil'
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'ui-element',
     title: 'UI ELEMENT',
     type: 'group',

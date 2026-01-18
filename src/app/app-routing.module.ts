@@ -54,10 +54,19 @@ const routes: Routes = [
       {
         path: 'sample-page',
         loadComponent: () => import('./demo/extra/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
+      },
+
+      // ============================================================================
+      // RUTAS DE LA APLICACIÓN
+      // ============================================================================
+
+      // Gestión de Usuarios
+      {
+        path: 'usuarios',
+        loadChildren: () => import('./features/users/users.routes').then((m) => m.USERS_ROUTES)
       }
 
-      // TODO: Agregar rutas de la aplicación real aquí
-      // Ejemplo:
+      // TODO: Agregar más rutas de la aplicación aquí
       // {
       //   path: 'tickets',
       //   loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES)

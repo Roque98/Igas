@@ -1,0 +1,278 @@
+<!-- Indicador de carga -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando perfil...</p>
+  </div>
+} @else if (profile()) {
+  <div class="row">
+    <!-- Columna izquierda - Avatar e información básica -->
+    <div class="col-md-4 mb-4">
+      <app-card [options]="false">
+        <div class="text-center">
+          <!-- Avatar -->
+          <div class="position-relative d-inline-block mb-3">
+            <img
+              [src]="getAvatarUrl()"
+              class="rounded-circle border"
+              width="150"
+              height="150"
+              style="object-fit: cover;"
+              alt="Avatar"
+            />
+            @if (uploadingAvatar()) {
+              <div class="avatar-overlay">
+                <div class="spinner-border spinner-border-sm text-white" role="status"></div>
+              </div>
+            }
+            <button
+              class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle"
+              style="width: 36px; height: 36px;"
+              (click)="triggerFileInput()"
+              [disabled]="uploadingAvatar()"
+            >
+              <i class="feather icon-camera"></i>
+            </button>
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              class="d-none"
+              (change)="onFileSelected($event)"
+            />
+          </div>
+
+          <!-- Nombre y rol -->
+          <h4 class="mb-1">{{ profile()!.nombre_completo }}</h4>
+          <p class="text-muted mb-2">{{ profile()!.email }}</p>
+
+          @if (profile()!.rol) {
+            <span class="badge bg-primary mb-2">{{ profile()!.rol!.nombre }}</span>
+          }
+
+          <br />
+
+          <span [class]="getDisponibilidadClass(profile()!.disponibilidad)">
+            {{ profile()!.disponibilidad }}
+          </span>
+
+          <!-- Botón eliminar avatar -->
+          @if (profile()!.avatar_url) {
+            <div class="mt-3">
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="openDeleteAvatarModal(deleteAvatarModal)"
+              >
+                <i class="feather icon-trash-2 me-1"></i> Eliminar foto
+              </button>
+            </div>
+          }
+        </div>
+
+        <hr />
+
+        <!-- Información adicional -->
+        <div class="small">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Equipo:</span>
+            <span>{{ profile()!.equipo?.nombre || 'Sin asignar' }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Horario:</span>
+            <span>{{ profile()!.horario?.nombre || 'Sin asignar' }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Teléfono:</span>
+            <span>{{ profile()!.telefono || '-' }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Miembro desde:</span>
+            <span>{{ profile()!.created_at | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Columna derecha - Tabs de edición -->
+    <div class="col-md-8">
+      <app-card [options]="false">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs mb-4">
+          <li [ngbNavItem]="1">
+            <button ngbNavLink>
+              <i class="feather icon-user me-2"></i> Información
+            </button>
+            <ng-template ngbNavContent>
+              <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre_completo" class="form-label">Nombre completo</label>
+                    <input
+                      type="text"
+                      id="nombre_completo"
+                      class="form-control"
+                      formControlName="nombre_completo"
+                      [class.is-invalid]="isFieldInvalid(profileForm, 'nombre_completo')"
+                    />
+                    @if (isFieldInvalid(profileForm, 'nombre_completo')) {
+                      <div class="invalid-feedback">{{ getFieldError(profileForm, 'nombre_completo') }}</div>
+                    }
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input
+                      type="tel"
+                      id="telefono"
+                      class="form-control"
+                      formControlName="telefono"
+                      placeholder="+52 1234567890"
+                      [class.is-invalid]="isFieldInvalid(profileForm, 'telefono')"
+                    />
+                    @if (isFieldInvalid(profileForm, 'telefono')) {
+                      <div class="invalid-feedback">{{ getFieldError(profileForm, 'telefono') }}</div>
+                    }
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="disponibilidad" class="form-label">Disponibilidad</label>
+                    <select
+                      id="disponibilidad"
+                      class="form-select"
+                      formControlName="disponibilidad"
+                    >
+                      @for (option of disponibilidadOptions; track option) {
+                        <option [value]="option">{{ option }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="text-end">
+                  <button type="submit" class="btn btn-primary" [disabled]="savingProfile()">
+                    @if (savingProfile()) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      Guardando...
+                    } @else {
+                      <i class="feather icon-save me-1"></i> Guardar cambios
+                    }
+                  </button>
+                </div>
+              </form>
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="2">
+            <button ngbNavLink>
+              <i class="feather icon-lock me-2"></i> Seguridad
+            </button>
+            <ng-template ngbNavContent>
+              <h6 class="mb-3">Cambiar contraseña</h6>
+
+              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="current_password" class="form-label">Contraseña actual</label>
+                    <input
+                      type="password"
+                      id="current_password"
+                      class="form-control"
+                      formControlName="current_password"
+                      [class.is-invalid]="isFieldInvalid(passwordForm, 'current_password')"
+                    />
+                    @if (isFieldInvalid(passwordForm, 'current_password')) {
+                      <div class="invalid-feedback">{{ getFieldError(passwordForm, 'current_password') }}</div>
+                    }
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="new_password" class="form-label">Nueva contraseña</label>
+                    <input
+                      type="password"
+                      id="new_password"
+                      class="form-control"
+                      formControlName="new_password"
+                      [class.is-invalid]="isFieldInvalid(passwordForm, 'new_password')"
+                    />
+                    @if (isFieldInvalid(passwordForm, 'new_password')) {
+                      <div class="invalid-feedback">{{ getFieldError(passwordForm, 'new_password') }}</div>
+                    }
+                    <!-- Indicador de fortaleza -->
+                    @if (passwordStrength() > 0) {
+                      <div class="mt-2">
+                        <div class="progress" style="height: 5px;">
+                          <div
+                            class="progress-bar"
+                            [class.bg-danger]="passwordStrength() < 40"
+                            [class.bg-warning]="passwordStrength() >= 40 && passwordStrength() < 70"
+                            [class.bg-success]="passwordStrength() >= 70"
+                            [style.width.%]="passwordStrength()"
+                          ></div>
+                        </div>
+                        <small [class]="passwordStrengthInfo().class">
+                          Fortaleza: {{ passwordStrengthInfo().message }}
+                        </small>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="confirm_password" class="form-label">Confirmar nueva contraseña</label>
+                    <input
+                      type="password"
+                      id="confirm_password"
+                      class="form-control"
+                      formControlName="confirm_password"
+                      [class.is-invalid]="isFieldInvalid(passwordForm, 'confirm_password') || hasPasswordMismatch()"
+                    />
+                    @if (hasPasswordMismatch()) {
+                      <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
+                    }
+                  </div>
+                </div>
+
+                <div class="alert alert-info small">
+                  <i class="feather icon-info me-2"></i>
+                  La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas y números.
+                </div>
+
+                <div class="text-end">
+                  <button type="submit" class="btn btn-primary" [disabled]="savingPassword()">
+                    @if (savingPassword()) {
+                      <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      Actualizando...
+                    } @else {
+                      <i class="feather icon-lock me-1"></i> Cambiar contraseña
+                    }
+                  </button>
+                </div>
+              </form>
+            </ng-template>
+          </li>
+        </ul>
+
+        <div [ngbNavOutlet]="nav"></div>
+      </app-card>
+    </div>
+  </div>
+}
+
+<!-- Modal de confirmación eliminar avatar -->
+<ng-template #deleteAvatarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Eliminar foto de perfil</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p>¿Está seguro que desea eliminar su foto de perfil?</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteAvatar()">
+      <i class="feather icon-trash-2 me-1"></i> Eliminar
+    </button>
+  </div>
+</ng-template>
