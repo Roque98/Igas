@@ -4,15 +4,16 @@
 // Servicio para gestión de notificaciones push del sistema
 // ============================================================================
 
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, OnDestroy } from '@angular/core';
 import { Observable, from, BehaviorSubject } from 'rxjs';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
 import { Notification, NotificationFilters, ServiceResponse, PaginatedResponse, PaginationOptions } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationPushService {
+export class NotificationPushService implements OnDestroy {
   private supabase = inject(SupabaseService);
 
   // Estado reactivo
@@ -22,9 +23,17 @@ export class NotificationPushService {
   // Subject para notificaciones en tiempo real
   private newNotification$ = new BehaviorSubject<Notification | null>(null);
 
+  // Canal de Realtime
+  private realtimeChannel: RealtimeChannel | null = null;
+  private isSubscribed = false;
+
   constructor() {
     // Cargar conteo inicial cuando el usuario esté autenticado
     this.initializeNotifications();
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribeFromRealtime();
   }
 
   private async initializeNotifications(): Promise<void> {
@@ -41,6 +50,7 @@ export class NotificationPushService {
         this.loadUnreadCount();
         this.subscribeToRealtime();
       } else if (event === 'SIGNED_OUT') {
+        this.unsubscribeFromRealtime();
         this.unreadCount.set(0);
         this.notifications.set([]);
       }
@@ -52,10 +62,13 @@ export class NotificationPushService {
    */
   private subscribeToRealtime(): void {
     const userId = this.supabase.user?.id;
-    if (!userId) return;
+    if (!userId || this.isSubscribed) return;
 
-    this.supabase.client
-      .channel('notifications')
+    // Limpiar canal anterior si existe
+    this.unsubscribeFromRealtime();
+
+    this.realtimeChannel = this.supabase.client
+      .channel(`notifications-${userId}`)
       .on(
         'postgres_changes',
         {
@@ -73,7 +86,26 @@ export class NotificationPushService {
           this.notifications.update(list => [newNotification, ...list]);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        this.isSubscribed = status === 'SUBSCRIBED';
+        if (status === 'SUBSCRIBED') {
+          console.log('Realtime notifications subscribed');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Realtime channel error, retrying...');
+          setTimeout(() => this.subscribeToRealtime(), 5000);
+        }
+      });
+  }
+
+  /**
+   * Desuscribirse del canal de Realtime
+   */
+  private unsubscribeFromRealtime(): void {
+    if (this.realtimeChannel) {
+      this.supabase.client.removeChannel(this.realtimeChannel);
+      this.realtimeChannel = null;
+      this.isSubscribed = false;
+    }
   }
 
   /**

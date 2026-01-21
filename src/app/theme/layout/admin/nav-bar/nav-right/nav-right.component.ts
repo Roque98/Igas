@@ -1,6 +1,6 @@
 // angular import
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 // bootstrap import
@@ -16,7 +16,7 @@ import { Notification } from 'src/app/core/models';
 
 @Component({
   selector: 'app-nav-right',
-  imports: [SharedModule, CommonModule, RouterLink],
+  imports: [SharedModule, CommonModule],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
   providers: [NgbDropdownConfig]
@@ -137,6 +137,12 @@ export class NavRightComponent implements OnInit {
     if (notification.datos?.['ticket_id']) {
       this.router.navigate(['/tickets', notification.datos['ticket_id']]);
     }
+  }
+
+  viewAllNotifications(): void {
+    // Por ahora redirigir al listado de tickets
+    // TODO: Crear página de notificaciones cuando sea necesario
+    this.router.navigate(['/tickets/lista']);
   }
 
   getNotificationIcon(tipo: string): string {
