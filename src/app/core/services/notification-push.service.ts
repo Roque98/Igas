@@ -28,7 +28,7 @@ export class NotificationPushService implements OnDestroy {
   private isSubscribed = false;
 
   constructor() {
-    // Cargar conteo inicial cuando el usuario esté autenticado
+    // Inicializar cuando el servicio se crea
     this.initializeNotifications();
   }
 
@@ -36,20 +36,15 @@ export class NotificationPushService implements OnDestroy {
     this.unsubscribeFromRealtime();
   }
 
-  private async initializeNotifications(): Promise<void> {
-    // Esperar a que el usuario esté autenticado
-    const user = this.supabase.user;
-    if (user) {
-      await this.loadUnreadCount();
-      this.subscribeToRealtime();
-    }
-
-    // Escuchar cambios de autenticación
-    this.supabase.client.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+  private initializeNotifications(): void {
+    // Suscribirse al observable de usuario para reaccionar a cambios
+    this.supabase.currentUser$.subscribe(user => {
+      if (user) {
+        // Usuario autenticado - cargar notificaciones y suscribirse
         this.loadUnreadCount();
         this.subscribeToRealtime();
-      } else if (event === 'SIGNED_OUT') {
+      } else {
+        // Usuario no autenticado - limpiar estado
         this.unsubscribeFromRealtime();
         this.unreadCount.set(0);
         this.notifications.set([]);
@@ -62,10 +57,20 @@ export class NotificationPushService implements OnDestroy {
    */
   private subscribeToRealtime(): void {
     const userId = this.supabase.user?.id;
-    if (!userId || this.isSubscribed) return;
+    if (!userId) {
+      console.log('🔔 No user ID for realtime subscription');
+      return;
+    }
+
+    if (this.isSubscribed) {
+      console.log('🔔 Already subscribed to notifications');
+      return;
+    }
 
     // Limpiar canal anterior si existe
     this.unsubscribeFromRealtime();
+
+    console.log(`🔔 Subscribing to notifications for user: ${userId}`);
 
     this.realtimeChannel = this.supabase.client
       .channel(`notifications-${userId}`)
@@ -78,6 +83,7 @@ export class NotificationPushService implements OnDestroy {
           filter: `usuario_id=eq.${userId}`
         },
         (payload) => {
+          console.log('🔔 New notification received:', payload.new);
           const newNotification = payload.new as Notification;
           this.newNotification$.next(newNotification);
           this.unreadCount.update(count => count + 1);
@@ -87,11 +93,11 @@ export class NotificationPushService implements OnDestroy {
         }
       )
       .subscribe((status) => {
+        console.log(`🔔 Realtime subscription status: ${status}`);
         this.isSubscribed = status === 'SUBSCRIBED';
-        if (status === 'SUBSCRIBED') {
-          console.log('Realtime notifications subscribed');
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('Realtime channel error, retrying...');
+        if (status === 'CHANNEL_ERROR') {
+          console.error('🔔 Realtime channel error, retrying in 5s...');
+          this.isSubscribed = false;
           setTimeout(() => this.subscribeToRealtime(), 5000);
         }
       });
@@ -119,12 +125,17 @@ export class NotificationPushService implements OnDestroy {
    * Carga el conteo de notificaciones no leídas
    */
   async loadUnreadCount(): Promise<void> {
+    console.log('🔔 Loading unread notification count...');
     const { data, error } = await this.supabase.client
       .rpc('contar_notificaciones_no_leidas');
 
-    if (!error && data !== null) {
-      this.unreadCount.set(data);
+    if (error) {
+      console.error('🔔 Error loading unread count:', error);
+      return;
     }
+
+    console.log(`🔔 Unread count: ${data}`);
+    this.unreadCount.set(data ?? 0);
   }
 
   /**
