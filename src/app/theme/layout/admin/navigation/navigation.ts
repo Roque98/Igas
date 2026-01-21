@@ -45,6 +45,41 @@ export const NavigationItems: NavigationItem[] = [
     ]
   },
   {
+    id: 'soporte',
+    title: 'Soporte',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'tickets',
+        title: 'Tickets',
+        type: 'collapse',
+        icon: 'feather icon-file-text',
+        children: [
+          {
+            id: 'tickets-dashboard',
+            title: 'Dashboard',
+            type: 'item',
+            url: '/tickets',
+            exactMatch: true
+          },
+          {
+            id: 'tickets-lista',
+            title: 'Lista de Tickets',
+            type: 'item',
+            url: '/tickets/lista'
+          },
+          {
+            id: 'tickets-nuevo',
+            title: 'Nuevo Ticket',
+            type: 'item',
+            url: '/tickets/nuevo'
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'administracion',
     title: 'Administración',
     type: 'group',
@@ -60,7 +95,8 @@ export const NavigationItems: NavigationItem[] = [
             id: 'usuarios-lista',
             title: 'Lista de Usuarios',
             type: 'item',
-            url: '/usuarios'
+            url: '/usuarios',
+            exactMatch: true
           },
           {
             id: 'usuarios-nuevo',
@@ -75,6 +111,56 @@ export const NavigationItems: NavigationItem[] = [
             url: '/usuarios/perfil'
           }
         ]
+      },
+      {
+        id: 'equipos',
+        title: 'Equipos',
+        type: 'collapse',
+        icon: 'feather icon-briefcase',
+        children: [
+          {
+            id: 'equipos-lista',
+            title: 'Lista de Equipos',
+            type: 'item',
+            url: '/equipos',
+            exactMatch: true
+          },
+          {
+            id: 'equipos-nuevo',
+            title: 'Nuevo Equipo',
+            type: 'item',
+            url: '/equipos/nuevo'
+          }
+        ]
+      },
+      {
+        id: 'horarios',
+        title: 'Horarios',
+        type: 'collapse',
+        icon: 'feather icon-clock',
+        children: [
+          {
+            id: 'horarios-lista',
+            title: 'Lista de Horarios',
+            type: 'item',
+            url: '/horarios',
+            exactMatch: true
+          },
+          {
+            id: 'horarios-nuevo',
+            title: 'Nuevo Horario',
+            type: 'item',
+            url: '/horarios/nuevo'
+          }
+        ]
+      },
+      {
+        id: 'auditoria',
+        title: 'Auditoría',
+        type: 'item',
+        icon: 'feather icon-file-text',
+        url: '/auditoria',
+        classes: 'nav-item'
       }
     ]
   },

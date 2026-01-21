@@ -1,0 +1,312 @@
+<app-card [options]="false" cardTitle="Listado de Tickets">
+
+  <!-- Barra de herramientas -->
+  <div class="row mb-4">
+    <!-- Búsqueda -->
+    <div class="col-md-4 mb-2">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por folio o descripción..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
+          <i class="feather icon-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="col-md-5 mb-2">
+      <div class="d-flex gap-2 flex-wrap">
+        <!-- Categoría -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedCategoriaId()"
+          (ngModelChange)="selectedCategoriaId.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Categoría</option>
+          @for (cat of categorias(); track cat.id) {
+            <option [ngValue]="cat.id">{{ cat.nombre }}</option>
+          }
+        </select>
+
+        <!-- Prioridad -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedPrioridad()"
+          (ngModelChange)="selectedPrioridad.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Prioridad</option>
+          @for (pri of prioridades; track pri) {
+            <option [ngValue]="pri">{{ pri }}</option>
+          }
+        </select>
+
+        <!-- Semáforo -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedSemaforo()"
+          (ngModelChange)="selectedSemaforo.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">SLA</option>
+          @for (sem of semaforos; track sem.value) {
+            <option [ngValue]="sem.value">{{ sem.label }}</option>
+          }
+        </select>
+
+        <!-- Filtros de checkbox -->
+        <div class="btn-group" role="group">
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnMisTickets"
+            [checked]="soloMisTickets()"
+            (change)="soloMisTickets.set(!soloMisTickets()); onFilterChange()"
+          />
+          <label class="btn btn-outline-primary btn-sm" for="btnMisTickets">
+            <i class="feather icon-user me-1"></i> Mis tickets
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnSinAsignar"
+            [checked]="soloSinAsignar()"
+            (change)="soloSinAsignar.set(!soloSinAsignar()); onFilterChange()"
+          />
+          <label class="btn btn-outline-warning btn-sm" for="btnSinAsignar">
+            <i class="feather icon-user-x me-1"></i> Sin asignar
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-3 mb-2 text-end">
+      @if (hasActiveFilters()) {
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
+          <i class="feather icon-x"></i> Limpiar
+        </button>
+      }
+      <a routerLink="/tickets/nuevo" class="btn btn-primary">
+        <i class="feather icon-plus me-1"></i> Nuevo Ticket
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros de Estatus (chips) -->
+  <div class="mb-3">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span class="text-muted small">Estatus:</span>
+      @for (est of estatus(); track est.id) {
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="isEstatusSelected(est.id)"
+          [class.btn-outline-secondary]="!isEstatusSelected(est.id)"
+          (click)="toggleEstatusFilter(est.id)"
+        >
+          <span
+            class="badge-dot me-1"
+            [style.background-color]="est.color"
+          ></span>
+          {{ est.nombre }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando tickets...</p>
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="feather icon-alert-circle me-2"></i>
+      {{ error() }}
+      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadTickets()">
+        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Tabla de tickets -->
+  @if (!loading() && !error()) {
+    @if (tickets().length === 0) {
+      <div class="text-center py-5">
+        <i class="feather icon-inbox" style="font-size: 48px; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No se encontraron tickets</p>
+        @if (hasActiveFilters()) {
+          <button class="btn btn-outline-primary" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="sortable" (click)="onSort('folio')">
+                Folio
+                <i [class]="getSortIcon('folio')"></i>
+              </th>
+              <th>Descripción</th>
+              <th class="sortable" (click)="onSort('categoria_id')">
+                Categoría
+                <i [class]="getSortIcon('categoria_id')"></i>
+              </th>
+              <th class="sortable text-center" (click)="onSort('prioridad')">
+                Prioridad
+                <i [class]="getSortIcon('prioridad')"></i>
+              </th>
+              <th>Responsable</th>
+              <th class="text-center">Estatus</th>
+              <th class="text-center" style="min-width: 150px;">SLA</th>
+              <th class="sortable" (click)="onSort('fecha_creacion')">
+                Fecha
+                <i [class]="getSortIcon('fecha_creacion')"></i>
+              </th>
+              <th class="text-center" style="width: 100px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ticket of tickets(); track ticket.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/tickets', ticket.id]" class="text-decoration-none fw-medium text-primary">
+                    {{ ticket.folio }}
+                  </a>
+                </td>
+                <td>
+                  <span class="text-truncate d-inline-block" style="max-width: 200px;" [title]="ticket.titulo || ticket.descripcion">
+                    {{ ticket.titulo || ticket.descripcion | slice:0:50 }}{{ (ticket.titulo || ticket.descripcion).length > 50 ? '...' : '' }}
+                  </span>
+                </td>
+                <td>
+                  @if (ticket.categoria_nombre) {
+                    <span class="badge" [style.background-color]="ticket.categoria_color || '#6c757d'">
+                      {{ ticket.categoria_nombre }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <app-prioridad-badge
+                    [prioridad]="ticket.prioridad"
+                    [showIcon]="false"
+                    size="small"
+                  ></app-prioridad-badge>
+                </td>
+                <td>
+                  @if (ticket.responsable_nombre) {
+                    <div class="d-flex align-items-center">
+                      <img
+                        [src]="ticket.responsable_avatar || 'assets/images/user/avatar-1.jpg'"
+                        class="rounded-circle me-2"
+                        width="28"
+                        height="28"
+                        [alt]="ticket.responsable_nombre"
+                        style="object-fit: cover;"
+                      />
+                      <span class="small">{{ ticket.responsable_nombre }}</span>
+                    </div>
+                  } @else {
+                    <span class="badge bg-warning text-dark">Sin asignar</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <app-estatus-badge
+                    [nombre]="ticket.estatus_nombre || 'Desconocido'"
+                    [color]="ticket.estatus_color || '#6c757d'"
+                    size="small"
+                  ></app-estatus-badge>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <app-progress-bar-sla
+                      [porcentaje]="ticket.porcentaje_sla || 0"
+                      [semaforo]="ticket.semaforo"
+                      [showPercentage]="false"
+                    ></app-progress-bar-sla>
+                    <app-semaforo-badge
+                      [semaforo]="ticket.semaforo"
+                      [porcentaje]="ticket.porcentaje_sla"
+                      [showLabel]="false"
+                      size="small"
+                    ></app-semaforo-badge>
+                  </div>
+                </td>
+                <td>
+                  <span class="small text-muted">{{ formatDate(ticket.fecha_creacion) }}</span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      class="btn btn-outline-primary"
+                      (click)="viewTicket(ticket)"
+                      ngbTooltip="Ver detalles"
+                    >
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary"
+                      (click)="editTicket(ticket)"
+                      ngbTooltip="Editar"
+                    >
+                      <i class="feather icon-edit"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+          {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
+          de {{ totalItems() }} tickets
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <select
+            class="form-select form-select-sm"
+            style="width: auto;"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)"
+          >
+            <option [value]="10">10 por página</option>
+            <option [value]="25">25 por página</option>
+            <option [value]="50">50 por página</option>
+          </select>
+          <ngb-pagination
+            [collectionSize]="totalItems()"
+            [page]="currentPage()"
+            [pageSize]="pageSize()"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+          ></ngb-pagination>
+        </div>
+      </div>
+    }
+  }
+</app-card>

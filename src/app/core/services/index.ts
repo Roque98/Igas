@@ -6,5 +6,7 @@
 
 export * from './supabase.service';
 export * from './user.service';
+export * from './equipo.service';
+export * from './horario.service';
 export * from './notification.service';
 export * from './inactivity.service';

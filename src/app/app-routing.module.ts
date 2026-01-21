@@ -64,13 +64,33 @@ const routes: Routes = [
       {
         path: 'usuarios',
         loadChildren: () => import('./features/users/users.routes').then((m) => m.USERS_ROUTES)
+      },
+
+      // Gestión de Equipos/Áreas
+      {
+        path: 'equipos',
+        loadChildren: () => import('./features/equipos/equipos.routes').then((m) => m.EQUIPOS_ROUTES)
+      },
+
+      // Gestión de Horarios/Turnos
+      {
+        path: 'horarios',
+        loadChildren: () => import('./features/horarios/horarios.routes').then((m) => m.HORARIOS_ROUTES)
+      },
+
+      // Auditoría del sistema (solo admin)
+      {
+        path: 'auditoria',
+        loadChildren: () => import('./features/auditoria/auditoria.routes').then((m) => m.AUDITORIA_ROUTES)
+      },
+
+      // Gestión de Tickets de Soporte
+      {
+        path: 'tickets',
+        loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES)
       }
 
       // TODO: Agregar más rutas de la aplicación aquí
-      // {
-      //   path: 'tickets',
-      //   loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES)
-      // },
       // {
       //   path: 'clientes',
       //   loadChildren: () => import('./features/clientes/clientes.routes').then((m) => m.CLIENTES_ROUTES)

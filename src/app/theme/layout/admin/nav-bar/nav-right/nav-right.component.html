@@ -1,74 +1,78 @@
 <ul class="navbar-nav">
+  <!-- Notificaciones -->
   <li>
-    <div class="dropdown" ngbDropdown placement="auto">
-      <a ngbDropdownToggle href="javascript:void(0)" data-toggle="dropdown"><i class="icon feather icon-bell"></i></a>
+    <div class="dropdown" ngbDropdown placement="auto" (openChange)="$event && loadNotifications()">
+      <a ngbDropdownToggle href="javascript:void(0)" data-toggle="dropdown" class="notification-toggle">
+        <i class="icon feather icon-bell"></i>
+        @if (unreadCount() > 0) {
+          <span class="badge bg-danger notification-badge">
+            {{ unreadCount() > 99 ? '99+' : unreadCount() }}
+          </span>
+        }
+      </a>
       <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end notification">
         <div class="notification-head">
-          <h6 class="d-inline-block m-b-0">Notifications</h6>
-          <div class="float-end">
-            <a href="javascript:void(0)" class="m-r-10 text-decoration-none">mark as read</a>
-            <a href="javascript:void(0)" class="text-decoration-none">clear all</a>
-          </div>
+          <h6 class="d-inline-block m-b-0">Notificaciones</h6>
+          @if (unreadCount() > 0) {
+            <div class="float-end">
+              <a href="javascript:void(0)" class="text-decoration-none" (click)="markAllAsRead()">
+                marcar todas como leídas
+              </a>
+            </div>
+          }
         </div>
-        <ul class="notification-body">
-          <li class="n-title">
-            <p class="m-b-0">NEW</p>
-          </li>
-          <li class="notification">
-            <div class="d-flex">
-              <img class="img-radius" src="assets/images/user/avatar-1.jpg" alt="Generic placeholder image" />
-              <div class="flex-grow-1">
-                <p>
-                  <strong>John Doe</strong>
-                  <span class="n-time text-muted">
-                    <i class="icon feather icon-clock m-r-10"></i>
-                    now
-                  </span>
-                </p>
-                <p>New ticket Added</p>
-              </div>
-            </div>
-          </li>
-          <li class="n-title">
-            <p class="m-b-0">EARLIER</p>
-          </li>
-          <li class="notification">
-            <div class="d-flex">
-              <img class="img-radius" src="assets/images/user/avatar-2.jpg" alt="Generic placeholder image" />
-              <div class="flex-grow-1">
-                <p>
-                  <strong>Joseph William</strong>
-                  <span class="n-time text-muted">
-                    <i class="icon feather icon-clock m-r-10"></i>
-                    10 min
-                  </span>
-                </p>
-                <p>Prchace New Theme and make payment</p>
-              </div>
-            </div>
-          </li>
-          <li class="notification">
-            <div class="d-flex">
-              <img class="img-radius" src="assets/images/user/avatar-3.jpg" alt="Generic placeholder image" />
-              <div class="flex-grow-1">
-                <p>
-                  <strong>Sara Soudein</strong>
-                  <span class="n-time text-muted">
-                    <i class="icon feather icon-clock m-r-10"></i>
-                    30 min
-                  </span>
-                </p>
-                <p>currently login</p>
-              </div>
-            </div>
-          </li>
-        </ul>
+
+        @if (loadingNotifications()) {
+          <div class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
+        } @else if (recentNotifications().length === 0) {
+          <div class="text-center py-4 text-muted">
+            <i class="feather icon-bell-off" style="font-size: 32px;"></i>
+            <p class="small mt-2 mb-0">No tienes notificaciones</p>
+          </div>
+        } @else {
+          <ul class="notification-body">
+            @for (notif of recentNotifications(); track notif.id) {
+              <li
+                class="notification"
+                [class.unread]="!notif.leida"
+                (click)="onNotificationClick(notif)"
+              >
+                <div class="d-flex">
+                  <div
+                    class="notification-icon"
+                    [style.background-color]="getNotificationColor(notif.tipo)"
+                  >
+                    <i [class]="'feather icon-' + getNotificationIcon(notif.tipo)"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <p class="mb-1">
+                      <strong>{{ notif.titulo }}</strong>
+                      <span class="n-time text-muted">
+                        <i class="icon feather icon-clock m-r-5"></i>
+                        {{ formatRelativeTime(notif.created_at) }}
+                      </span>
+                    </p>
+                    <p class="text-muted small mb-0">{{ notif.mensaje }}</p>
+                  </div>
+                  @if (!notif.leida) {
+                    <span class="unread-dot"></span>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+
         <div class="notification-footer">
-          <a href="javascript:void(0)">show all</a>
+          <a routerLink="/notificaciones">ver todas las notificaciones</a>
         </div>
       </div>
     </div>
   </li>
+
+  <!-- Perfil de Usuario -->
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a href="javascript:void(0)" ngbDropdownToggle data-toggle="dropdown">
@@ -77,8 +81,8 @@
       <div class="dropdown-menu dropdown-menu-end profile-notification" ngbDropdownMenu>
         @if (currentUser$ | async; as user) {
           <div class="pro-head">
-            <img src="assets/images/user/avatar-1.jpg" class="img-radius" alt="User-Profile-Image" />
-            <span>{{ user.email }}</span>
+            <img [src]="getAvatarUrl()" class="img-radius" alt="User-Profile-Image" />
+            <span>{{ getUserName() || user.email }}</span>
             <a href="javascript:void(0)" class="dud-logout" title="Cerrar Sesión" (click)="logout()">
               <i class="feather icon-log-out"></i>
             </a>
@@ -86,26 +90,14 @@
         }
         <ul class="pro-body">
           <li>
-            <a href="javascript:void(0)" class="dropdown-item">
-              <i class="feather icon-settings"></i>
-              Configuración
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)" class="dropdown-item">
+            <a href="javascript:void(0)" class="dropdown-item" (click)="goToProfile()">
               <i class="feather icon-user"></i>
-              Perfil
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)" class="dropdown-item">
-              <i class="feather icon-mail"></i>
-              Mis Mensajes
+              Mi Perfil
             </a>
           </li>
           <li>
             <a href="javascript:void(0)" class="dropdown-item" (click)="logout()">
-              <i class="feather icon-lock"></i>
+              <i class="feather icon-log-out"></i>
               Cerrar Sesión
             </a>
           </li>

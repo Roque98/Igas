@@ -8,3 +8,6 @@ export * from './profile.model';
 export * from './role.model';
 export * from './equipo.model';
 export * from './horario.model';
+export * from './audit.model';
+export * from './ticket.model';
+export * from './notification.model';

@@ -1,0 +1,63 @@
+// ============================================================================
+// Ticket List Styles
+// ============================================================================
+
+// Sortable columns
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  i {
+    font-size: 12px;
+    margin-left: 4px;
+    opacity: 0.5;
+  }
+}
+
+// Badge dot for estatus
+.badge-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+// Table row hover effect
+.table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+// Responsive table adjustments
+@media (max-width: 992px) {
+  .table {
+    font-size: 13px;
+  }
+
+  .btn-group-sm .btn {
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+// Filter chips
+.btn-outline-secondary.btn-sm {
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+// Checkbox buttons
+.btn-check:checked + .btn-outline-primary {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.btn-check:checked + .btn-outline-warning {
+  background-color: var(--bs-warning);
+  border-color: var(--bs-warning);
+  color: #333;
+}
