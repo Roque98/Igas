@@ -12,13 +12,13 @@
           <div class="mb-4">
             <i class="feather icon-user-plus auth-icon"></i>
           </div>
-          <h3 class="mb-4">Sign up</h3>
+          <h3 class="mb-4">Registrarse</h3>
           <div class="input-group mb-3">
             <input
               type="text"
               id="username"
               class="form-control"
-              placeholder="Username"
+              placeholder="Nombre de Usuario"
               [field]="registerForm.username"
               [class.is-invalid]="submitted() && registerForm.username().errors().length > 0"
             />
@@ -36,7 +36,7 @@
               class="form-control"
               id="floatingInput"
               [class.is-invalid]="submitted() && registerForm.email().invalid()"
-              placeholder="Email Address"
+              placeholder="Correo Electrónico"
               [field]="registerForm.email"
             />
             @if (submitted() && registerForm.email().invalid()) {
@@ -55,7 +55,7 @@
                 class="form-control"
                 [field]="registerForm.password"
                 [class.is-invalid]="submitted() && registerForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             } @else {
               <input
@@ -64,7 +64,7 @@
                 class="form-control"
                 [field]="registerForm.password"
                 [class.is-invalid]="submitted() && registerForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             }
             <i
@@ -83,24 +83,14 @@
           <div class="form-group text-start">
             <div class="checkbox checkbox-fill d-inline">
               <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-1" checked="" />
-              <label for="checkbox-fill-1" class="cr">Save Details</label>
+              <label for="checkbox-fill-1" class="cr">Recordar datos</label>
             </div>
           </div>
-          <div class="form-group text-start">
-            <div class="checkbox checkbox-fill d-inline">
-              <input type="checkbox" name="checkbox-fill-2" id="checkbox-fill-2" />
-              <label for="checkbox-fill-2" class="cr">
-                Send me the
-                <a href="javascript:void(0)">Newsletter</a>
-                weekly.
-              </label>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary shadow-2 mb-4">Sign up</button>
+          <button type="submit" class="btn btn-primary shadow-2 mb-4">Registrarse</button>
         </form>
         <p class="mb-0 text-muted">
-          Already have an account?
-          <a [routerLink]="['/login']">Log in</a>
+          ¿Ya tienes cuenta?
+          <a [routerLink]="['/login']">Iniciar Sesión</a>
         </p>
       </div>
     </div>

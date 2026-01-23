@@ -1,0 +1,71 @@
+// ============================================================================
+// Reporte Casos Component - Styles
+// ============================================================================
+
+:host {
+  display: block;
+}
+
+// KPI Cards
+.bg-primary, .bg-success, .bg-warning, .bg-danger, .bg-info, .bg-secondary {
+  border-radius: 8px;
+
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+
+  small {
+    font-size: 0.75rem;
+    opacity: 0.9;
+  }
+}
+
+// Table styles
+.table {
+  th {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  td {
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+}
+
+// Pagination
+.pagination {
+  .page-link {
+    border-color: #dee2e6;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: #F9B000;
+    border-color: #F9B000;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+
+  .bg-primary, .bg-success, .bg-warning, .bg-danger, .bg-info, .bg-secondary {
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+}

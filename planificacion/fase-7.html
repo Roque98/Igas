@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 7: Testing, Optimización y Despliegue - iGAS Service Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 10px 0 0;
+        }
+
+        .badge-proceso { background: #FFC107; color: #333; }
+        .badge-pendiente { background: rgba(255,255,255,0.3); }
+        .badge-completado { background: #4CAF50; }
+        .badge-critica { background: #F44336; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .progress-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .content-section h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        .content-section h4 {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .content-section li {
+            margin: 8px 0;
+        }
+
+        .content-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #F44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #3E3E3E;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-wrap: wrap;
+            }
+
+            .navbar a {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html" class="active">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 7: Testing, Optimización y Despliegue</h1>
+            <span class="badge badge-pendiente">Pendiente</span>
+            <span class="badge badge-proceso">0%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-card">
+            <h3>Progreso de la Fase</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 0%;"></div>
+                <div class="progress-bar-text">0% Completado</div>
+            </div>
+        </div>
+
+        <div class="content-section"><h2>Objetivo</h2>
+Realizar pruebas integrales del sistema, optimizar performance, preparar documentación y desplegar a producción.
+
+---
+
+<div class="content-section"><h2>Tareas</h2>
+
+<h3>1. Testing</h3>
+
+<h4>1.1 Tests Unitarios (Frontend)</h4>
+</p><div class="code-block">// Ejemplo con Jasmine/Karma
+describe('TicketService', () => {
+  it('should create ticket', async () => {
+    const ticket = await service.createTicket({...});
+    expect(ticket).toBeDefined();
+    expect(ticket.folio).toMatch(/TKT-\d{4}-\d{4}/);
+  });
+});</div>
+
+
+<li>⚪ Configurar ambiente de testing</li>
+<li>⚪ Tests de servicios:</li>
+  - ⚪ SupabaseService
+  - ⚪ TicketService
+  - ⚪ CasoService
+  - ⚪ ClienteService
+  - ⚪ UserService
+  - ⚪ NotificationService
+<li>⚪ Tests de componentes críticos:</li>
+  - ⚪ Login/Registro
+  - ⚪ Creación de tickets
+  - ⚪ Dashboard
+<li>⚪ Coverage mínimo del 60%</li>
+
+<h4>1.2 Tests de Integración (E2E)</h4>
+</p><div class="code-block">// Cypress o Playwright
+describe('Flujo de Ticket', () => {
+  it('Crear, asignar y cerrar ticket', () => {
+    cy.login('user@igas.mx', 'password');
+    cy.visit('/tickets/nuevo');
+    cy.get('#cliente').select('Cliente Test');
+    cy.get('#descripcion').type('Problema de prueba');
+    cy.get('button[type=submit]').click();
+    cy.url().should('include', '/tickets/');
+    // ... más pasos
+  });
+});</div>
+
+
+<li>⚪ Configurar Cypress o Playwright</li>
+<li>⚪ Tests E2E críticos:</li>
+  - ⚪ Flujo de autenticación
+  - ⚪ Creación de ticket completo
+  - ⚪ Escalamiento a caso
+  - ⚪ Creación de cliente
+  - ⚪ Ejecución de mantenimiento
+  - ⚪ Ejecución de instalación con firma
+<li>⚪ Tests en diferentes navegadores</li>
+
+<h4>1.3 Tests de Base de Datos</h4>
+</p><div class="code-block">-- Tests de funciones y triggers
+DO $
+BEGIN
+  -- Test generar folio ticket
+  PERFORM generar_folio_ticket();
+  ASSERT EXISTS (SELECT 1 FROM tickets WHERE folio LIKE 'TKT-2026-%');
+
+  -- Test cálculo SLA
+  -- ...
+END $;</div>
+
+
+<li>⚪ Tests de funciones SQL</li>
+<li>⚪ Tests de triggers</li>
+<li>⚪ Tests de RLS policies</li>
+<li>⚪ Tests de performance de queries</li>
+
+<h4>1.4 Tests de Seguridad</h4>
+
+<li>⚪ Verificar RLS en todas las tablas críticas</li>
+<li>⚪ Test de inyección SQL</li>
+<li>⚪ Test de XSS</li>
+<li>⚪ Test de autenticación y autorización</li>
+<li>⚪ Test de permisos por rol</li>
+<li>⚪ Validar que no hay endpoints expuestos sin auth</li>
+<li>⚪ Validar encriptación de datos sensibles</li>
+
+<h3>2. Optimización de Performance</h3>
+
+<h4>2.1 Base de Datos</h4>
+</p><div class="code-block">-- Analizar queries lentos
+EXPLAIN ANALYZE
+SELECT * FROM tickets_con_sla WHERE cliente_id = '...';
+
+-- Crear índices faltantes
+CREATE INDEX CONCURRENTLY idx_tickets_cliente_estatus
+  ON tickets(cliente_id, estatus_id);
+
+-- Optimizar views
+CREATE MATERIALIZED VIEW tickets_dashboard AS
+SELECT ...;</div>
+
+
+<li>⚪ Identificar queries lentos con Supabase Dashboard</li>
+<li>⚪ Crear índices faltantes</li>
+<li>⚪ Optimizar joins complejos</li>
+<li>⚪ Considerar materialized views para reportes</li>
+<li>⚪ Configurar connection pooling</li>
+<li>⚪ Analizar uso de storage</li>
+
+<h4>2.2 Frontend</h4>
+</p><div class="code-block">// Lazy loading de módulos
+const routes: Routes = [
+  {
+    path: 'tickets',
+    loadChildren: () => import('./features/tickets/tickets.module').then(m => m.TicketsModule)
+  }
+];
+
+// OnPush change detection
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})</div>
+
+
+<li>⚪ Implementar lazy loading en todas las rutas</li>
+<li>⚪ Usar OnPush change detection donde sea posible</li>
+<li>⚪ Optimizar bundle size:</li>
+  - ⚪ Analizar con webpack-bundle-analyzer
+  - ⚪ Tree shaking
+  - ⚪ Eliminar dependencias no usadas
+<li>⚪ Implementar virtual scrolling en listas largas</li>
+<li>⚪ Optimizar imágenes y assets:</li>
+  - ⚪ Comprimir imágenes
+  - ⚪ Usar WebP cuando sea posible
+  - ⚪ Lazy loading de imágenes
+<li>⚪ Implementar caché de datos:</li>
+  - ⚪ Service workers (PWA)
+  - ⚪ LocalStorage/IndexedDB para datos estáticos
+<li>⚪ Medir y mejorar Core Web Vitals:</li>
+  - ⚪ LCP (Largest Contentful Paint)
+  - ⚪ FID (First Input Delay)
+  - ⚪ CLS (Cumulative Layout Shift)
+
+<h4>2.3 Supabase</h4>
+
+<li>⚪ Optimizar políticas RLS (evitar queries complejos)</li>
+<li>⚪ Configurar caché de Supabase</li>
+<li>⚪ Implementar indexes compuestos</li>
+<li>⚪ Revisar límites de rate limiting</li>
+<li>⚪ Configurar backups automáticos</li>
+
+<h3>3. PWA (Progressive Web App) - Opcional</h3>
+
+<h4>3.1 Configuración PWA</h4>
+
+```json
+// manifest.json
+{
+  "name": "iGAS Mesa de Ayuda",
+  "short_name": "iGAS",
+  "theme_color": "#F9B000",
+  "background_color": "#FFFFFF",
+  "display": "standalone",
+  "icons": [...]
+}</p><div class="code-block">- [ ] Configurar manifest.json con branding iGAS
+- [ ] Configurar service worker
+- [ ] Implementar estrategia de caché offline
+- [ ] Agregar íconos PWA (diferentes tamaños)
+- [ ] Implementar modo offline para consultas
+- [ ] Sincronización en background cuando vuelve online
+
+### 4. Documentación
+
+#### 4.1 Documentación Técnica
+
+- [ ] Crear README.md del proyecto:
+  - [ ] Descripción del proyecto
+  - [ ] Stack tecnológico
+  - [ ] Requisitos previos
+  - [ ] Instalación
+  - [ ] Configuración
+  - [ ] Scripts disponibles
+  - [ ] Estructura de carpetas
+- [ ] Documentar arquitectura:
+  - [ ] Diagrama de arquitectura
+  - [ ] Diagrama de base de datos (ER)
+  - [ ] Flujo de datos
+- [ ] Documentar API/Servicios:
+  - [ ] Endpoints principales
+  - [ ] Modelos de datos
+  - [ ] Ejemplos de uso
+- [ ] Crear CONTRIBUTING.md
+- [ ] Crear CHANGELOG.md
+
+#### 4.2 Manual de Usuario
+
+- [ ] Crear manual de usuario (PDF):
+  - [ ] Introducción al sistema
+  - [ ] Login y registro
+  - [ ] Gestión de tickets paso a paso
+  - [ ] Gestión de casos
+  - [ ] Gestión de clientes
+  - [ ] Mantenimientos e instalaciones
+  - [ ] Reportes
+  - [ ] Notificaciones
+  - [ ] Preguntas frecuentes
+- [ ] Incluir capturas de pantalla
+- [ ] Videos tutoriales (opcional):
+  - [ ] Crear ticket
+  - [ ] Escalar a caso
+  - [ ] Ejecutar mantenimiento
+  - [ ] Hacer instalación con firma
+
+#### 4.3 Documentación de Despliegue
+
+- [ ] Crear guía de despliegue:
+  - [ ] Configuración de Supabase
+  - [ ] Variables de entorno
+  - [ ] Build de producción
+  - [ ] Despliegue en hosting
+  - [ ] Configuración de dominio
+  - [ ] SSL/HTTPS
+  - [ ] Backups
+
+### 5. Seguridad Final
+
+#### 5.1 Checklist de Seguridad
+
+- [ ] Todas las variables sensibles en .env (no en código)
+- [ ] .env en .gitignore
+- [ ] HTTPS en producción
+- [ ] RLS habilitado en todas las tablas
+- [ ] Validación de datos en frontend y backend
+- [ ] Protección contra CSRF
+- [ ] Headers de seguridad configurados
+- [ ] Rate limiting activo
+- [ ] Logs de seguridad implementados
+- [ ] Encriptación de datos sensibles
+- [ ] Backup automático configurado
+- [ ] Plan de recuperación ante desastres
+
+### 6. Despliegue
+
+#### 6.1 Preparación
+
+- [ ] Crear proyecto de producción en Supabase
+- [ ] Migrar esquema de BD a producción:
+  - [ ] Ejecutar todas las migraciones SQL
+  - [ ] Crear índices
+  - [ ] Insertar datos iniciales (catálogos)
+- [ ] Configurar variables de entorno de producción
+- [ ] Configurar dominio personalizado
+- [ ] Configurar SSL
+
+#### 6.2 Build de Producción</div>
+bash
+# Build optimizado
+ng build --configuration production
+
+# Verificar build
+npm run build-prod
+```
+
+<li>⚪ Ejecutar build de producción</li>
+<li>⚪ Verificar que no hay errores</li>
+<li>⚪ Verificar tamaño del bundle</li>
+<li>⚪ Probar build localmente</li>
+
+<h4>6.3 Hosting</h4>
+
+**Opciones de hosting:**
+1. **Vercel** (Recomendado para Angular)
+   - Deploy automático desde Git
+   - CDN global
+   - SSL gratis
+   - Fácil configuración
+
+2. **Netlify**
+   - Similar a Vercel
+   - Build automático
+
+3. **Firebase Hosting**
+   - Integración con Google
+   - CDN rápido
+
+4. **Servidor propio**
+   - Nginx + PM2
+   - Mayor control
+
+<li>⚪ Seleccionar plataforma de hosting</li>
+<li>⚪ Configurar deployment automático</li>
+<li>⚪ Configurar dominio (ejemplo: app.igas.mx)</li>
+<li>⚪ Verificar SSL activo</li>
+<li>⚪ Configurar redirects (HTTP → HTTPS, www → non-www)</li>
+
+<h4>6.4 Post-Despliegue</h4>
+
+<li>⚪ Smoke tests en producción:</li>
+  - ⚪ Login funciona
+  - ⚪ Crear ticket funciona
+  - ⚪ Notificaciones funcionan
+  - ⚪ Reportes cargan correctamente
+<li>⚪ Configurar monitoreo:</li>
+  - ⚪ Uptime monitoring (UptimeRobot)
+  - ⚪ Error tracking (Sentry)
+  - ⚪ Analytics (Google Analytics o similar)
+<li>⚪ Configurar alertas de downtime</li>
+<li>⚪ Realizar backup inicial de producción</li>
+
+<h3>7. Capacitación</h3>
+
+<h4>7.1 Capacitación a Usuarios</h4>
+
+<li>⚪ Preparar presentación del sistema</li>
+<li>⚪ Sesión de capacitación para admins:</li>
+  - ⚪ Gestión de usuarios y roles
+  - ⚪ Configuración de SLA
+  - ⚪ Configuración de catálogos
+  - ⚪ Reportes y análisis
+<li>⚪ Sesión de capacitación para técnicos:</li>
+  - ⚪ Gestión de tickets
+  - ⚪ Escalamiento a casos
+  - ⚪ Mantenimientos
+  - ⚪ Instalaciones
+<li>⚪ Sesión de capacitación para coordinadores:</li>
+  - ⚪ Supervisión de equipo
+  - ⚪ Reportes de productividad
+  - ⚪ Gestión de alertas
+<li>⚪ Material de capacitación entregado</li>
+
+<h3>8. Migración de Datos (Si aplica)</h3>
+
+<li>⚪ Exportar datos del sistema anterior</li>
+<li>⚪ Limpiar y normalizar datos</li>
+<li>⚪ Crear scripts de migración</li>
+<li>⚪ Migrar en etapas:</li>
+  - ⚪ Clientes
+  - ⚪ Sucursales
+  - ⚪ Contactos
+  - ⚪ Datos fiscales
+  - ⚪ Licencias y pólizas
+  - ⚪ Tickets históricos (opcional)
+<li>⚪ Validar integridad de datos migrados</li>
+<li>⚪ Generar reporte de migración</li>
+
+<h3>9. Plan de Mantenimiento</h3>
+
+<h4>9.1 Mantenimiento Preventivo</h4>
+
+<li>⚪ Documentar plan de mantenimiento:</li>
+  - ⚪ Backups diarios automáticos
+  - ⚪ Revisión semanal de logs
+  - ⚪ Actualización mensual de dependencias
+  - ⚪ Revisión trimestral de seguridad
+  - ⚪ Optimización semestral de BD
+<li>⚪ Configurar backups automáticos</li>
+<li>⚪ Configurar rotación de logs</li>
+<li>⚪ Documentar procedimientos de restauración</li>
+
+<h4>9.2 Monitoreo Continuo</h4>
+
+<li>⚪ Configurar dashboard de monitoreo</li>
+<li>⚪ Alertas de uso de recursos</li>
+<li>⚪ Alertas de errores críticos</li>
+<li>⚪ Métricas de uso (MAU, DAU)</li>
+<li>⚪ Métricas de performance</li>
+
+<h3>10. Entrega Final</h3>
+
+<h4>10.1 Checklist de Entrega</h4>
+
+<li>⚪ Código fuente en repositorio Git</li>
+<li>⚪ Aplicación desplegada en producción</li>
+<li>⚪ Base de datos migrada y funcional</li>
+<li>⚪ Documentación técnica completa</li>
+<li>⚪ Manual de usuario entregado</li>
+<li>⚪ Capacitación realizada</li>
+<li>⚪ Credenciales de acceso entregadas:</li>
+  - ⚪ Supabase Dashboard
+  - ⚪ Hosting
+  - ⚪ Dominio
+  - ⚪ Email service
+<li>⚪ Usuario admin creado</li>
+<li>⚪ Datos de prueba o reales cargados</li>
+
+<h4>10.2 Post-Entrega</h4>
+
+<li>⚪ Período de soporte post-lanzamiento (30 días)</li>
+<li>⚪ Corrección de bugs críticos</li>
+<li>⚪ Ajustes menores según feedback</li>
+<li>⚪ Reunión de cierre del proyecto</li>
+
+---
+
+<div class="content-section"><h2>Entregables</h2>
+
+<li>⚪ Suite de tests completa (unitarios + E2E)</li>
+<li>⚪ Aplicación optimizada</li>
+<li>⚪ PWA configurada (opcional)</li>
+<li>⚪ Documentación técnica completa</li>
+<li>⚪ Manual de usuario en PDF</li>
+<li>⚪ Videos tutoriales (opcional)</li>
+<li>⚪ Aplicación desplegada en producción</li>
+<li>⚪ Capacitación realizada</li>
+<li>⚪ Plan de mantenimiento documentado</li>
+
+<div class="content-section"><h2>Dependencias</h2>
+
+<li>Todas las fases anteriores (0-6) completadas</li>
+
+<div class="content-section"><h2>Criterios de Aceptación</h2>
+
+<li>⚪ Tests cubren funcionalidad crítica</li>
+<li>⚪ Performance LCP < 2.5s, FID < 100ms</li>
+<li>⚪ Bundle size optimizado (< 2MB initial)</li>
+<li>⚪ Sin errores en consola en producción</li>
+<li>⚪ RLS policies verificadas</li>
+<li>⚪ SSL activo en producción</li>
+<li>⚪ Documentación completa entregada</li>
+<li>⚪ Usuarios capacitados</li>
+<li>⚪ Sistema funcionando en producción sin errores críticos</li>
+<li>⚪ Backups configurados</li>
+
+<div class="content-section"><h2>Notas Técnicas</h2>
+
+<li>Usar **Lighthouse** para auditoría de performance</li>
+<li>**Sentry** o similar para error tracking en producción</li>
+<li>**Vercel** es ideal para Angular con deploy automático</li>
+<li>Configurar **Supabase Edge Functions** como scheduled para jobs automáticos</li>
+<li>Implementar **health check endpoint** para monitoreo</li>
+<li>Usar **semantic versioning** para releases</li>
+<li>Mantener **CHANGELOG.md** actualizado</li>
+
+---
+
+<div class="content-section"><h2>Stack Final del Proyecto</h2>
+
+**Frontend:**
+<li>Angular 21</li>
+<li>TypeScript</li>
+<li>Bootstrap 5.3.8</li>
+<li>SCSS</li>
+<li>ApexCharts</li>
+<li>Signature Pad (firmas)</li>
+
+**Backend/BaaS:**
+<li>Supabase (Auth, Database, Storage, Realtime, Edge Functions)</li>
+<li>PostgreSQL</li>
+
+**Despliegue:**
+<li>Vercel / Netlify (Frontend)</li>
+<li>Supabase Cloud (Backend)</li>
+
+**Servicios Externos:**
+<li>Resend / SendGrid (Emails)</li>
+<li>UptimeRobot (Monitoreo)</li>
+<li>Sentry (Error tracking)</li>
+
+**Herramientas:**
+<li>Git / GitHub</li>
+<li>VS Code</li>
+<li>Postman / Thunder Client</li>
+<li>Supabase Studio</li>
+
+---
+
+**🎉 Fin del Plan de Desarrollo iGAS Mesa de Ayuda v1.0**
+
+**Cliente:** ING. RAFAEL ROQUE ROMÁN
+**Desarrollador:** ING. ANGEL DAVID ROQUE AYALA
+**Contacto:** rroque.mor@igas.mx | 443 227 2217
+</p></div>
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Última actualización: 11 de enero de 2026
+        </p>
+    </div>
+</body>
+</html>

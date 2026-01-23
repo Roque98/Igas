@@ -1,0 +1,401 @@
+<!-- ============================================================================
+  Instalacion Detail Component - Template
+============================================================================= -->
+
+<div class="row">
+  <!-- Main content -->
+  <div class="col-12 col-xl-9">
+    <app-card [hidHeader]="true">
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      } @else if (!instalacion()) {
+        <div class="text-center py-5">
+          <i class="feather icon-alert-circle text-warning" style="font-size: 3rem;"></i>
+          <h5 class="mt-3">Instalación no encontrada</h5>
+          <button class="btn btn-primary mt-3" routerLink="/instalaciones">
+            <i class="feather icon-arrow-left me-1"></i>Volver al listado
+          </button>
+        </div>
+      } @else {
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <h4 class="mb-0">{{ instalacion()!.folio }}</h4>
+              <span class="badge" [style.backgroundColor]="getEstatusColor(instalacion()!.estatus_nombre)">
+                {{ instalacion()!.estatus_nombre }}
+              </span>
+            </div>
+            <p class="text-muted mb-0">
+              <i class="feather icon-briefcase me-1"></i>{{ instalacion()!.cliente_nombre }}
+              @if (instalacion()!.sucursal_nombre) {
+                - {{ instalacion()!.sucursal_nombre }}
+              }
+            </p>
+          </div>
+          <div class="d-flex gap-2">
+            @if (canEdit()) {
+              <button class="btn btn-outline-primary" [routerLink]="['editar']">
+                <i class="feather icon-edit me-1"></i>Editar
+              </button>
+            }
+            <button class="btn btn-outline-secondary" routerLink="/instalaciones">
+              <i class="feather icon-arrow-left me-1"></i>Volver
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small text-muted">Progreso del checklist</span>
+            <span class="small fw-bold">{{ instalacion()!.checklist_completados || 0 }}/{{ instalacion()!.checklist_total || 0 }}</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" [style.width.%]="getChecklistProgress()"></div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+          <!-- Tab General -->
+          <li [ngbNavItem]="'general'">
+            <a ngbNavLink>
+              <i class="feather icon-info me-1"></i>General
+            </a>
+            <ng-template ngbNavContent>
+              <div class="pt-3">
+                <div class="row">
+                  <!-- Info principal -->
+                  <div class="col-md-6">
+                    <h6 class="mb-3">Información de la instalación</h6>
+                    <table class="table table-borderless table-sm">
+                      <tbody>
+                        <tr>
+                          <td class="text-muted" style="width: 40%;">Fecha programada</td>
+                          <td><strong>{{ formatDate(instalacion()!.fecha_programada) }}</strong></td>
+                        </tr>
+                        @if (instalacion()!.hora_programada) {
+                          <tr>
+                            <td class="text-muted">Hora</td>
+                            <td>{{ instalacion()!.hora_programada }}</td>
+                          </tr>
+                        }
+                        <tr>
+                          <td class="text-muted">Técnico asignado</td>
+                          <td>{{ instalacion()!.tecnico_nombre || 'Sin asignar' }}</td>
+                        </tr>
+                        <tr>
+                          <td class="text-muted">Creada</td>
+                          <td>{{ formatDateTime(instalacion()!.created_at) }}</td>
+                        </tr>
+                        @if (instalacion()!.fecha_inicio) {
+                          <tr>
+                            <td class="text-muted">Iniciada</td>
+                            <td>{{ formatDateTime(instalacion()!.fecha_inicio) }}</td>
+                          </tr>
+                        }
+                        @if (instalacion()!.fecha_cierre) {
+                          <tr>
+                            <td class="text-muted">Cerrada</td>
+                            <td>{{ formatDateTime(instalacion()!.fecha_cierre) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Contacto -->
+                  <div class="col-md-6">
+                    <h6 class="mb-3">Contacto en sitio</h6>
+                    @if (instalacion()!.contacto_cliente || instalacion()!.telefono_contacto || instalacion()!.email_contacto) {
+                      <table class="table table-borderless table-sm">
+                        <tbody>
+                          @if (instalacion()!.contacto_cliente) {
+                            <tr>
+                              <td class="text-muted" style="width: 40%;">Nombre</td>
+                              <td>{{ instalacion()!.contacto_cliente }}</td>
+                            </tr>
+                          }
+                          @if (instalacion()!.telefono_contacto) {
+                            <tr>
+                              <td class="text-muted">Teléfono</td>
+                              <td>
+                                <a href="tel:{{ instalacion()!.telefono_contacto }}">
+                                  {{ instalacion()!.telefono_contacto }}
+                                </a>
+                              </td>
+                            </tr>
+                          }
+                          @if (instalacion()!.email_contacto) {
+                            <tr>
+                              <td class="text-muted">Email</td>
+                              <td>
+                                <a href="mailto:{{ instalacion()!.email_contacto }}">
+                                  {{ instalacion()!.email_contacto }}
+                                </a>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    } @else {
+                      <p class="text-muted">Sin información de contacto</p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Módulos instalados -->
+                <hr>
+                <h6 class="mb-3">Módulos a instalar</h6>
+                @if (modulos().length === 0) {
+                  <p class="text-muted">No hay módulos asignados</p>
+                } @else {
+                  <div class="row g-2">
+                    @for (mod of modulos(); track mod.id) {
+                      <div class="col-md-4">
+                        <div class="border rounded p-2">
+                          <div class="d-flex align-items-center">
+                            <i class="feather icon-box text-primary me-2"></i>
+                            <div>
+                              <strong>{{ mod.modulo_nombre }}</strong>
+                              @if (mod.version_instalada) {
+                                <small class="text-muted ms-1">v{{ mod.version_instalada }}</small>
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <!-- Notas internas -->
+                @if (instalacion()!.notas_internas) {
+                  <hr>
+                  <h6 class="mb-3">Notas internas</h6>
+                  <p class="text-muted mb-0" style="white-space: pre-line;">{{ instalacion()!.notas_internas }}</p>
+                }
+              </div>
+            </ng-template>
+          </li>
+
+          <!-- Tab Checklist -->
+          <li [ngbNavItem]="'checklist'">
+            <a ngbNavLink>
+              <i class="feather icon-check-square me-1"></i>Checklist
+              @if (instalacion()!.checklist_total) {
+                <span class="badge bg-secondary ms-1">
+                  {{ instalacion()!.checklist_completados || 0 }}/{{ instalacion()!.checklist_total }}
+                </span>
+              }
+            </a>
+            <ng-template ngbNavContent>
+              <div class="pt-3">
+                @if (loadingChecklist()) {
+                  <div class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm"></div>
+                    <span class="ms-2">Cargando checklist...</span>
+                  </div>
+                } @else {
+                  <app-checklist-execution
+                    [checklistItems]="checklistItems()"
+                    [isDisabled]="!canExecuteChecklist()"
+                    [groupByModule]="true"
+                    (itemExecuted)="onChecklistItemExecuted($event)">
+                  </app-checklist-execution>
+                }
+              </div>
+            </ng-template>
+          </li>
+
+          <!-- Tab Pendientes -->
+          <li [ngbNavItem]="'pendientes'">
+            <a ngbNavLink>
+              <i class="feather icon-alert-circle me-1"></i>Pendientes
+              @if (pendientesAbiertos() > 0) {
+                <span class="badge bg-warning ms-1">{{ pendientesAbiertos() }}</span>
+              }
+            </a>
+            <ng-template ngbNavContent>
+              <div class="pt-3">
+                @if (loadingPendientes()) {
+                  <div class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm"></div>
+                    <span class="ms-2">Cargando pendientes...</span>
+                  </div>
+                } @else {
+                  <app-pendientes-list
+                    [pendientesList]="pendientes()"
+                    [isDisabled]="!canManagePendientes()"
+                    (createPendiente)="onCreatePendiente($event)"
+                    (resolverPendiente)="onResolverPendiente($event)"
+                    (generarTicket)="onGenerarTicket($event)">
+                  </app-pendientes-list>
+                }
+              </div>
+            </ng-template>
+          </li>
+
+          <!-- Tab Evidencias -->
+          <li [ngbNavItem]="'evidencias'">
+            <a ngbNavLink>
+              <i class="feather icon-image me-1"></i>Evidencias
+              @if (evidencias().length > 0) {
+                <span class="badge bg-info ms-1">{{ evidencias().length }}</span>
+              }
+            </a>
+            <ng-template ngbNavContent>
+              <div class="pt-3">
+                @if (loadingEvidencias()) {
+                  <div class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm"></div>
+                    <span class="ms-2">Cargando evidencias...</span>
+                  </div>
+                } @else {
+                  <app-evidencias-upload
+                    [evidenciasList]="evidencias()"
+                    [isDisabled]="!canUploadEvidencias()"
+                    (uploadEvidencia)="onUploadEvidencia($event)"
+                    (deleteEvidencia)="onDeleteEvidencia($event)">
+                  </app-evidencias-upload>
+                }
+              </div>
+            </ng-template>
+          </li>
+
+          <!-- Tab Firma -->
+          <li [ngbNavItem]="'firma'">
+            <a ngbNavLink>
+              <i class="feather icon-edit-2 me-1"></i>Firma
+              @if (instalacion()!.firma_cliente_url) {
+                <i class="feather icon-check-circle text-success ms-1"></i>
+              }
+            </a>
+            <ng-template ngbNavContent>
+              <div class="pt-3">
+                <app-firma-digital
+                  [existingFirma]="instalacion()!.firma_cliente_url"
+                  [existingNombre]="instalacion()!.nombre_firmante"
+                  [existingPuesto]="instalacion()!.puesto_firmante"
+                  [existingFecha]="instalacion()!.fecha_firma"
+                  [isDisabled]="!canCaptureFirma()"
+                  [isSaving]="savingFirma()"
+                  (firmaConfirmada)="onFirmaConfirmada($event)">
+                </app-firma-digital>
+              </div>
+            </ng-template>
+          </li>
+        </ul>
+
+        <div [ngbNavOutlet]="nav"></div>
+      }
+    </app-card>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-12 col-xl-3">
+    @if (instalacion()) {
+      <!-- Acciones -->
+      <app-card cardTitle="Acciones" [options]="false">
+        <div class="d-grid gap-2">
+          @switch (instalacion()!.estatus_nombre) {
+            @case ('Programada') {
+              <button class="btn btn-primary" (click)="iniciarInstalacion()" [disabled]="actionLoading()">
+                @if (actionLoading()) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                <i class="feather icon-play me-1"></i>Iniciar Instalación
+              </button>
+            }
+            @case ('En proceso') {
+              @if (pendientesAbiertos() > 0) {
+                <button class="btn btn-warning" (click)="marcarConPendientes()" [disabled]="actionLoading()">
+                  @if (actionLoading()) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  <i class="feather icon-alert-circle me-1"></i>Marcar con Pendientes
+                </button>
+              } @else if (instalacion()!.firma_cliente_url) {
+                <button class="btn btn-success" (click)="cerrarInstalacion()" [disabled]="actionLoading()">
+                  @if (actionLoading()) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  <i class="feather icon-check-circle me-1"></i>Cerrar Instalación
+                </button>
+              } @else {
+                <button class="btn btn-outline-success" disabled ngbTooltip="Requiere firma del cliente">
+                  <i class="feather icon-check-circle me-1"></i>Cerrar Instalación
+                </button>
+                <small class="text-muted text-center">Capture la firma del cliente para poder cerrar</small>
+              }
+            }
+            @case ('Pendientes') {
+              @if (pendientesAbiertos() === 0) {
+                <button class="btn btn-primary" (click)="reanudarInstalacion()" [disabled]="actionLoading()">
+                  @if (actionLoading()) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                  }
+                  <i class="feather icon-play me-1"></i>Reanudar Instalación
+                </button>
+              } @else {
+                <div class="alert alert-warning mb-0">
+                  <i class="feather icon-alert-triangle me-1"></i>
+                  Resuelva los {{ pendientesAbiertos() }} pendiente(s) para continuar
+                </div>
+              }
+            }
+            @case ('Cerrada') {
+              <div class="alert alert-success mb-0">
+                <i class="feather icon-check-circle me-1"></i>
+                Instalación completada
+              </div>
+            }
+          }
+        </div>
+      </app-card>
+
+      <!-- Resumen -->
+      <app-card cardTitle="Resumen" [options]="false" class="mt-3">
+        <div class="row text-center">
+          <div class="col-6 mb-3">
+            <h4 class="mb-0 text-primary">{{ modulos().length }}</h4>
+            <small class="text-muted">Módulos</small>
+          </div>
+          <div class="col-6 mb-3">
+            <h4 class="mb-0 text-success">{{ getChecklistProgress() }}%</h4>
+            <small class="text-muted">Checklist</small>
+          </div>
+          <div class="col-6">
+            <h4 class="mb-0 text-warning">{{ pendientesAbiertos() }}</h4>
+            <small class="text-muted">Pendientes</small>
+          </div>
+          <div class="col-6">
+            <h4 class="mb-0 text-info">{{ evidencias().length }}</h4>
+            <small class="text-muted">Evidencias</small>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Cliente -->
+      <app-card cardTitle="Cliente" [options]="false" class="mt-3">
+        <div class="mb-2">
+          <strong>{{ instalacion()!.cliente_nombre }}</strong>
+        </div>
+        @if (instalacion()!.sucursal_nombre) {
+          <div class="small text-muted mb-2">
+            <i class="feather icon-map-pin me-1"></i>{{ instalacion()!.sucursal_nombre }}
+          </div>
+        }
+        <a [routerLink]="['/clientes', instalacion()!.cliente_id]" class="btn btn-sm btn-outline-primary w-100">
+          <i class="feather icon-external-link me-1"></i>Ver cliente
+        </a>
+      </app-card>
+    }
+  </div>
+</div>

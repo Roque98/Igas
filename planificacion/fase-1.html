@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fase 1: Autenticación y Gestión de Usuarios - iGAS Service Desk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegación sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #F9B000 0%, #FDB913 100%);
+            color: white;
+            padding: 40px 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 10px 10px 0 0;
+        }
+
+        .badge-proceso { background: #FFC107; color: #333; }
+        .badge-pendiente { background: rgba(255,255,255,0.3); }
+        .badge-completado { background: #4CAF50; }
+        .badge-critica { background: #F44336; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .progress-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            position: relative;
+            margin: 15px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4CAF50 0%, #00A651 100%);
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .content-section h2 {
+            color: #F9B000;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #F9B000;
+        }
+
+        .content-section h3 {
+            color: #3E3E3E;
+            font-size: 20px;
+            margin: 25px 0 15px 0;
+        }
+
+        .content-section h4 {
+            color: #666;
+            font-size: 16px;
+            margin: 20px 0 10px 0;
+        }
+
+        .content-section ul, .content-section ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        .content-section li {
+            margin: 8px 0;
+        }
+
+        .content-section code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #FFC107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border-left: 4px solid #F44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #F9B000;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .footer {
+            background: #3E3E3E;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul {
+                flex-wrap: wrap;
+            }
+
+            .navbar a {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+            }
+            .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html" class="active">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Fase 1: Autenticación y Gestión de Usuarios</h1>
+            <span class="badge badge-en proceso">En Proceso</span>
+            <span class="badge badge-proceso">90%</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-card">
+            <h3>Progreso de la Fase</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: 90%;"></div>
+                <div class="progress-bar-text">90% Completado</div>
+            </div>
+        </div>
+
+        <div class="content-section"><h2>Objetivo</h2>
+Completar el sistema de autenticación, implementar gestión de usuarios, roles y permisos según las especificaciones del módulo "Usuarios / Agentes de Soporte".
+
+---
+
+<div class="content-section"><h2>Tareas</h2>
+
+<h3>1. Sistema de Autenticación (Mejoras)</h3>
+
+<h4>1.1 Backend - Supabase Auth (Mejoras)</h4>
+<li>✅ Login con email/password (ya implementado)</li>
+<li>✅ Recuperación de contraseña (ya implementado)</li>
+<li>✅ Cambio de contraseña (ya implementado)</li>
+<li>✅ Mejorar manejo de errores con mensajes en español <a href="#version-1-1-0" style="font-size: 11px; color: #4CAF50;">[v1.1.0]</a></li>
+<li>✅ Implementar refresh token automático <a href="#version-1-8-0" style="font-size: 11px; color: #4CAF50;">[v1.8.0]</a></li>
+<li>✅ Configurar políticas de contraseña en Supabase <a href="#version-1-9-0" style="font-size: 11px; color: #4CAF50;">[v1.9.0]</a></li>
+<li>✅ Implementar bloqueo de cuenta después de X intentos fallidos <a href="#version-1-9-0" style="font-size: 11px; color: #4CAF50;">[v1.9.0]</a></li>
+
+**NOTA:** No habrá registro público. Los usuarios serán creados únicamente por administradores desde el panel de gestión de usuarios.
+
+<h4>1.2 Frontend - Auth (Mejoras)</h4>
+<li>✅ Páginas de login, forgot-password, reset-password</li>
+<li>✅ Personalizar páginas con branding iGAS (amarillo #F9B000) <a href="#version-1-2-0" style="font-size: 11px; color: #4CAF50;">[v1.2.0]</a></li>
+<li>✅ Agregar loading states con spinner <a href="#version-1-3-0" style="font-size: 11px; color: #4CAF50;">[v1.3.0]</a></li>
+<li>✅ Implementar validaciones de formulario mejoradas <a href="#version-1-10-0" style="font-size: 11px; color: #4CAF50;">[v1.10.0]</a></li>
+<li>✅ Agregar "Remember me" en login <a href="#version-1-4-0" style="font-size: 11px; color: #4CAF50;">[v1.4.0]</a></li>
+<li>✅ Implementar auto-logout por inactividad (30 min) - Excluido dashboard <a href="#version-1-5-0" style="font-size: 11px; color: #4CAF50;">[v1.5.0]</a></li>
+<li>✅ Agregar confirmación visual de acciones <a href="#version-1-6-0" style="font-size: 11px; color: #4CAF50;">[v1.6.0]</a></li>
+<li>✅ Eliminar links y referencias a "registro" en página de login <a href="#version-1-7-0" style="font-size: 11px; color: #4CAF50;">[v1.7.0]</a></li>
+
+<h4>1.3 Seguridad</h4>
+<li>✅ Implementar rate limiting en Supabase (configuración) <a href="#version-1-11-0" style="font-size: 11px; color: #4CAF50;">[v1.11.0]</a></li>
+<li>⚪ Implementar detección de sesión en múltiples dispositivos</li>
+<li>✅ Agregar logs de intentos de login fallidos <a href="#version-1-11-0" style="font-size: 11px; color: #4CAF50;">[v1.11.0]</a></li>
+
+<h3>2. Gestión de Usuarios / Agentes</h3>
+
+<h4>2.1 Modelo de Datos - Tabla profiles en Supabase ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivos: <code>database/migrations/03_usuarios.sql</code> y <code>06_functions.sql</code>
+</div>
+<div class="code-block">CREATE TABLE public.profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  nombre_completo TEXT NOT NULL,
+  email TEXT NOT NULL,
+  rol_id UUID REFERENCES roles(id) NOT NULL,        -- NOT NULL, asigna rol por defecto
+  area_equipo_id UUID REFERENCES equipos(id),
+  telefono TEXT,
+  estatus TEXT CHECK (estatus IN ('Activo', 'Inactivo')) DEFAULT 'Activo',
+  turno_horario_id UUID REFERENCES horarios(id),
+  avatar_url TEXT,
+  disponibilidad TEXT CHECK (disponibilidad IN ('En línea', 'Ocupado', 'Fuera de turno')) DEFAULT 'En línea',
+  configuracion JSONB DEFAULT '{}',                  -- Campo adicional para preferencias
+  password_changed_at TIMESTAMPTZ DEFAULT NOW(),    -- Para políticas de expiración
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para búsquedas rápidas
+CREATE INDEX idx_profiles_rol ON profiles(rol_id);
+CREATE INDEX idx_profiles_equipo ON profiles(area_equipo_id);
+CREATE INDEX idx_profiles_email ON profiles(email);
+
+-- Trigger para crear profile automáticamente
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, nombre_completo, email, rol_id)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nombre_completo', 'Usuario'),
+    NEW.email,
+    (SELECT id FROM public.roles WHERE nombre = 'Agente' LIMIT 1)
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();</div>
+
+
+<h4>2.2 Row Level Security (RLS) Policies ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivo: <code>database/migrations/07_rls_policies.sql</code>
+</div>
+<div class="code-block">-- Habilitar RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Los usuarios pueden ver su propio perfil
+CREATE POLICY "Users can view own profile"
+  ON public.profiles FOR SELECT
+  USING (auth.uid() = id);
+
+-- Los usuarios pueden actualizar su propio perfil
+CREATE POLICY "Users can update own profile"
+  ON public.profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+-- Solo admins pueden ver todos los perfiles
+CREATE POLICY "Admins can view all profiles"
+  ON public.profiles FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN roles r ON p.rol_id = r.id
+      WHERE p.id = auth.uid() AND r.nombre = 'Admin'
+    )
+  );
+
+-- Solo admins pueden crear/actualizar/eliminar usuarios
+CREATE POLICY "Admins can manage all profiles"
+  ON public.profiles FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN roles r ON p.rol_id = r.id
+      WHERE p.id = auth.uid() AND r.nombre = 'Admin'
+    )
+  );</div>
+
+
+<h4>2.3 Servicio Angular - UserService ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Archivo: <code>src/app/core/services/user.service.ts</code>
+</div>
+<div class="code-block">export interface Profile {
+  id: string;
+  nombre_completo: string;
+  email: string;
+  rol_id?: string;
+  area_equipo_id?: string;
+  telefono?: string;
+  estatus: 'Activo' | 'Inactivo';
+  turno_horario_id?: string;
+  avatar_url?: string;
+  disponibilidad?: 'En línea' | 'Ocupado' | 'Fuera de turno';
+  created_at: string;
+  updated_at: string;
+}</div>
+
+
+<li>✅ Crear UserService con métodos CRUD <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getUsers() con filtros y paginación <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getUserById(id) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar createUser(user) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar updateUser(id, user) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar deleteUser(id) - soft delete <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar getCurrentUserProfile() <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar updateCurrentUserProfile(data) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+<li>✅ Implementar uploadAvatar(file) <a href="#version-1-12-0" style="font-size: 11px; color: #4CAF50;">[v1.12.0]</a></li>
+
+<h4>2.4 Frontend - Módulo de Usuarios ✅</h4>
+<div class="success-box">
+    <strong>✅ IMPLEMENTADO</strong> - Directorio: <code>src/app/features/users/</code>
+</div>
+
+<li>✅ Crear módulo features/usuarios <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear componente de listado de usuarios (UserListComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Tabla con datos de usuarios
+  - ✅ Filtros por estatus, rol, área
+  - ✅ Búsqueda por nombre/email
+  - ✅ Badges de estatus (Activo/Inactivo) con colores
+  - ✅ Paginación
+  - ✅ Ordenamiento por columnas
+<li>✅ Crear componente de formulario de usuario (UserFormComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Campos: nombre, email, rol, área, teléfono, turno
+  - ✅ Selector de estatus
+  - ✅ Upload de avatar
+  - ✅ Validaciones con indicador de fortaleza
+<li>✅ Crear modal de creación/edición <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear confirmación de eliminación (desactivación) <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear página de perfil de usuario (UserProfileComponent): <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+  - ✅ Vista de información completa
+  - ✅ Edición de perfil propio
+  - ✅ Cambio de avatar
+  - ✅ Cambio de contraseña
+
+<h3>3. Sistema de Roles y Permisos</h3>
+
+<h4>3.1 Modelo de Datos - Roles ✅</h4>
+<div class="code-block">CREATE TABLE public.roles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT UNIQUE NOT NULL,
+  descripcion TEXT,
+  nivel_acceso INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE public.permisos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT UNIQUE NOT NULL,
+  descripcion TEXT,
+  modulo TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE public.roles_permisos (
+  rol_id UUID REFERENCES roles(id) ON DELETE CASCADE,
+  permiso_id UUID REFERENCES permisos(id) ON DELETE CASCADE,
+  PRIMARY KEY (rol_id, permiso_id)
+);
+
+-- Insertar roles iniciales
+INSERT INTO public.roles (nombre, descripcion, nivel_acceso) VALUES
+  ('Admin', 'Administrador del sistema', 100),
+  ('Coordinador', 'Coordinador de soporte', 80),
+  ('Técnico', 'Técnico de soporte', 50),
+  ('Dev', 'Desarrollador', 70),
+  ('Implementación', 'Equipo de implementación', 60),
+  ('Facturación', 'Equipo de facturación', 40);</div>
+
+
+<h4>3.2 Definición de Permisos</h4>
+
+<li>⚪ Definir permisos del sistema:</li>
+  - ⚪ tickets.create, tickets.read, tickets.update, tickets.delete
+  - ⚪ casos.create, casos.read, casos.update, casos.delete
+  - ⚪ clientes.create, clientes.read, clientes.update, clientes.delete
+  - ⚪ usuarios.create, usuarios.read, usuarios.update, usuarios.delete
+  - ⚪ mantenimientos.create, mantenimientos.read, mantenimientos.update
+  - ⚪ instalaciones.create, instalaciones.read, instalaciones.update
+  - ⚪ reportes.read, reportes.export
+  - ⚪ config.read, config.update
+<li>⚪ Asignar permisos a roles</li>
+
+<h4>3.3 Servicio Angular - RoleService & PermissionService</h4>
+
+<li>⚪ Crear RoleService</li>
+<li>⚪ Implementar getRoles()</li>
+<li>⚪ Implementar getUserPermissions(userId)</li>
+<li>⚪ Implementar hasPermission(permission): Observable<boolean></li>
+<li>⚪ Implementar hasRole(role): Observable<boolean></li>
+
+<h4>3.4 Guards y Directivas de Permisos</h4>
+<div class="code-block">// Permission Guard
+export const permissionGuard: CanActivateFn = (route) => {
+  const requiredPermission = route.data['permission'];
+  // Verificar si usuario tiene el permiso
+};
+
+// Role Guard
+export const roleGuard: CanActivateFn = (route) => {
+  const requiredRole = route.data['role'];
+  // Verificar si usuario tiene el rol
+};</div>
+
+
+<li>⚪ Crear PermissionGuard</li>
+<li>✅ Crear RoleGuard <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
+<li>⚪ Crear directiva *hasPermission</li>
+<li>✅ Crear directiva *hasRole <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
+<li>✅ Implementar en rutas protegidas <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
+
+<h3>4. Gestión de Equipos/Áreas</h3>
+
+<h4>4.1 Modelo de Datos - Equipos</h4>
+<div class="code-block">CREATE TABLE public.equipos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT NOT NULL,
+  descripcion TEXT,
+  responsable_id UUID REFERENCES profiles(id),
+  estatus TEXT CHECK (estatus IN ('Activo', 'Inactivo')) DEFAULT 'Activo',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insertar equipos iniciales
+INSERT INTO public.equipos (nombre, descripcion) VALUES
+  ('Soporte', 'Equipo de soporte técnico'),
+  ('Dev', 'Equipo de desarrollo'),
+  ('Implementación', 'Equipo de implementación'),
+  ('Facturación', 'Equipo de facturación'),
+  ('Cobranza', 'Equipo de cobranza');</div>
+
+
+<h4>4.2 Backend - EquipoService</h4>
+
+<li>✅ Crear EquipoService con CRUD completo <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Implementar relación equipos ↔ usuarios <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear query para obtener miembros de un equipo <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Gestión de usuarios sin equipo asignado <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+
+<h4>4.3 Frontend - Gestión de Equipos</h4>
+
+<li>✅ Crear EquipoListComponent con filtros y paginación <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear EquipoFormComponent (crear/editar) <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear EquipoDetailComponent con gestión de miembros <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Asignar/remover usuarios de equipos <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Configurar rutas con roleGuard <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Agregar menú de navegación <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+
+<h3>5. Horarios y Turnos</h3>
+
+<h4>5.1 Modelo de Datos - Horarios</h4>
+<div class="code-block">CREATE TABLE public.horarios (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  nombre TEXT NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  dias_semana INTEGER[], -- Array: 0=Domingo, 1=Lunes, etc.
+  es_horario_habil BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insertar horarios iniciales
+INSERT INTO public.horarios (nombre, hora_inicio, hora_fin, dias_semana, es_horario_habil) VALUES
+  ('Turno Matutino', '08:00', '16:00', '{1,2,3,4,5}', true),
+  ('Turno Vespertino', '14:00', '22:00', '{1,2,3,4,5}', true),
+  ('Turno Sábado', '09:00', '14:00', '{6}', true);</div>
+
+
+<h4>5.2 Funciones Helper para SLA</h4>
+<div class="code-block">-- Función para calcular si una hora está en horario hábil
+CREATE OR REPLACE FUNCTION es_horario_habil(
+  timestamp_check TIMESTAMPTZ,
+  horario_id UUID
+) RETURNS BOOLEAN AS $
+DECLARE
+  horario RECORD;
+  dia_semana INTEGER;
+BEGIN
+  SELECT * INTO horario FROM horarios WHERE id = horario_id;
+  dia_semana := EXTRACT(DOW FROM timestamp_check);
+
+  RETURN (
+    dia_semana = ANY(horario.dias_semana) AND
+    timestamp_check::TIME >= horario.hora_inicio AND
+    timestamp_check::TIME <= horario.hora_fin
+  );
+END;
+$ LANGUAGE plpgsql;</div>
+
+
+<li>✅ Modelo de datos Horario actualizado <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>⚪ Implementar función de cálculo de horarios hábiles</li>
+<li>⚪ Crear tabla de días festivos</li>
+
+<h4>5.3 Backend - HorarioService</h4>
+
+<li>✅ Crear HorarioService con CRUD completo <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Obtener usuarios por horario <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Asignar/remover horario a usuarios <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Helper isWithinSchedule para verificar si está en horario <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+
+<h4>5.4 Frontend - Horarios</h4>
+
+<li>✅ Crear HorarioListComponent con filtros y paginación <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Crear HorarioFormComponent con selector de días <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Crear HorarioDetailComponent con usuarios asignados <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Configurar rutas con roleGuard <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Agregar menú de navegación <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+
+<h3>6. Auditoría de Usuarios</h3>
+
+<h4>6.1 Sistema de Auditoría</h4>
+<div class="code-block">CREATE TABLE public.audit_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tabla TEXT NOT NULL,
+  accion TEXT NOT NULL, -- INSERT, UPDATE, DELETE
+  registro_id UUID,
+  usuario_id UUID REFERENCES profiles(id),
+  datos_anteriores JSONB,
+  datos_nuevos JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Función genérica de auditoría
+CREATE OR REPLACE FUNCTION audit_trigger_function()
+RETURNS TRIGGER AS $
+BEGIN
+  IF (TG_OP = 'DELETE') THEN
+    INSERT INTO audit_log (tabla, accion, registro_id, usuario_id, datos_anteriores)
+    VALUES (TG_TABLE_NAME, 'DELETE', OLD.id, auth.uid(), row_to_json(OLD));
+    RETURN OLD;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    INSERT INTO audit_log (tabla, accion, registro_id, usuario_id, datos_anteriores, datos_nuevos)
+    VALUES (TG_TABLE_NAME, 'UPDATE', NEW.id, auth.uid(), row_to_json(OLD), row_to_json(NEW));
+    RETURN NEW;
+  ELSIF (TG_OP = 'INSERT') THEN
+    INSERT INTO audit_log (tabla, accion, registro_id, usuario_id, datos_nuevos)
+    VALUES (TG_TABLE_NAME, 'INSERT', NEW.id, auth.uid(), row_to_json(NEW));
+    RETURN NEW;
+  END IF;
+END;
+$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Aplicar trigger a tabla profiles
+CREATE TRIGGER profiles_audit_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();</div>
+
+<li>✅ Tabla audit_log creada <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Función audit_trigger_function() con SECURITY DEFINER <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Triggers aplicados a profiles, roles, equipos, horarios <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+
+<h4>6.2 Historial de Sesiones</h4>
+<div class="code-block">CREATE TABLE public.sesiones_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  usuario_id UUID REFERENCES profiles(id),
+  accion TEXT, -- 'login', 'logout', 'login_failed'
+  ip_address INET,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</div>
+
+
+<li>✅ Tabla sesiones_log creada <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar logins exitosos <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar intentos fallidos <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar logouts <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Implementar consulta de historial <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+
+<h4>6.3 Frontend - Auditoría</h4>
+<li>✅ AuditService con métodos de consulta <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ AuditLogComponent con tabs, filtros y paginación <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Vista de cambios en datos (INSERT/UPDATE/DELETE) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Vista de eventos de sesión (login/logout/failed) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Modal de detalle con comparación de cambios <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Tarjetas de estadísticas <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Menú "Auditoría" en navegación (solo Admin) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+
+<h3>7. Panel de Administración - Usuarios</h3>
+
+<h4>7.1 Panel Admin</h4>
+
+<li>✅ Crear sección "Administración" en menú <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear submenu: Usuarios, Equipos, Horarios, Auditoría <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Implementar dashboard de usuarios: <a href="#version-1-18-0" style="font-size: 11px; color: #4CAF50;">[v1.18.0]</a></li>
+  - ✅ Total de usuarios activos/inactivos
+  - ✅ Usuarios por rol (gráfica donut)
+  - ✅ Usuarios por equipo (gráfica barras)
+  - ✅ Gráficas con ApexCharts
+  - ✅ Disponibilidad actual (gráfica pie)
+  - ✅ Barra de progreso activos/inactivos
+  - ✅ Tabla resumen por rol
+  - ✅ Accesos rápidos a módulos
+<li>✅ Implementar filtros avanzados (en lista de usuarios) <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear exportación a CSV <a href="#version-1-18-0" style="font-size: 11px; color: #4CAF50;">[v1.18.0]</a></li>
+<li>✅ Crear vista de actividad de usuarios (en auditoría) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Mostrar historial de auditoría <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+
+<h3>8. Mejoras de UX</h3>
+
+<h4>8.1 Componentes Visuales</h4>
+
+<li>⚪ Crear badges de rol con colores:</li>
+  - Admin: amarillo iGAS (#F9B000)
+  - Coordinador: azul
+  - Técnico: verde
+  - Dev: morado
+<li>⚪ Crear badges de estatus:</li>
+  - Activo: verde (#4CAF50)
+  - Inactivo: gris
+<li>⚪ Crear indicador de disponibilidad:</li>
+  - En línea: verde
+  - Ocupado: amarillo
+  - Fuera de turno: gris
+
+---
+
+<div class="content-section"><h2>Entregables</h2>
+
+<li>⚪ Sistema de autenticación completo y mejorado</li>
+<li>⚪ CRUD de usuarios funcional con RLS</li>
+<li>⚪ Sistema de roles y permisos operativo</li>
+<li>⚪ Gestión de equipos implementada</li>
+<li>⚪ Gestión de horarios/turnos</li>
+<li>⚪ Sistema de auditoría funcionando</li>
+<li>⚪ Panel de administración de usuarios</li>
+<li>⚪ Guards y directivas de permisos</li>
+<li>⚪ Documentación de políticas RLS</li>
+
+<div class="content-section"><h2>Dependencias</h2>
+
+<li>Fase 0: Configuración inicial (COMPLETADA)</li>
+
+<div class="content-section"><h2>Criterios de Aceptación</h2>
+
+<li>⚪ Usuarios pueden hacer login con credenciales asignadas</li>
+<li>⚪ Admins pueden crear y gestionar usuarios completos</li>
+<li>⚪ Sistema valida permisos en frontend y backend (RLS)</li>
+<li>⚪ Usuarios pueden ser asignados a roles y equipos</li>
+<li>⚪ Auditoría registra todas las acciones</li>
+<li>⚪ Panel admin permite gestión completa de usuarios</li>
+<li>⚪ Guards protegen rutas según permisos</li>
+<li>⚪ No existe opción de registro público (solo admins crean usuarios)</li>
+
+<div class="content-section"><h2>Notas Técnicas Supabase</h2>
+
+<li>Usar **Row Level Security (RLS)** para seguridad real a nivel de base de datos</li>
+<li>**Triggers** de Supabase para auditoría automática</li>
+<li>**auth.uid()** para obtener usuario actual en policies</li>
+<li>**Storage** de Supabase para avatares</li>
+<li>Considerar **Supabase Edge Functions** para lógica compleja</li>
+<li>Usar **Realtime** para actualización de disponibilidad en tiempo real</li>
+</p></div>
+
+<!-- Historial de Versiones -->
+<div class="content-section" id="historial-versiones" style="margin-top: 60px;">
+<h2>Historial de Versiones - Fase 1</h2>
+
+<div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
+    <p id="version-1-18-0"><strong>v1.18.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Panel de Administración - Usuarios - Punto 7 completado</li>
+        <li>📁 Dashboard actualizado <code>src/app/demo/dashboard/</code>:</li>
+        <li>  • Estadísticas de usuarios en tiempo real</li>
+        <li>  • Tarjetas: Total, Activos, Inactivos, Roles</li>
+        <li>  • Gráfica donut: Distribución por Rol (ApexCharts)</li>
+        <li>  • Gráfica barras: Usuarios por Equipo (ApexCharts)</li>
+        <li>  • Gráfica pie: Disponibilidad Actual</li>
+        <li>  • Barra de progreso: % Usuarios Activos</li>
+        <li>  • Tabla resumen de usuarios por rol</li>
+        <li>  • Panel de accesos rápidos a módulos</li>
+        <li>  • Mensaje de bienvenida personalizado</li>
+        <li>📁 UserService actualizado <code>src/app/core/services/user.service.ts</code>:</li>
+        <li>  • getUserStats() - estadísticas para dashboard</li>
+        <li>  • getAllUsersForExport() - obtener usuarios para CSV</li>
+        <li>📁 Exportación CSV en <code>src/app/features/users/pages/user-list/</code>:</li>
+        <li>  • Botón de exportación en barra de herramientas</li>
+        <li>  • Exporta: nombre, email, teléfono, rol, equipo, horario, estatus, disponibilidad, fecha</li>
+        <li>  • Encoding UTF-8 con BOM para Excel</li>
+        <li>  • Nombre de archivo con fecha: usuarios_YYYY-MM-DD.csv</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-17-0"><strong>v1.17.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Sistema de Auditoría - Punto 6 completado</li>
+        <li>📁 Migración <code>database/migrations/13_audit_system.sql</code>:</li>
+        <li>  • Tabla audit_log para registrar cambios en datos</li>
+        <li>  • Tabla sesiones_log para registrar eventos de sesión</li>
+        <li>  • Función audit_trigger_function() con SECURITY DEFINER</li>
+        <li>  • Función log_session_event() para registrar sesiones</li>
+        <li>  • Triggers en profiles, roles, equipos, horarios</li>
+        <li>  • Vistas v_audit_log_detail y v_sesiones_log_detail</li>
+        <li>  • Políticas RLS para seguridad</li>
+        <li>📁 Modelos en <code>src/app/core/models/audit.model.ts</code>:</li>
+        <li>  • AuditLog, AuditLogDetail, SessionLog, SessionLogDetail</li>
+        <li>  • AuditFilters, SessionFilters</li>
+        <li>  • Constantes para nombres y colores de acciones</li>
+        <li>📁 AuditService en <code>src/app/core/services/audit.service.ts</code>:</li>
+        <li>  • getAuditLogs() - logs con filtros y paginación</li>
+        <li>  • getSessionLogs() - sesiones con filtros y paginación</li>
+        <li>  • logSessionEvent() - registrar evento de sesión</li>
+        <li>  • getAuditStats() / getSessionStats() - estadísticas</li>
+        <li>  • getRecordHistory() / getUserSessionHistory()</li>
+        <li>📁 Componente en <code>src/app/features/auditoria/</code>:</li>
+        <li>  • AuditLogComponent - vista de auditoría para admins</li>
+        <li>  • Tabs: Cambios en Datos / Eventos de Sesión</li>
+        <li>  • Filtros por tabla, acción, fechas, usuario</li>
+        <li>  • Modal de detalle con comparación de cambios</li>
+        <li>  • Tarjetas de estadísticas</li>
+        <li>✅ Integración con login/logout:</li>
+        <li>  • auth-signin.component.ts actualizado para registrar login/login_failed</li>
+        <li>  • nav-right.component.ts actualizado para registrar logout</li>
+        <li>✅ Menú "Auditoría" en Administración (solo Admin)</li>
+        <li>✅ Ruta /auditoria con roleGuard</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-16-0"><strong>v1.16.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Gestión de Horarios/Turnos - Punto 5 completado</li>
+        <li>📁 Modelo horario.model.ts actualizado:</li>
+        <li>  • Horario, HorarioWithCount, DTOs y Filters</li>
+        <li>  • Helpers DIAS_SEMANA_NOMBRES y DIAS_SEMANA_ABREV</li>
+        <li>📁 HorarioService creado en <code>src/app/core/services/horario.service.ts</code>:</li>
+        <li>  • getHorarios() - listado con filtros y paginación</li>
+        <li>  • getHorarioById() - obtener horario con conteo</li>
+        <li>  • getUsuariosByHorario() - usuarios asignados a un horario</li>
+        <li>  • createHorario() / updateHorario() - CRUD completo</li>
+        <li>  • deactivateHorario() / activateHorario() - soft delete</li>
+        <li>  • assignHorarioToUser() / removeHorarioFromUser() - asignación</li>
+        <li>  • isWithinSchedule() - verifica si está en horario</li>
+        <li>📁 Componentes creados en <code>src/app/features/horarios/</code>:</li>
+        <li>  • HorarioListComponent - Lista con tabla, filtros, paginación</li>
+        <li>  • HorarioFormComponent - Formulario con selector de días interactivo</li>
+        <li>  • HorarioDetailComponent - Vista detallada con usuarios asignados</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por estatus y horario hábil</li>
+        <li>  • Selector visual de días de la semana</li>
+        <li>  • Conteo de usuarios por horario</li>
+        <li>  • Vista semanal en detalle</li>
+        <li>  • Indicador "En horario" si aplica</li>
+        <li>✅ Rutas configuradas en <code>/horarios</code>:</li>
+        <li>  • /horarios - Lista de horarios (Admin, Supervisor)</li>
+        <li>  • /horarios/nuevo - Crear horario (Admin)</li>
+        <li>  • /horarios/editar/:id - Editar horario (Admin)</li>
+        <li>  • /horarios/:id - Detalle de horario (Admin, Supervisor)</li>
+        <li>✅ Menú de navegación actualizado con sección "Horarios"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-15-0"><strong>v1.15.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Gestión de Equipos/Áreas - Punto 4 completado</li>
+        <li>📁 EquipoService creado en <code>src/app/core/services/equipo.service.ts</code>:</li>
+        <li>  • getEquipos() - listado con filtros y paginación</li>
+        <li>  • getEquipoById() - obtener equipo con relaciones</li>
+        <li>  • getEquipoMembers() - obtener miembros de un equipo</li>
+        <li>  • createEquipo() / updateEquipo() - CRUD completo</li>
+        <li>  • deactivateEquipo() / activateEquipo() - soft delete</li>
+        <li>  • assignMember() / removeMember() - gestión de miembros</li>
+        <li>  • getUnassignedUsers() - usuarios disponibles para asignar</li>
+        <li>📁 Componentes creados en <code>src/app/features/equipos/</code>:</li>
+        <li>  • EquipoListComponent - Lista con tabla, filtros, búsqueda, paginación</li>
+        <li>  • EquipoFormComponent - Formulario crear/editar equipos</li>
+        <li>  • EquipoDetailComponent - Vista detallada con gestión de miembros</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por supervisor y estatus</li>
+        <li>  • Búsqueda por nombre/descripción</li>
+        <li>  • Contador de miembros por equipo</li>
+        <li>  • Asignar/remover usuarios de equipos</li>
+        <li>  • Modal para seleccionar usuarios sin equipo</li>
+        <li>✅ Rutas configuradas en <code>/equipos</code>:</li>
+        <li>  • /equipos - Lista de equipos (Admin, Supervisor)</li>
+        <li>  • /equipos/nuevo - Crear equipo (Admin)</li>
+        <li>  • /equipos/editar/:id - Editar equipo (Admin)</li>
+        <li>  • /equipos/:id - Detalle de equipo (Admin, Supervisor)</li>
+        <li>✅ Menú de navegación actualizado con sección "Equipos"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-14-0"><strong>v1.14.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Sistema de Roles y Permisos - Punto 3 completado</li>
+        <li>📁 Guards creados en <code>src/app/core/guards/auth.guard.ts</code>:</li>
+        <li>  • roleGuard - Protege rutas basadas en roles del usuario</li>
+        <li>  • adminGuard - Atajo para rutas solo de administradores</li>
+        <li>📁 Directivas creadas en <code>src/app/core/directives/</code>:</li>
+        <li>  • HasRoleDirective - *hasRole="'Administrador'" o *hasRole="['Admin', 'Supervisor']"</li>
+        <li>  • IsAdminDirective - *isAdmin para mostrar elementos solo a admins</li>
+        <li>✅ Guards aplicados en rutas de usuarios:</li>
+        <li>  • /usuarios - Solo Administrador y Supervisor</li>
+        <li>  • /usuarios/nuevo - Solo Administrador</li>
+        <li>  • /usuarios/editar/:id - Solo Administrador</li>
+        <li>  • /usuarios/:id - Solo Administrador y Supervisor</li>
+        <li>  • /usuarios/perfil - Todos los usuarios autenticados</li>
+        <li>✅ Correcciones de UI:</li>
+        <li>  • Título "Card Title" cambiado por títulos correctos en componentes</li>
+        <li>  • Mensaje de error "Email not confirmed" mapeado correctamente</li>
+        <li>  • Creación de usuarios sin trigger (creación directa de profile)</li>
+        <li>✅ Políticas RLS actualizadas:</li>
+        <li>  • Admins can insert profiles - Para crear nuevos usuarios</li>
+        <li>  • Admins can update all profiles - Para editar usuarios</li>
+        <li>  • get_all_users() RPC function - Para listar todos los usuarios</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-13-0"><strong>v1.13.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Crear módulo de usuarios completo en <code>src/app/features/users/</code></li>
+        <li>📁 Componentes creados:</li>
+        <li>  • UserListComponent - Lista con tabla, filtros, búsqueda, paginación</li>
+        <li>  • UserFormComponent - Formulario crear/editar con validaciones</li>
+        <li>  • UserProfileComponent - Perfil del usuario actual</li>
+        <li>  • UserDetailComponent - Vista detallada de usuario (admin)</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por rol, equipo, estatus</li>
+        <li>  • Búsqueda por nombre/email</li>
+        <li>  • Badges de estatus y disponibilidad</li>
+        <li>  • Paginación con selector de tamaño</li>
+        <li>  • Modal de confirmación para desactivar</li>
+        <li>  • Upload y eliminación de avatar</li>
+        <li>  • Cambio de contraseña con indicador de fortaleza</li>
+        <li>  • Tabs de información y seguridad en perfil</li>
+        <li>✅ Rutas configuradas en <code>/usuarios</code>:</li>
+        <li>  • /usuarios - Lista de usuarios</li>
+        <li>  • /usuarios/nuevo - Crear usuario</li>
+        <li>  • /usuarios/editar/:id - Editar usuario</li>
+        <li>  • /usuarios/perfil - Mi perfil</li>
+        <li>  • /usuarios/:id - Detalle de usuario</li>
+        <li>✅ Menú de navegación actualizado con sección "Administración"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-12-0"><strong>v1.12.0</strong> - 17 de enero de 2026</p>
+    <ul>
+        <li>✅ Crear UserService con métodos CRUD completos</li>
+        <li>📁 Modelos creados en <code>src/app/core/models/</code>:</li>
+        <li>  • profile.model.ts - Profile, DTOs, filtros, paginación</li>
+        <li>  • role.model.ts - Role, RoleName, RolePermissions</li>
+        <li>  • equipo.model.ts - Equipo, EquipoWithSupervisor</li>
+        <li>  • horario.model.ts - Horario</li>
+        <li>✅ UserService implementado con:</li>
+        <li>  • getUsers() - listado con filtros y paginación</li>
+        <li>  • getUserById() - obtener usuario con relaciones</li>
+        <li>  • getCurrentUserProfile() - perfil del usuario actual</li>
+        <li>  • createUser() - crear usuario (admin)</li>
+        <li>  • updateUser/updateCurrentUserProfile() - actualizar</li>
+        <li>  • deactivateUser/activateUser() - soft delete</li>
+        <li>  • uploadAvatar/deleteAvatar() - gestión de avatar</li>
+        <li>  • getRoles/getEquipos/getHorarios() - catálogos</li>
+        <li>  • isAdmin/hasRole() - helpers de permisos</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-11-0"><strong>v1.11.0</strong> - 17 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar rate limiting en Supabase <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Agregar logs de intentos de login fallidos <a href="#setup-1-3" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Implementar verificación is_user_blocked en frontend</li>
+        <li>✅ Registro automático de intentos fallidos en BD</li>
+        <li>✅ Mensajes de advertencia con intentos restantes</li>
+        <li>✅ Bloqueo temporal después de 5 intentos (15 min)</li>
+        <li>💾 Script SQL: <code>database/migrations/10_login_security_functions.sql</code></li>
+        <li>  • Función record_failed_login_attempt()</li>
+        <li>  • Función get_remaining_login_attempts()</li>
+        <li>  • Permisos para usuarios anónimos (pre-login)</li>
+        <li>✅ Corrección de triggers save_password_to_history y update_password_changed_at</li>
+        <li>✅ Corrección de vistas con SECURITY INVOKER</li>
+        <li>✅ Corrección de funciones con SET search_path = public</li>
+        <li>✅ Nuevos mensajes de error en español:</li>
+        <li>  • userBlocked(): "Tu cuenta ha sido bloqueada temporalmente..."</li>
+        <li>  • remainingAttempts(): "Te quedan X intentos..."</li>
+        <li>  • samePassword(): "La nueva contraseña debe ser diferente..."</li>
+        <li>✅ Plantilla de correo personalizada con colores iGAS</li>
+        <li>✅ Confirmación de tabla profiles ya implementada</li>
+        <li>✅ Confirmación de políticas RLS ya implementadas</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-10-0"><strong>v1.10.0</strong> - 15 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar validaciones de formulario mejoradas <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>📝 Validadores personalizados creados en src/app/core/validators/</li>
+        <li>  • custom-validators.ts - Validadores estándar de Angular</li>
+        <li>  • signal-validators.ts - Validadores para @angular/forms/signals</li>
+        <li>✅ Validación de email mejorada:</li>
+        <li>  • Formato de email con regex mejorado</li>
+        <li>  • Prevención de espacios en blanco</li>
+        <li>  • Validación de dominio con punto</li>
+        <li>✅ Validación de contraseña robusta:</li>
+        <li>  • Requiere al menos una mayúscula</li>
+        <li>  • Requiere al menos una minúscula</li>
+        <li>  • Requiere al menos un número</li>
+        <li>  • Previene contraseñas comunes (password, 123456, etc.)</li>
+        <li>✅ Indicador visual de fortaleza de contraseña:</li>
+        <li>  • Barra de progreso con colores (rojo/amarillo/verde)</li>
+        <li>  • Mensajes descriptivos (Débil/Media/Fuerte)</li>
+        <li>  • Cálculo dinámico basado en múltiples factores</li>
+        <li>  • Implementado en reset-password.component.html</li>
+        <li>✅ Mensajes de error en español actualizados:</li>
+        <li>  • strongPassword(): "La contraseña debe contener al menos una mayúscula, una minúscula y un número"</li>
+        <li>  • commonPassword(): "Esta contraseña es muy común. Por favor, elige una contraseña más segura"</li>
+        <li>  • emailFormat(): "El formato del correo electrónico no es válido"</li>
+        <li>  • whitespace(): "Este campo no puede contener espacios en blanco"</li>
+        <li>✅ Componentes actualizados:</li>
+        <li>  • auth-signin: Validaciones mejoradas de email</li>
+        <li>  • auth-forgot-password: Validaciones mejoradas de email</li>
+        <li>  • auth-reset-password: Validaciones de contraseña + indicador visual</li>
+        <li>✅ Build exitoso sin errores</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-9-0"><strong>v1.9.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Configurar políticas de contraseña en Supabase <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Implementar bloqueo de cuenta después de intentos fallidos <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>📄 Documentación completa creada (PASSWORD_POLICIES.md)</li>
+        <li>🌐 Guía visual HTML creada (documentacion/PASSWORD_SETUP.html)</li>
+        <li>💾 Script SQL completo (09_password_policies.sql) con:</li>
+        <li>  • Tabla password_history - Historial de últimas 5 contraseñas</li>
+        <li>  • Tabla failed_login_attempts - Registro de intentos fallidos</li>
+        <li>  • Columna password_changed_at en profiles para expiración</li>
+        <li>  • Funciones: save_password_to_history(), update_password_changed_at()</li>
+        <li>  • Funciones: cleanup_old_failed_attempts(), is_user_blocked(), is_password_expired()</li>
+        <li>  • Vistas: passwords_expiring_soon, blocked_users, failed_login_stats</li>
+        <li>🔒 Políticas configurables:</li>
+        <li>  • Longitud mínima: 8 caracteres (12 para admins)</li>
+        <li>  • Complejidad: mayúsculas, minúsculas, números, caracteres especiales</li>
+        <li>  • Bloqueo: 5 intentos fallidos = 15 minutos bloqueado</li>
+        <li>  • Expiración: 60 días admins, 90 días otros roles</li>
+        <li>  • Rate limiting configurado para endpoints de auth</li>
+        <li>📊 Sistema de monitoreo y reportes implementado</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-8-0"><strong>v1.8.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar refresh token automático <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Configuración explícita de autoRefreshToken en cliente Supabase</li>
+        <li>✅ Configuración de persistSession con localStorage</li>
+        <li>✅ Implementación de PKCE flow para mejor seguridad</li>
+        <li>✅ Custom storage key (igas-auth-token) para mejor organización</li>
+        <li>✅ Logging detallado de eventos de autenticación (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, etc.)</li>
+        <li>✅ Método refreshSession() para refresh manual si es necesario</li>
+        <li>✅ Método getSessionInfo() para debugging y monitoreo de tokens</li>
+        <li>✅ Información de expiración de tokens (minutesUntilExpiry)</li>
+        <li>✅ Manejo automático de errores de refresh con fallback a signOut</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-7-0"><strong>v1.7.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Eliminar links y referencias a "registro" en página de login <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Comentado signup menu item en navigation.ts</li>
+        <li>✅ Register route ya estaba comentado en routing</li>
+        <li>✅ Sistema confirma que no hay registro público - solo admins crean usuarios</li>
+        <li>✅ Build y deploy exitoso a GitHub Pages</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-6-0"><strong>v1.6.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar confirmación visual de acciones <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Toast de éxito en login: "¡Bienvenido! Has iniciado sesión correctamente."</li>
+        <li>✅ Toast de éxito en reset password: "Tu contraseña ha sido actualizada correctamente."</li>
+        <li>✅ Toast de info en logout: "Has cerrado sesión correctamente."</li>
+        <li>✅ Toast de error en logout fallido con mensaje descriptivo</li>
+        <li>✅ Integración con NotificationService existente</li>
+        <li>✅ UX mejorada con feedback visual consistente</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-5-0"><strong>v1.5.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Implementar auto-logout por inactividad (30 min) <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ InactivityService creado con timeout de 30 minutos</li>
+        <li>✅ Dashboard excluido de auto-logout por requerimiento del usuario</li>
+        <li>✅ Sistema detecta actividad: mouse, teclado, touch, scroll</li>
+        <li>✅ Monitoreo automático basado en rutas (route-aware)</li>
+        <li>✅ Mensaje de sesión expirada en login page</li>
+        <li>✅ Optimización con NgZone para performance</li>
+        <li>✅ Integración en AppComponent con subscriber de usuario</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-4-0"><strong>v1.4.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar "Remember me" en login <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Checkbox "Recordar datos" implementado en login</li>
+        <li>✅ Email guardado en localStorage cuando activado</li>
+        <li>✅ Auto-carga de email en login si existe</li>
+        <li>✅ Limpieza de localStorage si se desmarca</li>
+        <li>✅ Manejo seguro de errores en localStorage</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-3-0"><strong>v1.3.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Agregar loading states con spinner <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Spinner en botón de login durante autenticación</li>
+        <li>✅ Texto "Iniciando sesión..." mientras carga</li>
+        <li>✅ Deshabilitación de botón durante proceso</li>
+        <li>✅ Estados de loading en forgot-password y reset-password</li>
+        <li>✅ Feedback visual consistente en todas las páginas auth</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-2-0"><strong>v1.2.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Personalizar páginas con branding iGAS <a href="#setup-1-2" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Círculos de fondo con colores corporativos (amarillo #F9B000 y gris #3E3E3E)</li>
+        <li>✅ Checkbox con color primario iGAS amarillo</li>
+        <li>✅ Logo con fondo blanco y padding en sidebar</li>
+        <li>✅ HashLocationStrategy para GitHub Pages (fix 404 en reload)</li>
+        <li>✅ URLs ahora usan formato /#/ruta</li>
+        <li>✅ Limpieza de archivos temporales tmpclaude-*</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-1-0"><strong>v1.1.0</strong> - 12 de enero de 2026</p>
+    <ul>
+        <li>✅ Mejorar manejo de errores con mensajes en español <a href="#setup-1-1" style="font-size: 11px; color: #4CAF50;">[↑ ver punto]</a></li>
+        <li>✅ Helper error-messages.ts con mensajes amigables</li>
+        <li>✅ Mapper de errores de Supabase a español</li>
+        <li>✅ Mensajes específicos para cada tipo de error auth</li>
+        <li>✅ Validaciones con feedback claro en formularios</li>
+        <li>✅ Errores HTTP interceptados y formateados</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-0-0"><strong>v1.0.0</strong> - 11 de enero de 2026</p>
+    <ul>
+        <li>🎉 <strong>FASE 0 COMPLETADA - Inicio de Fase 1</strong></li>
+        <li>✅ Sistema de autenticación base funcional (login, recovery, reset)</li>
+        <li>✅ Supabase Auth integrado con guards</li>
+        <li>✅ Páginas de autenticación con template Datta-Able</li>
+        <li>✅ Branding iGAS aplicado (logo, colores corporativos)</li>
+        <li>✅ Routing configurado con lazy loading</li>
+        <li>✅ Sistema de notificaciones (toasts) implementado</li>
+        <li>✅ Base de datos con RLS policies configuradas</li>
+    </ul>
+</div>
+</div>
+
+    </div>
+
+    <div class="footer">
+        <p><strong>iGAS Control Volumétrico</strong></p>
+        <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
+        <p style="margin-top: 15px; font-size: 12px;">
+            Última actualización: 18 de enero de 2026<br>
+            Fase 1: v1.14.0 - Sistema de Roles y Guards implementado
+        </p>
+    </div>
+</body>
+</html>

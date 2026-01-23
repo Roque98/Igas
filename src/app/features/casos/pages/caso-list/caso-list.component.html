@@ -1,0 +1,326 @@
+<app-card [options]="false" cardTitle="Listado de Casos (Escalamientos)">
+
+  <!-- Barra de herramientas -->
+  <div class="row mb-4">
+    <!-- Búsqueda -->
+    <div class="col-md-4 mb-2">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por folio..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
+          <i class="feather icon-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="col-md-5 mb-2">
+      <div class="d-flex gap-2 flex-wrap">
+        <!-- Área destino -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedAreaDestino()"
+          (ngModelChange)="selectedAreaDestino.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Área destino</option>
+          @for (area of areasDestino; track area.value) {
+            <option [ngValue]="area.value">{{ area.label }}</option>
+          }
+        </select>
+
+        <!-- Motivo -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedMotivo()"
+          (ngModelChange)="selectedMotivo.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Motivo</option>
+          @for (motivo of motivosEscalamiento; track motivo.value) {
+            <option [ngValue]="motivo.value">{{ motivo.label }}</option>
+          }
+        </select>
+
+        <!-- Semáforo -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedSemaforo()"
+          (ngModelChange)="selectedSemaforo.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">SLA</option>
+          @for (sem of semaforos; track sem.value) {
+            <option [ngValue]="sem.value">{{ sem.label }}</option>
+          }
+        </select>
+
+        <!-- Filtros de checkbox -->
+        <div class="btn-group" role="group">
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnMisCasos"
+            [checked]="soloMisCasos()"
+            (change)="soloMisCasos.set(!soloMisCasos()); onFilterChange()"
+          />
+          <label class="btn btn-outline-primary btn-sm" for="btnMisCasos">
+            <i class="feather icon-user me-1"></i> Mis casos
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnVencidos"
+            [checked]="soloCompromisoVencido()"
+            (change)="soloCompromisoVencido.set(!soloCompromisoVencido()); onFilterChange()"
+          />
+          <label class="btn btn-outline-danger btn-sm" for="btnVencidos">
+            <i class="feather icon-alert-triangle me-1"></i> Vencidos
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-3 mb-2 text-end">
+      @if (hasActiveFilters()) {
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
+          <i class="feather icon-x"></i> Limpiar
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Filtros de Estatus (chips) -->
+  <div class="mb-3">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <span class="text-muted small">Estatus:</span>
+      @for (est of estatus(); track est.id) {
+        <button
+          class="btn btn-sm"
+          [class.btn-primary]="selectedEstatusId() === est.id"
+          [class.btn-outline-secondary]="selectedEstatusId() !== est.id"
+          (click)="selectedEstatusId.set(selectedEstatusId() === est.id ? null : est.id); onFilterChange()"
+        >
+          <span
+            class="badge-dot me-1"
+            [style.background-color]="est.color"
+          ></span>
+          {{ est.nombre }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando casos...</p>
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="feather icon-alert-circle me-2"></i>
+      {{ error() }}
+      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadCasos()">
+        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Tabla de casos -->
+  @if (!loading() && !error()) {
+    @if (casos().length === 0) {
+      <div class="text-center py-5">
+        <i class="feather icon-inbox" style="font-size: 48px; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No se encontraron casos</p>
+        @if (hasActiveFilters()) {
+          <button class="btn btn-outline-primary" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="sortable" (click)="onSort('folio')">
+                Folio
+                <i [class]="getSortIcon('folio')"></i>
+              </th>
+              <th>Ticket</th>
+              <th class="sortable" (click)="onSort('area_destino')">
+                Área
+                <i [class]="getSortIcon('area_destino')"></i>
+              </th>
+              <th>Motivo</th>
+              <th class="text-center">Prioridad</th>
+              <th>Responsable</th>
+              <th class="text-center">Estatus</th>
+              <th class="text-center" style="min-width: 150px;">SLA</th>
+              <th class="sortable" (click)="onSort('fecha_compromiso')">
+                Compromiso
+                <i [class]="getSortIcon('fecha_compromiso')"></i>
+              </th>
+              <th class="text-center" style="width: 100px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (caso of casos(); track caso.id) {
+              <tr [class.table-danger]="caso.compromiso_vencido">
+                <td>
+                  <a [routerLink]="['/casos', caso.id]" class="text-decoration-none fw-medium text-primary">
+                    {{ caso.folio }}
+                  </a>
+                </td>
+                <td>
+                  @if (caso.ticket_folio) {
+                    <a
+                      [routerLink]="['/tickets', caso.ticket_id]"
+                      class="text-decoration-none small"
+                      ngbTooltip="Ver ticket origen"
+                    >
+                      {{ caso.ticket_folio }}
+                    </a>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td>
+                  <span class="badge" [style.background-color]="getAreaColor(caso.area_destino)">
+                    {{ caso.area_destino }}
+                  </span>
+                </td>
+                <td>
+                  <span class="small">
+                    <i [class]="'feather icon-' + getMotivoInfo(caso.motivo).icon + ' me-1'"></i>
+                    {{ getMotivoInfo(caso.motivo).label }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <app-prioridad-badge
+                    [prioridad]="caso.prioridad"
+                    [showIcon]="false"
+                    size="small"
+                  ></app-prioridad-badge>
+                </td>
+                <td>
+                  @if (caso.responsable_nombre) {
+                    <div class="d-flex align-items-center">
+                      <img
+                        [src]="caso.responsable_avatar || 'assets/images/user/avatar-1.jpg'"
+                        class="rounded-circle me-2"
+                        width="28"
+                        height="28"
+                        [alt]="caso.responsable_nombre"
+                        style="object-fit: cover;"
+                      />
+                      <span class="small">{{ caso.responsable_nombre }}</span>
+                    </div>
+                  } @else {
+                    <span class="badge bg-warning text-dark">Sin asignar</span>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (caso.estatus_nombre) {
+                    <span class="badge" [style.background-color]="caso.estatus_color || '#6c757d'">
+                      {{ caso.estatus_nombre }}
+                    </span>
+                  }
+                </td>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <app-progress-bar-sla
+                      [porcentaje]="caso.porcentaje_sla || 0"
+                      [semaforo]="caso.semaforo"
+                      [showPercentage]="false"
+                    ></app-progress-bar-sla>
+                    <app-semaforo-badge
+                      [semaforo]="caso.semaforo"
+                      [porcentaje]="caso.porcentaje_sla"
+                      [showLabel]="false"
+                      size="small"
+                    ></app-semaforo-badge>
+                  </div>
+                </td>
+                <td>
+                  @if (caso.fecha_compromiso) {
+                    <span class="small" [class.text-danger]="caso.compromiso_vencido">
+                      <i class="feather icon-calendar me-1"></i>
+                      {{ formatDateShort(caso.fecha_compromiso) }}
+                    </span>
+                  } @else {
+                    <span class="text-muted small">-</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      class="btn btn-outline-primary"
+                      (click)="viewCaso(caso)"
+                      ngbTooltip="Ver detalles"
+                    >
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    @if (caso.ticket_id) {
+                      <button
+                        class="btn btn-outline-secondary"
+                        (click)="viewTicket(caso.ticket_id)"
+                        ngbTooltip="Ver ticket"
+                      >
+                        <i class="feather icon-file-text"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+          {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
+          de {{ totalItems() }} casos
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <select
+            class="form-select form-select-sm"
+            style="width: auto;"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)"
+          >
+            <option [value]="10">10 por página</option>
+            <option [value]="25">25 por página</option>
+            <option [value]="50">50 por página</option>
+          </select>
+          <ngb-pagination
+            [collectionSize]="totalItems()"
+            [page]="currentPage()"
+            [pageSize]="pageSize()"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+          ></ngb-pagination>
+        </div>
+      </div>
+    }
+  }
+</app-card>

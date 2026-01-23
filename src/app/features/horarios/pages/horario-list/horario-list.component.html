@@ -1,0 +1,239 @@
+<app-card [options]="false" cardTitle="Gestión de Horarios/Turnos">
+
+  <!-- Barra de herramientas -->
+  <div class="row mb-4">
+    <!-- Búsqueda -->
+    <div class="col-md-4 mb-2">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nombre..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
+          <i class="feather icon-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtro por Horario Hábil -->
+    <div class="col-md-2 mb-2">
+      <select
+        class="form-select"
+        [ngModel]="selectedHorarioHabil()"
+        (ngModelChange)="selectedHorarioHabil.set($event); onFilterChange()"
+      >
+        <option [ngValue]="null">Todos</option>
+        <option [ngValue]="true">Horario hábil</option>
+        <option [ngValue]="false">No hábil</option>
+      </select>
+    </div>
+
+    <!-- Filtro por Estatus -->
+    <div class="col-md-2 mb-2">
+      <select
+        class="form-select"
+        [ngModel]="selectedEstatus()"
+        (ngModelChange)="selectedEstatus.set($event); onFilterChange()"
+      >
+        <option [ngValue]="null">Todos los estatus</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-4 mb-2 text-end">
+      <button class="btn btn-outline-secondary me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
+        <i class="feather icon-x"></i>
+      </button>
+      <a routerLink="/horarios/nuevo" class="btn btn-primary">
+        <i class="feather icon-plus me-1"></i> Nuevo Horario
+      </a>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando horarios...</p>
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="feather icon-alert-circle me-2"></i>
+      {{ error() }}
+      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadHorarios()">
+        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Tabla de horarios -->
+  @if (!loading() && !error()) {
+    @if (horarios().length === 0) {
+      <div class="text-center py-5">
+        <i class="feather icon-clock" style="font-size: 48px; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No se encontraron horarios</p>
+        @if (searchTerm() || selectedEstatus() || selectedHorarioHabil() !== null) {
+          <button class="btn btn-outline-primary" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Horario</th>
+              <th>Días</th>
+              <th class="text-center">Usuarios</th>
+              <th class="text-center">Hábil</th>
+              <th class="text-center">Estatus</th>
+              <th class="text-center" style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (horario of horarios(); track horario.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/horarios', horario.id]" class="text-decoration-none fw-medium">
+                    <i class="feather icon-clock me-2 text-primary"></i>
+                    {{ horario.nombre }}
+                  </a>
+                  @if (horario.descripcion) {
+                    <br>
+                    <small class="text-muted">{{ horario.descripcion | slice:0:40 }}{{ horario.descripcion.length > 40 ? '...' : '' }}</small>
+                  }
+                </td>
+                <td>
+                  <span class="fw-medium">{{ formatHorarioRango(horario) }}</span>
+                </td>
+                <td>
+                  <span class="text-muted">{{ formatDiasSemana(horario.dias_semana) }}</span>
+                </td>
+                <td class="text-center">
+                  <span [class]="getUserCountBadgeClass(horario._count?.usuarios || 0)">
+                    <i class="feather icon-users me-1"></i>
+                    {{ horario._count?.usuarios || 0 }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span [class]="getHorarioHabilBadgeClass(horario.es_horario_habil)">
+                    {{ horario.es_horario_habil ? 'Hábil' : 'No hábil' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span [class]="getEstatusBadgeClass(horario.estatus)">
+                    {{ horario.estatus }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      class="btn btn-outline-primary"
+                      (click)="viewHorario(horario)"
+                      ngbTooltip="Ver detalles"
+                    >
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary"
+                      (click)="editHorario(horario)"
+                      ngbTooltip="Editar"
+                    >
+                      <i class="feather icon-edit"></i>
+                    </button>
+                    @if (horario.estatus === 'Activo') {
+                      <button
+                        class="btn btn-outline-danger"
+                        (click)="openDeactivateModal(deactivateModal, horario)"
+                        ngbTooltip="Desactivar"
+                      >
+                        <i class="feather icon-x-circle"></i>
+                      </button>
+                    } @else {
+                      <button
+                        class="btn btn-outline-success"
+                        (click)="activateHorario(horario)"
+                        ngbTooltip="Activar"
+                      >
+                        <i class="feather icon-check-circle"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+          {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
+          de {{ totalItems() }} horarios
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <select
+            class="form-select form-select-sm"
+            style="width: auto;"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)"
+          >
+            <option [value]="10">10 por página</option>
+            <option [value]="25">25 por página</option>
+            <option [value]="50">50 por página</option>
+          </select>
+          <ngb-pagination
+            [collectionSize]="totalItems()"
+            [page]="currentPage()"
+            [pageSize]="pageSize()"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+          ></ngb-pagination>
+        </div>
+      </div>
+    }
+  }
+</app-card>
+
+<!-- Modal de confirmación de desactivación -->
+<ng-template #deactivateModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmar Desactivación</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedHorario()) {
+      <p>¿Está seguro que desea desactivar el horario <strong>{{ selectedHorario()!.nombre }}</strong>?</p>
+      @if (selectedHorario()!._count?.usuarios && selectedHorario()!._count!.usuarios > 0) {
+        <div class="alert alert-warning">
+          <i class="feather icon-alert-triangle me-2"></i>
+          Este horario tiene {{ selectedHorario()!._count!.usuarios }} usuario(s) asignado(s).
+          Los usuarios mantendrán su asignación pero el horario no estará disponible para nuevas asignaciones.
+        </div>
+      }
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeactivate()">
+      <i class="feather icon-x-circle me-1"></i> Desactivar
+    </button>
+  </div>
+</ng-template>

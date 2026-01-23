@@ -1,0 +1,269 @@
+<app-card [options]="false" cardTitle="Gestión de Usuarios">
+
+  <!-- Barra de herramientas -->
+  <div class="row mb-4">
+    <!-- Búsqueda -->
+    <div class="col-md-4 mb-2">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nombre o email..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
+          <i class="feather icon-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtro por Rol -->
+    <div class="col-md-2 mb-2">
+      <select
+        class="form-select"
+        [ngModel]="selectedRolId()"
+        (ngModelChange)="selectedRolId.set($event); onFilterChange()"
+      >
+        <option [ngValue]="null">Todos los roles</option>
+        @for (rol of roles(); track rol.id) {
+          <option [ngValue]="rol.id">{{ rol.nombre }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Filtro por Equipo -->
+    <div class="col-md-2 mb-2">
+      <select
+        class="form-select"
+        [ngModel]="selectedEquipoId()"
+        (ngModelChange)="selectedEquipoId.set($event); onFilterChange()"
+      >
+        <option [ngValue]="null">Todos los equipos</option>
+        @for (equipo of equipos(); track equipo.id) {
+          <option [ngValue]="equipo.id">{{ equipo.nombre }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Filtro por Estatus -->
+    <div class="col-md-2 mb-2">
+      <select
+        class="form-select"
+        [ngModel]="selectedEstatus()"
+        (ngModelChange)="selectedEstatus.set($event); onFilterChange()"
+      >
+        <option [ngValue]="null">Todos los estatus</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+      </select>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-2 mb-2 text-end">
+      <button class="btn btn-outline-secondary me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
+        <i class="feather icon-x"></i>
+      </button>
+      <button
+        class="btn btn-outline-success me-2"
+        (click)="exportToCSV()"
+        [disabled]="exporting()"
+        ngbTooltip="Exportar a CSV"
+      >
+        @if (exporting()) {
+          <span class="spinner-border spinner-border-sm"></span>
+        } @else {
+          <i class="feather icon-download"></i>
+        }
+      </button>
+      <a routerLink="/usuarios/nuevo" class="btn btn-primary">
+        <i class="feather icon-plus me-1"></i> Nuevo
+      </a>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando usuarios...</p>
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="feather icon-alert-circle me-2"></i>
+      {{ error() }}
+      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadUsers()">
+        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Tabla de usuarios -->
+  @if (!loading() && !error()) {
+    @if (users().length === 0) {
+      <div class="text-center py-5">
+        <i class="feather icon-users" style="font-size: 48px; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No se encontraron usuarios</p>
+        @if (searchTerm() || selectedRolId() || selectedEquipoId() || selectedEstatus()) {
+          <button class="btn btn-outline-primary" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 50px;"></th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Equipo</th>
+              <th class="text-center">Estatus</th>
+              <th class="text-center">Disponibilidad</th>
+              <th class="text-center" style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>
+                  <img
+                    [src]="getAvatarUrl(user)"
+                    class="rounded-circle"
+                    width="40"
+                    height="40"
+                    [alt]="user.nombre_completo"
+                    style="object-fit: cover;"
+                  />
+                </td>
+                <td>
+                  <a [routerLink]="['/usuarios', user.id]" class="text-decoration-none fw-medium">
+                    {{ user.nombre_completo }}
+                  </a>
+                </td>
+                <td>{{ user.email }}</td>
+                <td>
+                  @if (user.rol) {
+                    <span class="badge bg-light text-dark">{{ user.rol.nombre }}</span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td>
+                  @if (user.equipo) {
+                    {{ user.equipo.nombre }}
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td class="text-center">
+                  <span [class]="getEstatusBadgeClass(user.estatus)">
+                    {{ user.estatus }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span [class]="getDisponibilidadBadgeClass(user.disponibilidad)">
+                    {{ user.disponibilidad }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      class="btn btn-outline-primary"
+                      (click)="viewUser(user)"
+                      ngbTooltip="Ver detalles"
+                    >
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary"
+                      (click)="editUser(user)"
+                      ngbTooltip="Editar"
+                    >
+                      <i class="feather icon-edit"></i>
+                    </button>
+                    @if (user.estatus === 'Activo') {
+                      <button
+                        class="btn btn-outline-danger"
+                        (click)="openDeactivateModal(deactivateModal, user)"
+                        ngbTooltip="Desactivar"
+                      >
+                        <i class="feather icon-user-x"></i>
+                      </button>
+                    } @else {
+                      <button
+                        class="btn btn-outline-success"
+                        (click)="activateUser(user)"
+                        ngbTooltip="Activar"
+                      >
+                        <i class="feather icon-user-check"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+          {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
+          de {{ totalItems() }} usuarios
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <select
+            class="form-select form-select-sm"
+            style="width: auto;"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)"
+          >
+            <option [value]="10">10 por página</option>
+            <option [value]="25">25 por página</option>
+            <option [value]="50">50 por página</option>
+          </select>
+          <ngb-pagination
+            [collectionSize]="totalItems()"
+            [page]="currentPage()"
+            [pageSize]="pageSize()"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+          ></ngb-pagination>
+        </div>
+      </div>
+    }
+  }
+</app-card>
+
+<!-- Modal de confirmación de desactivación -->
+<ng-template #deactivateModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmar Desactivación</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedUser()) {
+      <p>¿Está seguro que desea desactivar al usuario <strong>{{ selectedUser()!.nombre_completo }}</strong>?</p>
+      <p class="text-muted small">El usuario no podrá acceder al sistema hasta que sea reactivado.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeactivate()">
+      <i class="feather icon-user-x me-1"></i> Desactivar
+    </button>
+  </div>
+</ng-template>

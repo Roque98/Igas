@@ -1,0 +1,127 @@
+// ============================================================================
+// Ticket Dashboard Styles
+// ============================================================================
+
+// Widget Cards
+.widget-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.widget-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 24px;
+  }
+}
+
+// Light background variants
+.bg-light-primary {
+  background-color: rgba(4, 169, 245, 0.15);
+}
+
+.bg-light-info {
+  background-color: rgba(23, 162, 184, 0.15);
+}
+
+.bg-light-success {
+  background-color: rgba(76, 175, 80, 0.15);
+}
+
+.bg-light-warning {
+  background-color: rgba(255, 193, 7, 0.15);
+}
+
+.bg-light-danger {
+  background-color: rgba(244, 67, 54, 0.15);
+}
+
+.bg-light-secondary {
+  background-color: rgba(108, 117, 125, 0.15);
+}
+
+// Semáforo Cards
+.semaforo-card {
+  border: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .semaforo-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 28px;
+      color: white;
+    }
+  }
+}
+
+.semaforo-verde {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+.semaforo-amarillo {
+  background: linear-gradient(135deg, #FFC107 0%, #e6ac00 100%);
+}
+
+.semaforo-rojo {
+  background: linear-gradient(135deg, #F44336 0%, #d32f2f 100%);
+}
+
+// List group styling
+.list-group-item {
+  border-left: none;
+  border-right: none;
+  padding: 12px 16px;
+
+  &:first-child {
+    border-top: none;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .widget-icon {
+    width: 40px;
+    height: 40px;
+
+    i {
+      font-size: 20px;
+    }
+  }
+
+  .semaforo-card .semaforo-icon {
+    width: 48px;
+    height: 48px;
+
+    i {
+      font-size: 24px;
+    }
+  }
+}

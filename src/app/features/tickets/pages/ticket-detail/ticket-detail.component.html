@@ -1,0 +1,478 @@
+<!-- Loading State -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando ticket...</p>
+  </div>
+}
+
+<!-- Error State -->
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="feather icon-alert-circle me-2"></i>
+    {{ error() }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadTicket()">
+      <i class="feather icon-refresh-cw me-1"></i> Reintentar
+    </button>
+    <button class="btn btn-sm btn-outline-secondary ms-2" (click)="goBack()">
+      Volver
+    </button>
+  </div>
+}
+
+@if (!loading() && !error() && ticket()) {
+  <!-- Header con Folio prominente -->
+  <div class="ticket-header mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+            <i class="feather icon-arrow-left"></i>
+          </button>
+          <h2 class="folio-title mb-0">{{ ticket()!.folio }}</h2>
+          <app-semaforo-badge
+            [semaforo]="ticket()!.semaforo"
+            [porcentaje]="ticket()!.porcentaje_sla"
+            size="large"
+          ></app-semaforo-badge>
+        </div>
+        <p class="text-muted mb-0">
+          Creado {{ formatRelativeTime(ticket()!.fecha_creacion) }} por {{ ticket()!.creador_nombre || 'Usuario' }}
+        </p>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-outline-primary" (click)="openCambiarEstatusModal(cambiarEstatusModal)">
+          <i class="feather icon-refresh-cw me-1"></i> Cambiar Estatus
+        </button>
+        <button class="btn btn-outline-info" (click)="openAsignarModal(asignarModal)">
+          <i class="feather icon-user-check me-1"></i> Asignar
+        </button>
+        <button class="btn btn-outline-success" (click)="openAgregarNotaModal(agregarNotaModal)">
+          <i class="feather icon-message-square me-1"></i> Agregar Nota
+        </button>
+        <button class="btn btn-outline-danger" (click)="openEscalarModal(escalarModal)" ngbTooltip="Escalar a otra área">
+          <i class="feather icon-trending-up me-1"></i> Escalar
+        </button>
+        <div class="btn-group">
+          <button class="btn btn-outline-secondary" (click)="fileInput.click()">
+            <i class="feather icon-paperclip me-1"></i> Adjuntar
+          </button>
+          <input #fileInput type="file" class="d-none" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.log,.doc,.docx,.xls,.xlsx" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de progreso SLA -->
+    <div class="sla-progress-container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-muted small">Progreso SLA</span>
+        <span class="fw-medium">{{ ticket()!.porcentaje_sla?.toFixed(1) || 0 }}%</span>
+      </div>
+      <app-progress-bar-sla
+        [porcentaje]="ticket()!.porcentaje_sla || 0"
+        [semaforo]="ticket()!.semaforo"
+        [showPercentage]="false"
+        size="large"
+      ></app-progress-bar-sla>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Columna izquierda: Información del ticket -->
+    <div class="col-xl-4 col-lg-5 mb-4">
+      <!-- Información básica -->
+      <app-card [options]="false" cardTitle="Información del Ticket">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Estatus</span>
+            <app-estatus-badge
+              [nombre]="ticket()!.estatus_nombre || 'Desconocido'"
+              [color]="ticket()!.estatus_color || '#6c757d'"
+            ></app-estatus-badge>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Prioridad</span>
+            <app-prioridad-badge [prioridad]="ticket()!.prioridad"></app-prioridad-badge>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Categoría</span>
+            <span class="badge" [style.background-color]="ticket()!.categoria_color || '#6c757d'">
+              {{ ticket()!.categoria_nombre || 'Sin categoría' }}
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Canal</span>
+            <span class="text-muted">
+              <i class="feather icon-{{ ticket()!.canal === 'Teléfono' ? 'phone' : ticket()!.canal === 'WhatsApp' ? 'message-circle' : ticket()!.canal === 'Correo' ? 'mail' : 'globe' }} me-1"></i>
+              {{ ticket()!.canal }}
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Responsable</span>
+            @if (ticket()!.responsable_nombre) {
+              <div class="d-flex align-items-center">
+                <img
+                  [src]="ticket()!.responsable_avatar || 'assets/images/user/avatar-1.jpg'"
+                  class="rounded-circle me-2"
+                  width="28"
+                  height="28"
+                  [alt]="ticket()!.responsable_nombre"
+                  style="object-fit: cover;"
+                />
+                <span>{{ ticket()!.responsable_nombre }}</span>
+              </div>
+            } @else {
+              <span class="badge bg-warning text-dark">Sin asignar</span>
+            }
+          </div>
+
+          @if (ticket()!.equipo_nombre) {
+            <div class="info-item">
+              <span class="info-label">Equipo</span>
+              <span>{{ ticket()!.equipo_nombre }}</span>
+            </div>
+          }
+        </div>
+      </app-card>
+
+      <!-- Fechas -->
+      <app-card [options]="false" cardTitle="Fechas" class="mt-4">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Creación</span>
+            <span>{{ formatDate(ticket()!.fecha_creacion) }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Primera respuesta</span>
+            <span>{{ formatDate(ticket()!.fecha_primera_respuesta) }}</span>
+          </div>
+
+          @if (ticket()!.fecha_resolucion) {
+            <div class="info-item">
+              <span class="info-label">Resolución</span>
+              <span>{{ formatDate(ticket()!.fecha_resolucion) }}</span>
+            </div>
+          }
+
+          @if (ticket()!.fecha_cierre) {
+            <div class="info-item">
+              <span class="info-label">Cierre</span>
+              <span>{{ formatDate(ticket()!.fecha_cierre) }}</span>
+            </div>
+          }
+
+          <div class="info-item">
+            <span class="info-label">SLA Objetivo</span>
+            <span>{{ ticket()!.sla_objetivo_minutos }} minutos</span>
+          </div>
+
+          @if (ticket()!.tiempo_pausado_minutos && ticket()!.tiempo_pausado_minutos > 0) {
+            <div class="info-item">
+              <span class="info-label">Tiempo pausado</span>
+              <span>{{ ticket()!.tiempo_pausado_minutos }} minutos</span>
+            </div>
+          }
+        </div>
+      </app-card>
+
+      <!-- Adjuntos -->
+      <app-card [options]="false" cardTitle="Adjuntos" class="mt-4">
+        @if (adjuntos().length === 0) {
+          <div class="text-center py-3 text-muted">
+            <i class="feather icon-paperclip" style="font-size: 32px;"></i>
+            <p class="small mt-2 mb-0">Sin adjuntos</p>
+          </div>
+        } @else {
+          <div class="attachments-grid">
+            @for (adj of adjuntos(); track adj.id) {
+              <a
+                [href]="adj.url"
+                target="_blank"
+                class="attachment-item"
+                [ngbTooltip]="adj.nombre_archivo"
+              >
+                <div class="attachment-icon">
+                  <i [class]="'feather icon-' + getFileIcon(adj.tipo_archivo)"></i>
+                </div>
+                <div class="attachment-info">
+                  <span class="attachment-name">{{ adj.nombre_archivo | slice:0:20 }}{{ adj.nombre_archivo.length > 20 ? '...' : '' }}</span>
+                  <span class="attachment-size">{{ formatFileSize(adj.tamanio_bytes) }}</span>
+                </div>
+              </a>
+            }
+          </div>
+        }
+      </app-card>
+    </div>
+
+    <!-- Columna derecha: Descripción y Bitácora -->
+    <div class="col-xl-8 col-lg-7">
+      <!-- Descripción -->
+      <app-card [options]="false" cardTitle="Descripción">
+        <p class="mb-0" style="white-space: pre-wrap;">{{ ticket()!.descripcion }}</p>
+      </app-card>
+
+      <!-- Bitácora / Timeline -->
+      <app-card [options]="false" cardTitle="Bitácora" class="mt-4">
+        @if (loadingBitacora()) {
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
+        } @else if (bitacora().length === 0) {
+          <div class="text-center py-4 text-muted">
+            <i class="feather icon-clock" style="font-size: 32px;"></i>
+            <p class="small mt-2 mb-0">Sin actividad registrada</p>
+          </div>
+        } @else {
+          <div class="timeline">
+            @for (entry of bitacora(); track entry.id) {
+              <div class="timeline-item">
+                <div class="timeline-marker" [style.background-color]="getBitacoraColor(entry.tipo)">
+                  <i [class]="'feather icon-' + getBitacoraIcon(entry.tipo)"></i>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <div class="d-flex align-items-center gap-2">
+                      @if (entry.usuario) {
+                        <img
+                          [src]="entry.usuario.avatar_url || 'assets/images/user/avatar-1.jpg'"
+                          class="rounded-circle"
+                          width="24"
+                          height="24"
+                          [alt]="entry.usuario.nombre_completo"
+                          style="object-fit: cover;"
+                        />
+                        <span class="fw-medium">{{ entry.usuario.nombre_completo }}</span>
+                      } @else {
+                        <span class="fw-medium">Sistema</span>
+                      }
+                    </div>
+                    <span class="timeline-time">{{ formatRelativeTime(entry.created_at) }}</span>
+                  </div>
+                  <div class="timeline-body">
+                    {{ entry.mensaje }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+}
+
+<!-- Modal Cambiar Estatus -->
+<ng-template #cambiarEstatusModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Cambiar Estatus</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Nuevo Estatus</label>
+      <select
+        class="form-select"
+        [ngModel]="nuevoEstatusId()"
+        (ngModelChange)="nuevoEstatusId.set($event)"
+      >
+        @for (est of estatus(); track est.id) {
+          <option [ngValue]="est.id">
+            {{ est.nombre }}
+            @if (est.pausa_sla) { (Pausa SLA) }
+          </option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nota (opcional)</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        placeholder="Agrega una nota sobre el cambio de estatus..."
+        [ngModel]="notaCambioEstatus()"
+        (ngModelChange)="notaCambioEstatus.set($event)"
+      ></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="confirmCambiarEstatus()"
+      [disabled]="savingAction() || !nuevoEstatusId()"
+    >
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Guardar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Asignar -->
+<ng-template #asignarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Asignar Ticket</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Responsable</label>
+      <select
+        class="form-select"
+        [ngModel]="nuevoResponsableId()"
+        (ngModelChange)="nuevoResponsableId.set($event)"
+      >
+        <option [ngValue]="null">Selecciona un usuario...</option>
+        @for (user of usuarios(); track user.id) {
+          <option [ngValue]="user.id">{{ user.nombre_completo }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo (opcional)</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        placeholder="Motivo de la asignación..."
+        [ngModel]="motivoAsignacion()"
+        (ngModelChange)="motivoAsignacion.set($event)"
+      ></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="confirmAsignar()"
+      [disabled]="savingAction() || !nuevoResponsableId()"
+    >
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Asignar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Agregar Nota -->
+<ng-template #agregarNotaModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Agregar Nota</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Nota</label>
+      <textarea
+        class="form-control"
+        rows="4"
+        placeholder="Escribe tu nota aquí..."
+        [ngModel]="nuevaNota()"
+        (ngModelChange)="nuevaNota.set($event)"
+      ></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="confirmAgregarNota()"
+      [disabled]="savingAction() || !nuevaNota().trim()"
+    >
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Agregar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Escalar Ticket -->
+<ng-template #escalarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="feather icon-trending-up me-2"></i>
+      Escalar Ticket a Caso
+    </h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-info py-2 mb-3">
+      <i class="feather icon-info me-1"></i>
+      Se creará un caso para seguimiento por el área especializada.
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Área destino *</label>
+      <select
+        class="form-select"
+        [ngModel]="escalarAreaDestino()"
+        (ngModelChange)="escalarAreaDestino.set($event)"
+      >
+        <option [ngValue]="null">Selecciona un área...</option>
+        @for (area of areasDestino; track area.value) {
+          <option [ngValue]="area.value">{{ area.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo *</label>
+      <select
+        class="form-select"
+        [ngModel]="escalarMotivo()"
+        (ngModelChange)="escalarMotivo.set($event)"
+      >
+        <option [ngValue]="null">Selecciona un motivo...</option>
+        @for (motivo of motivosEscalamiento; track motivo.value) {
+          <option [ngValue]="motivo.value">{{ motivo.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descripción del problema (opcional)</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        placeholder="Describe el problema a resolver..."
+        [ngModel]="escalarDescripcion()"
+        (ngModelChange)="escalarDescripcion.set($event)"
+      ></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Fecha de compromiso (opcional)</label>
+      <input
+        type="datetime-local"
+        class="form-control"
+        [ngModel]="escalarFechaCompromiso()"
+        (ngModelChange)="escalarFechaCompromiso.set($event)"
+      />
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirmEscalar()"
+      [disabled]="savingAction() || !escalarAreaDestino() || !escalarMotivo()"
+    >
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Escalar Ticket
+    </button>
+  </div>
+</ng-template>

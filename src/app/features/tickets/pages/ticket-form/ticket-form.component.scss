@@ -1,0 +1,151 @@
+// ============================================================================
+// Ticket Form Styles
+// ============================================================================
+
+// Dropzone
+.dropzone {
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f8f9fa;
+
+  &:hover {
+    border-color: #04a9f5;
+    background: rgba(4, 169, 245, 0.05);
+  }
+
+  i {
+    font-size: 48px;
+    color: #6c757d;
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+// Selected files
+.selected-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.file-icon {
+  width: 36px;
+  height: 36px;
+  background: #04a9f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 18px;
+    color: white;
+  }
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  font-size: 11px;
+  color: #6c757d;
+}
+
+// Priority options
+.priority-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.priority-option {
+  cursor: pointer;
+  padding: 10px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #dee2e6;
+    background: #f8f9fa;
+  }
+
+  &.selected {
+    border-color: #04a9f5;
+    background: rgba(4, 169, 245, 0.05);
+  }
+}
+
+.priority-content {
+  display: flex;
+  align-items: center;
+}
+
+// Info box
+.info-box {
+  background: #e8f4fd;
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid #04a9f5;
+
+  h6 {
+    color: #0277bd;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  ul {
+    padding-left: 20px;
+    font-size: 13px;
+    color: #333;
+
+    li {
+      margin-bottom: 6px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 992px) {
+  .dropzone {
+    padding: 24px;
+
+    i {
+      font-size: 36px;
+    }
+  }
+}

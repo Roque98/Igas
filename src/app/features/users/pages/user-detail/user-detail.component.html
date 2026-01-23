@@ -1,0 +1,234 @@
+<!-- Barra de navegación -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <button class="btn btn-outline-secondary" (click)="goBack()">
+    <i class="feather icon-arrow-left me-1"></i> Volver
+  </button>
+  @if (user()) {
+    <div class="btn-group">
+      <button class="btn btn-primary" (click)="editUser()">
+        <i class="feather icon-edit me-1"></i> Editar
+      </button>
+      @if (user()!.estatus === 'Activo') {
+        <button class="btn btn-outline-danger" (click)="openDeactivateModal(deactivateModal)">
+          <i class="feather icon-user-x me-1"></i> Desactivar
+        </button>
+      } @else {
+        <button class="btn btn-outline-success" (click)="activateUser()">
+          <i class="feather icon-user-check me-1"></i> Activar
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<!-- Indicador de carga -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando usuario...</p>
+  </div>
+}
+
+<!-- Mensaje de error -->
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="feather icon-alert-circle me-2"></i>
+    {{ error() }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="goBack()">
+      <i class="feather icon-arrow-left me-1"></i> Volver a la lista
+    </button>
+  </div>
+}
+
+<!-- Contenido del usuario -->
+@if (!loading() && !error() && user()) {
+  <div class="row">
+    <!-- Columna izquierda - Avatar e información básica -->
+    <div class="col-md-4 mb-4">
+      <app-card [options]="false">
+        <div class="text-center">
+          <!-- Avatar -->
+          <div class="mb-3">
+            <img
+              [src]="getAvatarUrl()"
+              class="rounded-circle border"
+              width="150"
+              height="150"
+              style="object-fit: cover;"
+              alt="Avatar"
+            />
+          </div>
+
+          <!-- Nombre y rol -->
+          <h4 class="mb-1">{{ user()!.nombre_completo }}</h4>
+          <p class="text-muted mb-2">{{ user()!.email }}</p>
+
+          @if (user()!.rol) {
+            <span class="badge bg-primary mb-2">{{ user()!.rol!.nombre }}</span>
+          }
+
+          <div class="mt-2">
+            <span [class]="getEstatusBadgeClass(user()!.estatus)" class="me-2">
+              {{ user()!.estatus }}
+            </span>
+            <span [class]="getDisponibilidadBadgeClass(user()!.disponibilidad)">
+              {{ user()!.disponibilidad }}
+            </span>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Información de contacto -->
+        <h6 class="text-muted mb-3">Información de contacto</h6>
+        <div class="small">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">
+              <i class="feather icon-mail me-2"></i>Email:
+            </span>
+            <span>{{ user()!.email }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">
+              <i class="feather icon-phone me-2"></i>Teléfono:
+            </span>
+            <span>{{ user()!.telefono || '-' }}</span>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Columna derecha - Detalles -->
+    <div class="col-md-8">
+      <app-card [options]="false">
+        <h5 class="mb-4">Detalles del Usuario</h5>
+
+        <div class="row">
+          <!-- Equipo -->
+          <div class="col-md-6 mb-4">
+            <div class="border rounded p-3">
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded p-2 me-3">
+                  <i class="feather icon-users text-primary" style="font-size: 24px;"></i>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Equipo/Área</small>
+                  <strong>{{ user()!.equipo?.nombre || 'Sin asignar' }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horario -->
+          <div class="col-md-6 mb-4">
+            <div class="border rounded p-3">
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded p-2 me-3">
+                  <i class="feather icon-clock text-primary" style="font-size: 24px;"></i>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Horario/Turno</small>
+                  <strong>{{ user()!.horario?.nombre || 'Sin asignar' }}</strong>
+                  @if (user()!.horario) {
+                    <br />
+                    <small class="text-muted">
+                      {{ user()!.horario!.hora_inicio }} - {{ user()!.horario!.hora_fin }}
+                    </small>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fecha de creación -->
+          <div class="col-md-6 mb-4">
+            <div class="border rounded p-3">
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded p-2 me-3">
+                  <i class="feather icon-calendar text-primary" style="font-size: 24px;"></i>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Fecha de registro</small>
+                  <strong>{{ user()!.created_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Última actualización -->
+          <div class="col-md-6 mb-4">
+            <div class="border rounded p-3">
+              <div class="d-flex align-items-center">
+                <div class="bg-light rounded p-2 me-3">
+                  <i class="feather icon-refresh-cw text-primary" style="font-size: 24px;"></i>
+                </div>
+                <div>
+                  <small class="text-muted d-block">Última actualización</small>
+                  <strong>{{ user()!.updated_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Último cambio de contraseña -->
+          @if (user()!.password_changed_at) {
+            <div class="col-md-6 mb-4">
+              <div class="border rounded p-3">
+                <div class="d-flex align-items-center">
+                  <div class="bg-light rounded p-2 me-3">
+                    <i class="feather icon-lock text-primary" style="font-size: 24px;"></i>
+                  </div>
+                  <div>
+                    <small class="text-muted d-block">Último cambio de contraseña</small>
+                    <strong>{{ user()!.password_changed_at | date:'dd/MM/yyyy HH:mm' }}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Rol y permisos -->
+        @if (user()!.rol) {
+          <hr />
+          <h6 class="mb-3">Rol y Permisos</h6>
+          <div class="border rounded p-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">{{ user()!.rol!.nombre }}</h6>
+                <p class="text-muted small mb-0">{{ user()!.rol!.descripcion || 'Sin descripción' }}</p>
+              </div>
+              @if (user()!.rol!.nivel_acceso) {
+                <span class="badge bg-light text-dark">
+                  Nivel de acceso: {{ user()!.rol!.nivel_acceso }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+}
+
+<!-- Modal de confirmación de desactivación -->
+<ng-template #deactivateModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmar Desactivación</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (user()) {
+      <p>¿Está seguro que desea desactivar al usuario <strong>{{ user()!.nombre_completo }}</strong>?</p>
+      <p class="text-muted small">El usuario no podrá acceder al sistema hasta que sea reactivado.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeactivate()">
+      <i class="feather icon-user-x me-1"></i> Desactivar
+    </button>
+  </div>
+</ng-template>

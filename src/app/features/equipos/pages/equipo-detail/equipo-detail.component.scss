@@ -1,0 +1,14 @@
+// ============================================================================
+// Equipo Detail Component Styles
+// ============================================================================
+
+// La mayoría de estilos vienen de Bootstrap y SharedModule
+
+.list-group-item {
+  cursor: pointer;
+
+  &.active {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-color: #007bff;
+  }
+}

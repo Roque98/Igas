@@ -1,0 +1,110 @@
+<!-- ============================================================================
+  Mantenimiento Calendar Component - Template
+============================================================================= -->
+
+<div class="row">
+  <div class="col-12">
+    <app-card [hidHeader]="true">
+      <!-- Header -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">Calendario de Mantenimientos</h4>
+          <p class="text-muted mb-0">{{ nombreMes() }} {{ anioActual() }}</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-primary" (click)="goToList()">
+            <i class="feather icon-list me-1"></i>Ver Lista
+          </button>
+          <button type="button" class="btn btn-primary" routerLink="/mantenimientos/nuevo">
+            <i class="feather icon-plus me-1"></i>Nuevo
+          </button>
+        </div>
+      </div>
+
+      <!-- Controles del calendario -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2 align-items-center">
+          <button type="button" class="btn btn-outline-secondary" (click)="mesAnterior()">
+            <i class="feather icon-chevron-left"></i>
+          </button>
+          <select class="form-select" style="width: auto;" [ngModel]="mesActual()" (ngModelChange)="onMesChange($event)">
+            @for (mes of meses; track $index) {
+              <option [value]="$index + 1">{{ mes }}</option>
+            }
+          </select>
+          <select class="form-select" style="width: auto;" [ngModel]="anioActual()" (ngModelChange)="onAnioChange($event)">
+            @for (anio of anios; track anio) {
+              <option [value]="anio">{{ anio }}</option>
+            }
+          </select>
+          <button type="button" class="btn btn-outline-secondary" (click)="mesSiguiente()">
+            <i class="feather icon-chevron-right"></i>
+          </button>
+        </div>
+        <button type="button" class="btn btn-outline-primary" (click)="irAHoy()">
+          <i class="feather icon-calendar me-1"></i>Hoy
+        </button>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      } @else {
+        <!-- Calendario -->
+        <div class="calendar-grid">
+          <!-- Encabezado de días -->
+          <div class="calendar-header">
+            @for (dia of diasSemana; track dia) {
+              <div class="calendar-header-cell">{{ dia }}</div>
+            }
+          </div>
+
+          <!-- Días del calendario -->
+          <div class="calendar-body">
+            @for (dia of diasCalendario(); track dia.fecha.getTime()) {
+              <div class="calendar-cell"
+                   [class.other-month]="!dia.esMesActual"
+                   [class.today]="dia.esHoy"
+                   (dblclick)="newMantenimientoEnFecha(dia)">
+                <div class="cell-header">
+                  <span class="day-number" [class.today-number]="dia.esHoy">{{ dia.dia }}</span>
+                  @if (dia.esMesActual && dia.mantenimientos.length === 0) {
+                    <button type="button" class="btn btn-sm btn-icon add-btn"
+                            ngbTooltip="Agregar mantenimiento"
+                            (click)="newMantenimientoEnFecha(dia)">
+                      <i class="feather icon-plus"></i>
+                    </button>
+                  }
+                </div>
+                <div class="cell-content">
+                  @for (mtn of dia.mantenimientos; track mtn.id) {
+                    <div class="mtn-pill"
+                         [style.borderLeftColor]="mtn.tipo_mantenimiento_color"
+                         [style.backgroundColor]="mtn.estatus_color + '20'"
+                         [ngbTooltip]="mtn.cliente_nombre + ' - ' + mtn.tipo_mantenimiento_nombre"
+                         (click)="viewMantenimiento(mtn); $event.stopPropagation()">
+                      <span class="mtn-folio">{{ mtn.folio }}</span>
+                      <span class="mtn-cliente text-truncate">{{ mtn.cliente_nombre }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="mt-4 d-flex flex-wrap gap-3">
+          <small class="text-muted">
+            <i class="feather icon-info me-1"></i>
+            Doble clic en un día para agregar mantenimiento
+          </small>
+        </div>
+      }
+    </app-card>
+  </div>
+</div>

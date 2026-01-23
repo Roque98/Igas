@@ -1,0 +1,163 @@
+<!-- ============================================================================
+  Notification Preferences - Preferencias de Notificaciones
+============================================================================ -->
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <h5 class="mb-0">
+              <i class="feather icon-settings me-2"></i>
+              Preferencias de Notificaciones
+            </h5>
+            <small class="text-muted">Configura qué notificaciones deseas recibir</small>
+          </div>
+          <div class="d-flex gap-2">
+            <a routerLink="/notificaciones" class="btn btn-outline-secondary btn-sm">
+              <i class="feather icon-arrow-left me-1"></i>
+              Volver
+            </a>
+            <button class="btn btn-outline-warning btn-sm" (click)="resetToDefaults()">
+              <i class="feather icon-refresh-cw me-1"></i>
+              Restaurar predeterminados
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        @if (loading()) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Cargando preferencias...</p>
+          </div>
+        } @else if (preferencias().length === 0) {
+          <div class="text-center py-5">
+            <i class="feather icon-alert-circle" style="font-size: 48px; color: #ddd;"></i>
+            <p class="text-muted mt-3">No se pudieron cargar las preferencias de notificaciones.</p>
+            <button class="btn btn-primary btn-sm" (click)="loadPreferencias()">
+              <i class="feather icon-refresh-cw me-1"></i>
+              Reintentar
+            </button>
+          </div>
+        } @else {
+          <!-- Leyenda -->
+          <div class="alert alert-light mb-4">
+            <div class="row">
+              <div class="col-md-6">
+                <i class="feather icon-bell me-1 text-primary"></i>
+                <strong>Push:</strong> Notificaciones en la aplicación (campana)
+              </div>
+              <div class="col-md-6">
+                <i class="feather icon-mail me-1 text-info"></i>
+                <strong>Email:</strong> Notificaciones por correo electrónico
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferencias por categoría -->
+          @for (categoria of preferencias(); track categoria.categoria) {
+            <div class="preferences-category mb-4">
+              <div class="category-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h6 class="mb-0">
+                  <i [class]="'feather icon-' + getCategoryIcon(categoria.categoria) + ' me-2 text-primary'"></i>
+                  {{ categoria.categoriaNombre }}
+                </h6>
+                <div class="btn-group btn-group-sm">
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    ngbTooltip="Activar todas las push"
+                    (click)="toggleAllPush(categoria, true)"
+                  >
+                    <i class="feather icon-bell"></i> Todas
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    ngbTooltip="Desactivar todas las push"
+                    (click)="toggleAllPush(categoria, false)"
+                  >
+                    <i class="feather icon-bell-off"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 50%;">Tipo de notificación</th>
+                      <th class="text-center" style="width: 25%;">
+                        <i class="feather icon-bell me-1"></i> Push
+                      </th>
+                      <th class="text-center" style="width: 25%;">
+                        <i class="feather icon-mail me-1"></i> Email
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (pref of categoria.preferencias; track pref.tipo_codigo) {
+                      <tr [class.saving]="isSaving(pref.tipo_codigo)">
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <span
+                              class="notification-icon-sm me-2"
+                              [style.background-color]="pref.color || '#6c757d'"
+                            >
+                              <i [class]="'feather icon-' + (pref.icono || 'bell')"></i>
+                            </span>
+                            <div>
+                              <strong>{{ pref.tipo_nombre }}</strong>
+                              @if (pref.tipo_descripcion) {
+                                <br>
+                                <small class="text-muted">{{ pref.tipo_descripcion }}</small>
+                              }
+                            </div>
+                          </div>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="form-check form-switch d-inline-block">
+                            <input
+                              type="checkbox"
+                              class="form-check-input"
+                              [id]="'push-' + pref.tipo_codigo"
+                              [checked]="pref.recibir_push"
+                              [disabled]="isSaving(pref.tipo_codigo)"
+                              (change)="onPreferenciaChange(pref, 'push')"
+                            />
+                          </div>
+                          @if (isSaving(pref.tipo_codigo)) {
+                            <span class="spinner-border spinner-border-sm ms-1" role="status"></span>
+                          }
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="form-check form-switch d-inline-block">
+                            <input
+                              type="checkbox"
+                              class="form-check-input"
+                              [id]="'email-' + pref.tipo_codigo"
+                              [checked]="pref.recibir_email"
+                              [disabled]="isSaving(pref.tipo_codigo) || !pref.default_email"
+                              (change)="onPreferenciaChange(pref, 'email')"
+                            />
+                          </div>
+                          @if (!pref.default_email) {
+                            <i
+                              class="feather icon-info text-muted ms-1"
+                              ngbTooltip="Este tipo de notificación no envía emails"
+                            ></i>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

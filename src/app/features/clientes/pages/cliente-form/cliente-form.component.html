@@ -1,0 +1,235 @@
+<!-- Loading State -->
+@if (loadingCliente()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando cliente...</p>
+  </div>
+}
+
+@if (!loadingCliente()) {
+  <app-card [options]="false" [cardTitle]="isEditMode() ? 'Editar Cliente' : 'Nuevo Cliente'">
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Información básica -->
+        <div class="col-12">
+          <h6 class="text-muted mb-3">
+            <i class="feather icon-info me-1"></i>
+            Información Básica
+          </h6>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Código Cliente</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="codigo_cliente"
+            placeholder="Ej: CLI-001"
+          />
+        </div>
+
+        <div class="col-md-5 mb-3">
+          <label class="form-label">Razón Social <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('razon_social')"
+            formControlName="razon_social"
+            placeholder="Razón social del cliente"
+          />
+          @if (isFieldInvalid('razon_social')) {
+            <div class="invalid-feedback">{{ getFieldError('razon_social') }}</div>
+          }
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Nombre Comercial</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="nombre_comercial"
+            placeholder="Nombre comercial (si es diferente)"
+          />
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">RFC</label>
+          <input
+            type="text"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('rfc')"
+            formControlName="rfc"
+            placeholder="XAXX010101000"
+            (blur)="formatRfc()"
+            maxlength="13"
+          />
+          @if (isFieldInvalid('rfc')) {
+            <div class="invalid-feedback">{{ getFieldError('rfc') }}</div>
+          }
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Tipo Cliente <span class="text-danger">*</span></label>
+          <select
+            class="form-select"
+            [class.is-invalid]="isFieldInvalid('tipo_cliente')"
+            formControlName="tipo_cliente"
+          >
+            @for (tipo of tiposCliente; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Estatus <span class="text-danger">*</span></label>
+          <select
+            class="form-select"
+            [class.is-invalid]="isFieldInvalid('estatus_cliente')"
+            formControlName="estatus_cliente"
+          >
+            @for (estatus of estatusCliente; track estatus.value) {
+              <option [value]="estatus.value">{{ estatus.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Tipo de Servicio</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="tipo_servicio"
+            placeholder="Ej: Premium, Básico"
+          />
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="col-12 mt-3">
+          <h6 class="text-muted mb-3">
+            <i class="feather icon-phone me-1"></i>
+            Información de Contacto
+          </h6>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Teléfono Principal</label>
+          <input
+            type="tel"
+            class="form-control"
+            formControlName="telefono"
+            placeholder="Ej: 55 1234 5678"
+          />
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Teléfono Secundario</label>
+          <input
+            type="tel"
+            class="form-control"
+            formControlName="telefono_secundario"
+            placeholder="Teléfono alternativo"
+          />
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Email Principal</label>
+          <input
+            type="email"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('email')"
+            formControlName="email"
+            placeholder="correo@empresa.com"
+          />
+          @if (isFieldInvalid('email')) {
+            <div class="invalid-feedback">{{ getFieldError('email') }}</div>
+          }
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Email Secundario</label>
+          <input
+            type="email"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('email_secundario')"
+            formControlName="email_secundario"
+            placeholder="Email alternativo"
+          />
+          @if (isFieldInvalid('email_secundario')) {
+            <div class="invalid-feedback">{{ getFieldError('email_secundario') }}</div>
+          }
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">Contacto Principal</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="contacto_principal"
+            placeholder="Nombre del contacto principal"
+          />
+        </div>
+
+        <!-- Soporte remoto -->
+        <div class="col-12 mt-3">
+          <h6 class="text-muted mb-3">
+            <i class="feather icon-monitor me-1"></i>
+            Soporte Remoto
+          </h6>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label">ID AnyDesk</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="anydesk"
+            placeholder="Ej: 123 456 789"
+          />
+          <small class="text-muted">ID para conexión remota</small>
+        </div>
+
+        <!-- Notas -->
+        <div class="col-12 mt-3">
+          <h6 class="text-muted mb-3">
+            <i class="feather icon-edit-3 me-1"></i>
+            Notas Adicionales
+          </h6>
+        </div>
+
+        <div class="col-12 mb-3">
+          <textarea
+            class="form-control"
+            formControlName="notas"
+            rows="4"
+            placeholder="Notas o comentarios sobre el cliente..."
+          ></textarea>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 mt-4">
+          <hr>
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()" [disabled]="loading()">
+              <i class="feather icon-x me-1"></i>
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+                Guardando...
+              } @else {
+                <i class="feather icon-save me-1"></i>
+                {{ isEditMode() ? 'Actualizar' : 'Crear Cliente' }}
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </app-card>
+}

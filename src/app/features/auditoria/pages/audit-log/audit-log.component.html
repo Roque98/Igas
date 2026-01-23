@@ -1,0 +1,398 @@
+<div class="row">
+  <!-- Header -->
+  <div class="col-12 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-1">Registro de Auditoría</h4>
+        <p class="text-muted mb-0">Historial de cambios y eventos de sesión del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="col-md-3 col-sm-6 mb-4">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <h6 class="text-white">Total Cambios</h6>
+        <h3 class="text-white mb-0">{{ auditStats().totalCambios | number }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-4">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <h6 class="text-white">Cambios Hoy</h6>
+        <h3 class="text-white mb-0">{{ auditStats().cambiosHoy | number }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-4">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <h6 class="text-white">Logins Hoy</h6>
+        <h3 class="text-white mb-0">{{ sessionStats().loginsHoy | number }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-sm-6 mb-4">
+    <div class="card bg-danger text-white">
+      <div class="card-body">
+        <h6 class="text-white">Intentos Fallidos</h6>
+        <h3 class="text-white mb-0">{{ sessionStats().loginsFallidosHoy | number }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <ul ngbNav #nav="ngbNav" class="nav-tabs card-header-tabs" (navChange)="onTabChange($event.nextId)">
+          <li [ngbNavItem]="'cambios'">
+            <button ngbNavLink>
+              <i class="feather icon-edit-2 me-2"></i>Cambios en Datos
+            </button>
+            <ng-template ngbNavContent>
+              <!-- Filtros de Auditoría -->
+              <div class="card-body border-bottom">
+                <div class="row g-3">
+                  <div class="col-md-2">
+                    <label class="form-label">Tabla</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filterTabla">
+                      <option value="">Todas</option>
+                      @for (tabla of tablasDisponibles; track tabla.value) {
+                        <option [value]="tabla.value">{{ tabla.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Acción</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filterAccion">
+                      <option value="">Todas</option>
+                      <option value="INSERT">Creación</option>
+                      <option value="UPDATE">Actualización</option>
+                      <option value="DELETE">Eliminación</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Desde</label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterFechaDesde">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterFechaHasta">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Usuario..."
+                           [(ngModel)]="filterSearch">
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button class="btn btn-primary btn-sm" (click)="applyAuditFilters()">
+                      <i class="feather icon-search"></i>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" (click)="clearAuditFilters()">
+                      <i class="feather icon-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabla de Auditoría -->
+              <div class="card-body p-0">
+                @if (loadingAudit()) {
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </div>
+                } @else if (auditLogs().length === 0) {
+                  <div class="text-center py-5 text-muted">
+                    <i class="feather icon-inbox" style="font-size: 48px;"></i>
+                    <p class="mt-3">No hay registros de auditoría</p>
+                  </div>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="bg-light">
+                        <tr>
+                          <th style="width: 160px;">Fecha</th>
+                          <th style="width: 100px;">Tabla</th>
+                          <th style="width: 100px;">Acción</th>
+                          <th>Usuario</th>
+                          <th>Cambios</th>
+                          <th style="width: 80px;">Detalle</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (log of auditLogs(); track log.id) {
+                          <tr>
+                            <td>
+                              <small>{{ formatDate(log.created_at) }}</small>
+                            </td>
+                            <td>
+                              <span class="badge bg-light text-dark">{{ getTablaNombre(log.tabla) }}</span>
+                            </td>
+                            <td>
+                              <span class="badge bg-{{ getAccionColor(log.accion) }}">
+                                {{ getAccionNombre(log.accion) }}
+                              </span>
+                            </td>
+                            <td>
+                              @if (log.usuario_nombre) {
+                                {{ log.usuario_nombre }}
+                                <br><small class="text-muted">{{ log.usuario_email }}</small>
+                              } @else {
+                                <span class="text-muted">Sistema</span>
+                              }
+                            </td>
+                            <td>
+                              @if (log.accion === 'UPDATE') {
+                                @for (field of getChangedFields(log); track field; let i = $index) {
+                                  @if (i < 3) {
+                                    <span class="badge bg-light text-dark me-1">{{ field }}</span>
+                                  }
+                                }
+                                @if (getChangedFields(log).length > 3) {
+                                  <span class="badge bg-secondary">+{{ getChangedFields(log).length - 3 }}</span>
+                                }
+                              } @else {
+                                <span class="text-muted">-</span>
+                              }
+                            </td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-primary" (click)="viewDetail(log)"
+                                      ngbTooltip="Ver detalle">
+                                <i class="feather icon-eye"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Paginación -->
+                  @if (auditTotal() > auditPageSize()) {
+                    <div class="card-footer">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                          Mostrando {{ (auditPage() - 1) * auditPageSize() + 1 }} -
+                          {{ Math.min(auditPage() * auditPageSize(), auditTotal()) }} de {{ auditTotal() }}
+                        </small>
+                        <ngb-pagination
+                          [collectionSize]="auditTotal()"
+                          [page]="auditPage()"
+                          [pageSize]="auditPageSize()"
+                          (pageChange)="onAuditPageChange($event)"
+                          [maxSize]="5"
+                          [rotate]="true"
+                          [boundaryLinks]="true"
+                          size="sm">
+                        </ngb-pagination>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="'sesiones'">
+            <button ngbNavLink>
+              <i class="feather icon-log-in me-2"></i>Eventos de Sesión
+            </button>
+            <ng-template ngbNavContent>
+              <!-- Filtros de Sesiones -->
+              <div class="card-body border-bottom">
+                <div class="row g-3">
+                  <div class="col-md-2">
+                    <label class="form-label">Evento</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="filterSessionAccion">
+                      <option value="">Todos</option>
+                      <option value="login">Login</option>
+                      <option value="logout">Logout</option>
+                      <option value="login_failed">Intento Fallido</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Desde</label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterSessionFechaDesde">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" class="form-control form-control-sm" [(ngModel)]="filterSessionFechaHasta">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Email</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="Buscar por email..."
+                           [(ngModel)]="filterSessionEmail">
+                  </div>
+                  <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button class="btn btn-primary btn-sm" (click)="applySessionFilters()">
+                      <i class="feather icon-search"></i> Filtrar
+                    </button>
+                    <button class="btn btn-secondary btn-sm" (click)="clearSessionFilters()">
+                      <i class="feather icon-x"></i> Limpiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabla de Sesiones -->
+              <div class="card-body p-0">
+                @if (loadingSessions()) {
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando...</span>
+                    </div>
+                  </div>
+                } @else if (sessionLogs().length === 0) {
+                  <div class="text-center py-5 text-muted">
+                    <i class="feather icon-inbox" style="font-size: 48px;"></i>
+                    <p class="mt-3">No hay eventos de sesión registrados</p>
+                  </div>
+                } @else {
+                  <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                      <thead class="bg-light">
+                        <tr>
+                          <th style="width: 160px;">Fecha</th>
+                          <th style="width: 130px;">Evento</th>
+                          <th>Usuario</th>
+                          <th>Email</th>
+                          <th>Navegador</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (log of sessionLogs(); track log.id) {
+                          <tr>
+                            <td>
+                              <small>{{ formatDate(log.created_at) }}</small>
+                            </td>
+                            <td>
+                              <span class="badge bg-{{ getSessionAccionColor(log.accion) }}">
+                                {{ getSessionAccionNombre(log.accion) }}
+                              </span>
+                            </td>
+                            <td>
+                              {{ log.usuario_nombre || '-' }}
+                            </td>
+                            <td>
+                              <small>{{ log.email || '-' }}</small>
+                            </td>
+                            <td>
+                              <small class="text-muted" [ngbTooltip]="log.user_agent">
+                                {{ log.user_agent ? (log.user_agent | slice:0:50) + '...' : '-' }}
+                              </small>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- Paginación -->
+                  @if (sessionTotal() > sessionPageSize()) {
+                    <div class="card-footer">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                          Mostrando {{ (sessionPage() - 1) * sessionPageSize() + 1 }} -
+                          {{ Math.min(sessionPage() * sessionPageSize(), sessionTotal()) }} de {{ sessionTotal() }}
+                        </small>
+                        <ngb-pagination
+                          [collectionSize]="sessionTotal()"
+                          [page]="sessionPage()"
+                          [pageSize]="sessionPageSize()"
+                          (pageChange)="onSessionPageChange($event)"
+                          [maxSize]="5"
+                          [rotate]="true"
+                          [boundaryLinks]="true"
+                          size="sm">
+                        </ngb-pagination>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </ng-template>
+          </li>
+        </ul>
+      </div>
+      <div [ngbNavOutlet]="nav"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalle -->
+@if (showDetailModal() && selectedLog()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <span class="badge bg-{{ getAccionColor(selectedLog()!.accion) }} me-2">
+              {{ getAccionNombre(selectedLog()!.accion) }}
+            </span>
+            {{ getTablaNombre(selectedLog()!.tabla) }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeDetailModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Fecha:</strong>
+              <p class="mb-0">{{ formatDate(selectedLog()!.created_at) }}</p>
+            </div>
+            <div class="col-md-6">
+              <strong>Usuario:</strong>
+              <p class="mb-0">
+                {{ selectedLog()!.usuario_nombre || 'Sistema' }}
+                @if (selectedLog()!.usuario_email) {
+                  <br><small class="text-muted">{{ selectedLog()!.usuario_email }}</small>
+                }
+              </p>
+            </div>
+          </div>
+
+          @if (selectedLog()!.accion === 'UPDATE' && selectedLog()!.datos_anteriores && selectedLog()!.datos_nuevos) {
+            <h6 class="mt-4 mb-3">Campos Modificados</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered">
+                <thead class="bg-light">
+                  <tr>
+                    <th>Campo</th>
+                    <th>Valor Anterior</th>
+                    <th>Valor Nuevo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (field of getChangedFields(selectedLog()!); track field) {
+                    <tr>
+                      <td><strong>{{ field }}</strong></td>
+                      <td class="text-danger">
+                        <small>{{ selectedLog()!.datos_anteriores![field] | json }}</small>
+                      </td>
+                      <td class="text-success">
+                        <small>{{ selectedLog()!.datos_nuevos![field] | json }}</small>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else if (selectedLog()!.accion === 'INSERT' && selectedLog()!.datos_nuevos) {
+            <h6 class="mt-4 mb-3">Datos Creados</h6>
+            <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow: auto;">{{ formatJson(selectedLog()!.datos_nuevos) }}</pre>
+          } @else if (selectedLog()!.accion === 'DELETE' && selectedLog()!.datos_anteriores) {
+            <h6 class="mt-4 mb-3">Datos Eliminados</h6>
+            <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow: auto;">{{ formatJson(selectedLog()!.datos_anteriores) }}</pre>
+          }
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

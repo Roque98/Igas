@@ -1,0 +1,203 @@
+<!-- ============================================================================
+  Instalacion Form Component - Template
+============================================================================= -->
+
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <app-card [hidHeader]="true">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">{{ isEditMode() ? 'Editar Instalación' : 'Nueva Instalación' }}</h4>
+          <p class="text-muted mb-0">
+            {{ isEditMode() ? 'Modifica los datos de la instalación' : 'Programa una nueva instalación' }}
+          </p>
+        </div>
+        <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+          <i class="feather icon-x me-1"></i>Cancelar
+        </button>
+      </div>
+
+      <!-- Loading -->
+      @if (loadingInstalacion()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      } @else {
+        <!-- Formulario -->
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Cliente y Sucursal -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Cliente <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="cliente_id"
+                      [class.is-invalid]="isFieldInvalid('cliente_id')">
+                <option value="">Seleccionar cliente...</option>
+                @for (cliente of clientes(); track cliente.id) {
+                  <option [value]="cliente.id">{{ cliente.razon_social }}</option>
+                }
+              </select>
+              @if (isFieldInvalid('cliente_id')) {
+                <div class="invalid-feedback">{{ getFieldError('cliente_id') }}</div>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Sucursal</label>
+              <select class="form-select" formControlName="sucursal_id"
+                      [disabled]="sucursales().length === 0">
+                <option value="">Seleccionar sucursal...</option>
+                @for (suc of sucursales(); track suc.id) {
+                  <option [value]="suc.id">
+                    {{ suc.nombre }}
+                    @if (suc.es_matriz) { (Matriz) }
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Módulos a instalar -->
+          @if (!isEditMode()) {
+            <div class="mb-4">
+              <label class="form-label">Módulos a instalar <span class="text-danger">*</span></label>
+              <div class="row g-2">
+                @for (modulo of modulos(); track modulo.id) {
+                  <div class="col-md-6">
+                    <div class="modulo-card" [class.selected]="isModuloSelected(modulo.id)"
+                         (click)="toggleModulo(modulo.id)">
+                      <div class="form-check">
+                        <input type="checkbox" class="form-check-input"
+                               [checked]="isModuloSelected(modulo.id)"
+                               (click)="$event.stopPropagation()">
+                        <label class="form-check-label">
+                          <strong>{{ modulo.nombre }}</strong>
+                          @if (modulo.version_actual) {
+                            <small class="text-muted ms-1">v{{ modulo.version_actual }}</small>
+                          }
+                        </label>
+                      </div>
+                      @if (modulo.descripcion) {
+                        <small class="text-muted d-block mt-1">{{ modulo.descripcion }}</small>
+                      }
+                      @if (modulo.requiere_capacitacion) {
+                        <span class="badge bg-info mt-1">
+                          <i class="feather icon-book me-1"></i>Requiere capacitación
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              @if (selectedModulos().size === 0) {
+                <small class="text-muted">Seleccione los módulos que se instalarán</small>
+              } @else {
+                <small class="text-success">{{ selectedModulos().size }} módulo(s) seleccionado(s)</small>
+              }
+            </div>
+          }
+
+          <!-- Fecha, Hora y Técnico -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <label class="form-label">Fecha Programada <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" formControlName="fecha_programada"
+                     [class.is-invalid]="isFieldInvalid('fecha_programada')">
+              @if (isFieldInvalid('fecha_programada')) {
+                <div class="invalid-feedback">{{ getFieldError('fecha_programada') }}</div>
+              }
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Hora</label>
+              <input type="time" class="form-control" formControlName="hora_programada">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Técnico Asignado</label>
+              <select class="form-select" formControlName="tecnico_id">
+                <option value="">Sin asignar</option>
+                @for (tec of tecnicos(); track tec.id) {
+                  <option [value]="tec.id">{{ tec.nombre_completo }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Contacto del cliente -->
+          <h6 class="mb-3">Datos de contacto en sitio</h6>
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <label class="form-label">Nombre del contacto</label>
+              <input type="text" class="form-control" formControlName="contacto_cliente"
+                     placeholder="Nombre completo">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Teléfono</label>
+              <input type="tel" class="form-control" formControlName="telefono_contacto"
+                     placeholder="Teléfono de contacto">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" formControlName="email_contacto"
+                     placeholder="Email" [class.is-invalid]="isFieldInvalid('email_contacto')">
+              @if (isFieldInvalid('email_contacto')) {
+                <div class="invalid-feedback">{{ getFieldError('email_contacto') }}</div>
+              }
+            </div>
+          </div>
+
+          <!-- Notas internas -->
+          <div class="mb-4">
+            <label class="form-label">Notas internas</label>
+            <textarea class="form-control" formControlName="notas_internas" rows="3"
+                      placeholder="Notas o instrucciones especiales para el técnico..."></textarea>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ isEditMode() ? 'Guardar Cambios' : 'Crear Instalación' }}
+            </button>
+          </div>
+        </form>
+      }
+    </app-card>
+  </div>
+
+  <!-- Panel lateral de ayuda -->
+  <div class="col-12 col-lg-4">
+    <app-card cardTitle="Información" [options]="false">
+      <div class="help-content">
+        <h6><i class="feather icon-box text-primary me-2"></i>Módulos</h6>
+        <p class="small text-muted">
+          Seleccione los módulos que se instalarán. Cada módulo puede tener
+          un checklist de verificación asociado.
+        </p>
+
+        <hr>
+
+        <h6><i class="feather icon-check-square text-success me-2"></i>Proceso de Instalación</h6>
+        <ul class="small text-muted ps-3">
+          <li>Programada: Instalación agendada</li>
+          <li>En proceso: Técnico trabajando</li>
+          <li>Pendientes: Hay items por resolver</li>
+          <li>Cerrada: Instalación completada y firmada</li>
+        </ul>
+
+        <hr>
+
+        <h6><i class="feather icon-edit text-warning me-2"></i>Firma Digital</h6>
+        <p class="small text-muted mb-0">
+          Al finalizar la instalación, el cliente podrá firmar
+          digitalmente para confirmar la entrega.
+        </p>
+      </div>
+    </app-card>
+  </div>
+</div>

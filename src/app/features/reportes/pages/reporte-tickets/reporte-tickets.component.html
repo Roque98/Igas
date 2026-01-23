@@ -1,0 +1,373 @@
+<!-- ============================================================================
+  Reporte Tickets Component - Template
+============================================================================= -->
+
+<div class="row">
+  <!-- Header -->
+  <div class="col-12 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-1">Reporte de Tickets</h4>
+        <p class="text-muted mb-0">Análisis detallado de tickets de soporte</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-success" (click)="exportToExcel()" [disabled]="loading()">
+          <i class="feather icon-file-text me-1"></i>Excel
+        </button>
+        <button class="btn btn-outline-danger" (click)="exportToPDF()" [disabled]="loading()">
+          <i class="feather icon-file me-1"></i>PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="col-12 mb-4">
+    <app-card [hidHeader]="true">
+      <div class="row g-3">
+        <div class="col-md-2">
+          <label class="form-label small">Fecha Inicio</label>
+          <input type="date" class="form-control form-control-sm"
+                 [ngModel]="filters().fecha_inicio"
+                 (ngModelChange)="updateFilter('fecha_inicio', $event)">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Fecha Fin</label>
+          <input type="date" class="form-control form-control-sm"
+                 [ngModel]="filters().fecha_fin"
+                 (ngModelChange)="updateFilter('fecha_fin', $event)">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Cliente</label>
+          <select class="form-select form-select-sm"
+                  [ngModel]="filters().cliente_id"
+                  (ngModelChange)="updateFilter('cliente_id', $event)">
+            <option value="">Todos</option>
+            @for (cliente of clientes(); track cliente.id) {
+              <option [value]="cliente.id">{{ cliente.nombre_comercial }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Categoría</label>
+          <select class="form-select form-select-sm"
+                  [ngModel]="filters().categoria_id"
+                  (ngModelChange)="updateFilter('categoria_id', $event)">
+            <option value="">Todas</option>
+            @for (cat of categorias(); track cat.id) {
+              <option [value]="cat.id">{{ cat.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small">Prioridad</label>
+          <select class="form-select form-select-sm"
+                  [ngModel]="filters().prioridad"
+                  (ngModelChange)="updateFilter('prioridad', $event)">
+            <option value="">Todas</option>
+            @for (p of prioridades; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end gap-2">
+          <button class="btn btn-primary btn-sm" (click)="applyFilters()" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            } @else {
+              <i class="feather icon-search me-1"></i>
+            }
+            Filtrar
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
+            <i class="feather icon-x"></i>
+          </button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+
+  <!-- KPIs -->
+  @if (resumen()) {
+    <div class="col-12 mb-4">
+      <div class="row g-3">
+        <!-- Total Tickets -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" cardClass="bg-primary text-white">
+            <div class="text-center">
+              <h3 class="mb-0">{{ resumen()!.total }}</h3>
+              <small>Total Tickets</small>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Abiertos -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" cardClass="bg-warning">
+            <div class="text-center">
+              <h3 class="mb-0">{{ resumen()!.abiertos }}</h3>
+              <small>Abiertos</small>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Cerrados -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" cardClass="bg-success text-white">
+            <div class="text-center">
+              <h3 class="mb-0">{{ resumen()!.cerrados }}</h3>
+              <small>Cerrados</small>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Cumplimiento SLA -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" [cardClass]="cumplimientoSLA() >= 80 ? 'bg-success text-white' : cumplimientoSLA() >= 60 ? 'bg-warning' : 'bg-danger text-white'">
+            <div class="text-center">
+              <h3 class="mb-0">{{ formatPercent(resumen()!.cumplimiento_sla_resolucion_pct) }}</h3>
+              <small>Cumplimiento SLA</small>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Tiempo Promedio Respuesta -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" cardClass="bg-info text-white">
+            <div class="text-center">
+              <h3 class="mb-0">{{ formatHours(resumen()!.tiempo_promedio_respuesta_hrs) }}</h3>
+              <small>Prom. Respuesta</small>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Tiempo Promedio Resolución -->
+        <div class="col-md-2 col-6">
+          <app-card [hidHeader]="true" cardClass="bg-secondary text-white">
+            <div class="text-center">
+              <h3 class="mb-0">{{ formatHours(resumen()!.tiempo_promedio_resolucion_hrs) }}</h3>
+              <small>Prom. Resolución</small>
+            </div>
+          </app-card>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Gráficas -->
+  <div class="col-12 mb-4">
+    <div class="row g-3">
+      <!-- Tendencia Mensual -->
+      <div class="col-md-8">
+        <app-card cardTitle="Tendencia Mensual" [options]="false">
+          @if (loadingTendencia()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          } @else if (chartTendencia) {
+            <apx-chart
+              [series]="chartTendencia.series"
+              [chart]="chartTendencia.chart"
+              [xaxis]="chartTendencia.xaxis"
+              [colors]="chartTendencia.colors"
+              [stroke]="chartTendencia.stroke"
+              [fill]="chartTendencia.fill"
+              [dataLabels]="chartTendencia.dataLabels"
+              [legend]="chartTendencia.legend">
+            </apx-chart>
+          } @else {
+            <div class="text-center py-5 text-muted">
+              <i class="feather icon-bar-chart-2" style="font-size: 3rem;"></i>
+              <p class="mt-2">Sin datos para mostrar</p>
+            </div>
+          }
+        </app-card>
+      </div>
+
+      <!-- Semáforo SLA -->
+      <div class="col-md-4">
+        <app-card cardTitle="Estado SLA" [options]="false">
+          @if (loadingResumen()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          } @else if (chartSemaforo && resumen()) {
+            <apx-chart
+              [series]="chartSemaforo.series"
+              [chart]="chartSemaforo.chart"
+              [plotOptions]="chartSemaforo.plotOptions"
+              [labels]="chartSemaforo.labels"
+              [colors]="chartSemaforo.colors">
+            </apx-chart>
+            <div class="d-flex justify-content-around mt-2">
+              <div class="text-center">
+                <span class="badge" style="background-color: #28a745;">{{ resumen()!.semaforo_verde }}</span>
+                <small class="d-block text-muted">Verde</small>
+              </div>
+              <div class="text-center">
+                <span class="badge" style="background-color: #ffc107; color: #333;">{{ resumen()!.semaforo_amarillo }}</span>
+                <small class="d-block text-muted">Amarillo</small>
+              </div>
+              <div class="text-center">
+                <span class="badge" style="background-color: #dc3545;">{{ resumen()!.semaforo_rojo }}</span>
+                <small class="d-block text-muted">Rojo</small>
+              </div>
+            </div>
+          }
+        </app-card>
+      </div>
+
+      <!-- Por Prioridad -->
+      <div class="col-md-4">
+        <app-card cardTitle="Por Prioridad" [options]="false">
+          @if (loadingResumen()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          } @else if (chartPrioridad) {
+            <apx-chart
+              [series]="chartPrioridad.series"
+              [chart]="chartPrioridad.chart"
+              [labels]="chartPrioridad.labels"
+              [colors]="chartPrioridad.colors"
+              [legend]="chartPrioridad.legend"
+              [dataLabels]="chartPrioridad.dataLabels">
+            </apx-chart>
+          } @else {
+            <div class="text-center py-5 text-muted">
+              <i class="feather icon-pie-chart" style="font-size: 3rem;"></i>
+              <p class="mt-2">Sin datos</p>
+            </div>
+          }
+        </app-card>
+      </div>
+
+      <!-- Por Categoría -->
+      <div class="col-md-8">
+        <app-card cardTitle="Top 5 Categorías" [options]="false">
+          @if (loadingResumen()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary"></div>
+            </div>
+          } @else if (chartCategoria) {
+            <apx-chart
+              [series]="chartCategoria.series"
+              [chart]="chartCategoria.chart"
+              [plotOptions]="chartCategoria.plotOptions"
+              [xaxis]="chartCategoria.xaxis"
+              [colors]="chartCategoria.colors"
+              [dataLabels]="chartCategoria.dataLabels">
+            </apx-chart>
+          } @else {
+            <div class="text-center py-5 text-muted">
+              <i class="feather icon-bar-chart" style="font-size: 3rem;"></i>
+              <p class="mt-2">Sin datos</p>
+            </div>
+          }
+        </app-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Detalle -->
+  <div class="col-12">
+    <app-card cardTitle="Detalle de Tickets" [options]="false">
+      @if (loadingDetalle()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted">Cargando tickets...</p>
+        </div>
+      } @else if (detalle().length === 0) {
+        <div class="text-center py-5 text-muted">
+          <i class="feather icon-inbox" style="font-size: 3rem;"></i>
+          <p class="mt-2">No se encontraron tickets con los filtros aplicados</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Categoría</th>
+                <th>Prioridad</th>
+                <th>Estatus</th>
+                <th>Responsable</th>
+                <th class="text-center">SLA</th>
+                <th class="text-end">T. Respuesta</th>
+                <th class="text-end">T. Resolución</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ticket of detalle(); track ticket.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/tickets', ticket.id]" class="text-primary fw-medium">
+                      {{ ticket.folio }}
+                    </a>
+                  </td>
+                  <td class="text-muted small">{{ formatDate(ticket.fecha_creacion) }}</td>
+                  <td>{{ ticket.cliente_nombre }}</td>
+                  <td>{{ ticket.categoria_nombre }}</td>
+                  <td>
+                    <span class="badge" [style.backgroundColor]="getPrioridadColor(ticket.prioridad)">
+                      {{ ticket.prioridad }}
+                    </span>
+                  </td>
+                  <td>{{ ticket.estatus_nombre }}</td>
+                  <td>{{ ticket.responsable_nombre || '-' }}</td>
+                  <td class="text-center">
+                    <span class="badge rounded-pill"
+                          [style.backgroundColor]="getSemaforoColor(ticket.semaforo)"
+                          [style.color]="ticket.semaforo === 'amarillo' ? '#333' : '#fff'"
+                          ngbTooltip="{{ ticket.semaforo | titlecase }}">
+                      <i class="feather icon-circle"></i>
+                    </span>
+                  </td>
+                  <td class="text-end small">{{ formatHours(ticket.horas_respuesta) }}</td>
+                  <td class="text-end small">{{ formatHours(ticket.horas_resolucion) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        @if (totalPages() > 1) {
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">
+              Mostrando {{ (pagination().page - 1) * pagination().pageSize + 1 }} -
+              {{ Math.min(pagination().page * pagination().pageSize, totalItems()) }}
+              de {{ totalItems() }} tickets
+            </small>
+            <nav>
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="pagination().page === 1">
+                  <button class="page-link" (click)="onPageChange(pagination().page - 1)">
+                    <i class="feather icon-chevron-left"></i>
+                  </button>
+                </li>
+                @for (p of [].constructor(Math.min(5, totalPages())); track $index) {
+                  @let pageNum = pagination().page <= 3 ? $index + 1 :
+                                 pagination().page >= totalPages() - 2 ? totalPages() - 4 + $index :
+                                 pagination().page - 2 + $index;
+                  @if (pageNum > 0 && pageNum <= totalPages()) {
+                    <li class="page-item" [class.active]="pageNum === pagination().page">
+                      <button class="page-link" (click)="onPageChange(pageNum)">{{ pageNum }}</button>
+                    </li>
+                  }
+                }
+                <li class="page-item" [class.disabled]="pagination().page === totalPages()">
+                  <button class="page-link" (click)="onPageChange(pagination().page + 1)">
+                    <i class="feather icon-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      }
+    </app-card>
+  </div>
+</div>

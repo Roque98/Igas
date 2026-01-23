@@ -1,11 +1,12 @@
 // angular import
-import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
+import { ErrorMessages } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-auth-signup',
@@ -14,7 +15,6 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
   styleUrls: ['./auth-signup.component.scss']
 })
 export class AuthSignupComponent {
-  private cd = inject(ChangeDetectorRef);
 
   submitted = signal(false);
   error = signal('');
@@ -27,11 +27,11 @@ export class AuthSignupComponent {
   });
 
   registerForm = form(this.registerModel, (schemaPath) => {
-    required(schemaPath.email, { message: 'Email is required' });
-    email(schemaPath.email, { message: 'Enter a valid email address' });
-    required(schemaPath.password, { message: 'Password is required' });
-    minLength(schemaPath.password, 8, { message: 'Password must be at least 8 characters' });
-    required(schemaPath.username, { message: 'Username is required' });
+    required(schemaPath.email, { message: ErrorMessages.required('Correo electrónico') });
+    email(schemaPath.email, { message: ErrorMessages.email() });
+    required(schemaPath.password, { message: ErrorMessages.required('Contraseña') });
+    minLength(schemaPath.password, 8, { message: ErrorMessages.minLength('Contraseña', 8) });
+    required(schemaPath.username, { message: ErrorMessages.required('Nombre de usuario') });
   });
 
   onSubmit(event: Event) {
@@ -40,7 +40,6 @@ export class AuthSignupComponent {
     event.preventDefault();
     const credentials = this.registerModel();
     console.log('register user logged in with:', credentials);
-    this.cd.detectChanges();
   }
 
   togglePasswordVisibility() {

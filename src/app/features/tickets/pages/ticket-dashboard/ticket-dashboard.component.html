@@ -1,0 +1,325 @@
+<!-- Dashboard Header -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="mb-1">Dashboard de Tickets</h4>
+        <p class="text-muted mb-0">Vista general del estado de tickets de soporte</p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" (click)="refreshDashboard()" ngbTooltip="Actualizar">
+          <i class="feather icon-refresh-cw"></i>
+        </button>
+        <a routerLink="/tickets/nuevo" class="btn btn-primary">
+          <i class="feather icon-plus me-1"></i> Nuevo Ticket
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando dashboard...</p>
+  </div>
+}
+
+@if (!loading() && stats()) {
+  <!-- Widgets Row 1 - Principales -->
+  <div class="row mb-4">
+    <!-- Total Tickets -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card widget-card h-100" (click)="navigateToList()" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="text-muted mb-2">Total Activos</h6>
+              <h3 class="mb-0">{{ stats()!.abiertos + stats()!.en_progreso }}</h3>
+            </div>
+            <div class="widget-icon bg-light-primary">
+              <i class="feather icon-file-text text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis Tickets -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card widget-card h-100" (click)="navigateToList('mis-tickets')" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="text-muted mb-2">Mis Tickets</h6>
+              <h3 class="mb-0">{{ stats()!.mis_tickets }}</h3>
+            </div>
+            <div class="widget-icon bg-light-info">
+              <i class="feather icon-user text-info"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin Asignar -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card widget-card h-100" (click)="navigateToList('sin-asignar')" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="text-muted mb-2">Sin Asignar</h6>
+              <h3 class="mb-0" [class.text-danger]="stats()!.sin_asignar > 0">
+                {{ stats()!.sin_asignar }}
+              </h3>
+            </div>
+            <div class="widget-icon" [class.bg-light-danger]="stats()!.sin_asignar > 0" [class.bg-light-secondary]="stats()!.sin_asignar === 0">
+              <i class="feather icon-user-x" [class.text-danger]="stats()!.sin_asignar > 0" [class.text-secondary]="stats()!.sin_asignar === 0"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cumplimiento SLA -->
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card widget-card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="text-muted mb-2">Cumplimiento SLA</h6>
+              <h3 class="mb-0" [class.text-success]="stats()!.cumplimiento_sla >= 80" [class.text-warning]="stats()!.cumplimiento_sla >= 60 && stats()!.cumplimiento_sla < 80" [class.text-danger]="stats()!.cumplimiento_sla < 60">
+                {{ stats()!.cumplimiento_sla }}%
+              </h3>
+            </div>
+            <div class="widget-icon" [class.bg-light-success]="stats()!.cumplimiento_sla >= 80" [class.bg-light-warning]="stats()!.cumplimiento_sla >= 60 && stats()!.cumplimiento_sla < 80" [class.bg-light-danger]="stats()!.cumplimiento_sla < 60">
+              <i class="feather icon-award" [class.text-success]="stats()!.cumplimiento_sla >= 80" [class.text-warning]="stats()!.cumplimiento_sla >= 60 && stats()!.cumplimiento_sla < 80" [class.text-danger]="stats()!.cumplimiento_sla < 60"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Widgets Row 2 - Semáforos -->
+  <div class="row mb-4">
+    <!-- Verde -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card semaforo-card semaforo-verde h-100" (click)="navigateToList('verde')" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-white mb-1 opacity-75">En tiempo</h6>
+              <h2 class="text-white mb-0">{{ stats()!.por_semaforo.verde }}</h2>
+            </div>
+            <div class="semaforo-icon">
+              <i class="feather icon-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amarillo -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card semaforo-card semaforo-amarillo h-100" (click)="navigateToList('amarillo')" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-white mb-1 opacity-75">Por vencer</h6>
+              <h2 class="text-white mb-0">{{ stats()!.por_semaforo.amarillo }}</h2>
+            </div>
+            <div class="semaforo-icon">
+              <i class="feather icon-alert-triangle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rojo -->
+    <div class="col-xl-4 col-md-4 mb-4">
+      <div class="card semaforo-card semaforo-rojo h-100" (click)="navigateToList('rojo')" style="cursor: pointer;">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-white mb-1 opacity-75">Vencidos</h6>
+              <h2 class="text-white mb-0">{{ stats()!.por_semaforo.rojo }}</h2>
+            </div>
+            <div class="semaforo-icon">
+              <i class="feather icon-alert-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts & Alerts Row -->
+  <div class="row">
+    <!-- Gráfica por Categoría -->
+    <div class="col-xl-6 mb-4">
+      <app-card [options]="false" cardTitle="Tickets por Categoría">
+        @if (categoriaChartOptions()) {
+          <apx-chart
+            [series]="categoriaChartOptions()!.series"
+            [chart]="categoriaChartOptions()!.chart"
+            [labels]="categoriaChartOptions()!.labels"
+            [colors]="categoriaChartOptions()!.colors"
+            [legend]="categoriaChartOptions()!.legend"
+            [dataLabels]="categoriaChartOptions()!.dataLabels"
+            [plotOptions]="categoriaChartOptions()!.plotOptions"
+            [responsive]="categoriaChartOptions()!.responsive"
+          ></apx-chart>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-pie-chart" style="font-size: 48px;"></i>
+            <p class="mt-2">No hay datos de categorías</p>
+          </div>
+        }
+      </app-card>
+    </div>
+
+    <!-- Gráfica de Semáforos -->
+    <div class="col-xl-6 mb-4">
+      <app-card [options]="false" cardTitle="Estado de SLA">
+        @if (semaforoChartOptions()) {
+          <apx-chart
+            [series]="semaforoChartOptions()!.series"
+            [chart]="semaforoChartOptions()!.chart"
+            [xaxis]="semaforoChartOptions()!.xaxis"
+            [colors]="semaforoChartOptions()!.colors"
+            [plotOptions]="semaforoChartOptions()!.plotOptions"
+            [dataLabels]="semaforoChartOptions()!.dataLabels"
+            [legend]="semaforoChartOptions()!.legend"
+            [tooltip]="semaforoChartOptions()!.tooltip"
+          ></apx-chart>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-bar-chart-2" style="font-size: 48px;"></i>
+            <p class="mt-2">No hay datos de SLA</p>
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+
+  <!-- Alertas y Tickets Recientes -->
+  <div class="row">
+    <!-- Alertas SLA -->
+    <div class="col-xl-6 mb-4">
+      <app-card [options]="false" cardTitle="Alertas SLA">
+        @if (alertas().length === 0) {
+          <div class="text-center py-4">
+            <i class="feather icon-check-circle text-success" style="font-size: 48px;"></i>
+            <p class="mt-2 text-muted mb-0">No hay tickets con alertas</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Folio</th>
+                  <th>SLA</th>
+                  <th class="text-center">Estado</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (alerta of alertas(); track alerta.id) {
+                  <tr>
+                    <td>
+                      <a [routerLink]="['/tickets', alerta.id]" class="text-decoration-none fw-medium">
+                        {{ alerta.folio }}
+                      </a>
+                    </td>
+                    <td>
+                      <app-progress-bar-sla
+                        [porcentaje]="alerta.porcentaje_sla || 0"
+                        [semaforo]="alerta.semaforo"
+                      ></app-progress-bar-sla>
+                    </td>
+                    <td class="text-center">
+                      <app-semaforo-badge
+                        [semaforo]="alerta.semaforo"
+                        [porcentaje]="alerta.porcentaje_sla"
+                        [showLabel]="false"
+                        size="small"
+                      ></app-semaforo-badge>
+                    </td>
+                    <td class="text-end">
+                      <button
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="navigateToTicket(alerta.id)"
+                        ngbTooltip="Ver ticket"
+                      >
+                        <i class="feather icon-eye"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (alertas().length >= 10) {
+            <div class="text-center mt-3">
+              <a routerLink="/tickets/lista" [queryParams]="{filter: 'alertas'}" class="btn btn-sm btn-outline-primary">
+                Ver todas las alertas
+              </a>
+            </div>
+          }
+        }
+      </app-card>
+    </div>
+
+    <!-- Tickets Recientes -->
+    <div class="col-xl-6 mb-4">
+      <app-card [options]="false" cardTitle="Tickets Recientes">
+        @if (ticketsRecientes().length === 0) {
+          <div class="text-center py-4">
+            <i class="feather icon-inbox text-muted" style="font-size: 48px;"></i>
+            <p class="mt-2 text-muted mb-0">No hay tickets recientes</p>
+          </div>
+        } @else {
+          <div class="list-group list-group-flush">
+            @for (ticket of ticketsRecientes(); track ticket.id) {
+              <a
+                [routerLink]="['/tickets', ticket.id]"
+                class="list-group-item list-group-item-action"
+              >
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="fw-medium">{{ ticket.folio }}</span>
+                      <app-prioridad-badge
+                        [prioridad]="ticket.prioridad"
+                        [showIcon]="false"
+                        size="small"
+                      ></app-prioridad-badge>
+                    </div>
+                    <p class="text-muted small mb-0 text-truncate" style="max-width: 300px;">
+                      {{ ticket.titulo || ticket.descripcion }}
+                    </p>
+                  </div>
+                  <app-semaforo-badge
+                    [semaforo]="ticket.semaforo"
+                    [showLabel]="false"
+                    size="small"
+                  ></app-semaforo-badge>
+                </div>
+              </a>
+            }
+          </div>
+          <div class="text-center mt-3">
+            <a routerLink="/tickets/lista" class="btn btn-sm btn-outline-primary">
+              Ver todos los tickets
+            </a>
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+}

@@ -1,5 +1,5 @@
 @if (item().url && !item().external) {
-  <li [ngClass]="item().classes" [routerLinkActive]="['active']">
+  <li [ngClass]="item().classes" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: item().exactMatch ?? false }">
     <a class="nav-link" [target]="item().target ? '_blank' : '_self'" [routerLink]="[item().url]" (click)="closeOtherMenu($event)">
       @if (item().icon) {
         <span class="pcoded-micon"><i class="feather" [ngClass]="item().icon"></i></span>

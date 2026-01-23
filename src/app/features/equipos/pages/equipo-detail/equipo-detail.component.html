@@ -1,0 +1,274 @@
+<!-- Indicador de carga -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando equipo...</p>
+  </div>
+}
+
+<!-- Mensaje de error -->
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="feather icon-alert-circle me-2"></i>
+    {{ error() }}
+    <button class="btn btn-sm btn-outline-primary ms-3" (click)="goBack()">
+      <i class="feather icon-arrow-left me-1"></i> Volver
+    </button>
+  </div>
+}
+
+<!-- Contenido principal -->
+@if (!loading() && !error() && equipo()) {
+  <!-- Encabezado -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+        <i class="feather icon-arrow-left"></i>
+      </button>
+      <span class="h4 mb-0">
+        <i class="feather icon-briefcase me-2 text-primary"></i>
+        {{ equipo()!.nombre }}
+      </span>
+      <span [class]="equipo()!.estatus === 'Activo' ? 'badge bg-success ms-2' : 'badge bg-secondary ms-2'">
+        {{ equipo()!.estatus }}
+      </span>
+    </div>
+    <div>
+      <button class="btn btn-primary" (click)="editEquipo()">
+        <i class="feather icon-edit me-1"></i> Editar
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Información del equipo -->
+    <div class="col-md-4 mb-4">
+      <app-card [options]="false" cardTitle="Información">
+        <dl class="mb-0">
+          <dt class="text-muted small">Descripción</dt>
+          <dd class="mb-3">
+            @if (equipo()!.descripcion) {
+              {{ equipo()!.descripcion }}
+            } @else {
+              <span class="text-muted">Sin descripción</span>
+            }
+          </dd>
+
+          <dt class="text-muted small">Supervisor</dt>
+          <dd class="mb-3">
+            @if (equipo()!.supervisor) {
+              <div class="d-flex align-items-center">
+                <img
+                  [src]="equipo()!.supervisor!.avatar_url || 'assets/images/user/avatar-1.jpg'"
+                  class="rounded-circle me-2"
+                  width="32"
+                  height="32"
+                  [alt]="equipo()!.supervisor!.nombre_completo"
+                  style="object-fit: cover;"
+                />
+                <div>
+                  <div>{{ equipo()!.supervisor!.nombre_completo }}</div>
+                  <small class="text-muted">{{ equipo()!.supervisor!.email }}</small>
+                </div>
+              </div>
+            } @else {
+              <span class="text-muted">Sin supervisor asignado</span>
+            }
+          </dd>
+
+          <dt class="text-muted small">Fecha de creación</dt>
+          <dd class="mb-3">{{ equipo()!.created_at | date:'dd/MM/yyyy HH:mm' }}</dd>
+
+          <dt class="text-muted small">Última actualización</dt>
+          <dd class="mb-0">{{ equipo()!.updated_at | date:'dd/MM/yyyy HH:mm' }}</dd>
+        </dl>
+      </app-card>
+    </div>
+
+    <!-- Miembros del equipo -->
+    <div class="col-md-8 mb-4">
+      <app-card [options]="false" cardTitle="Miembros del Equipo">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted">
+            <i class="feather icon-users me-1"></i>
+            {{ miembros().length }} miembros
+          </span>
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="openAddMemberModal(addMemberModal)"
+          >
+            <i class="feather icon-user-plus me-1"></i> Agregar miembro
+          </button>
+        </div>
+
+        @if (loadingMiembros()) {
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
+        }
+
+        @if (!loadingMiembros() && miembros().length === 0) {
+          <div class="text-center py-4">
+            <i class="feather icon-users" style="font-size: 48px; color: #ccc;"></i>
+            <p class="mt-3 text-muted">Este equipo no tiene miembros asignados</p>
+            <button
+              class="btn btn-outline-primary"
+              (click)="openAddMemberModal(addMemberModal)"
+            >
+              <i class="feather icon-user-plus me-1"></i> Agregar primer miembro
+            </button>
+          </div>
+        }
+
+        @if (!loadingMiembros() && miembros().length > 0) {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 50px;"></th>
+                  <th>Nombre</th>
+                  <th>Rol</th>
+                  <th class="text-center">Disponibilidad</th>
+                  <th class="text-center" style="width: 80px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (member of miembros(); track member.id) {
+                  <tr>
+                    <td>
+                      <img
+                        [src]="getAvatarUrl(member)"
+                        class="rounded-circle"
+                        width="40"
+                        height="40"
+                        [alt]="member.nombre_completo"
+                        style="object-fit: cover;"
+                      />
+                    </td>
+                    <td>
+                      <div class="fw-medium">{{ member.nombre_completo }}</div>
+                      <small class="text-muted">{{ member.email }}</small>
+                    </td>
+                    <td>
+                      @if (member.rol) {
+                        <span class="badge bg-light text-dark">{{ member.rol.nombre }}</span>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      <span [class]="getDisponibilidadClass(member.disponibilidad)">
+                        {{ member.disponibilidad || 'N/A' }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="openRemoveMemberModal(removeMemberModal, member)"
+                        ngbTooltip="Remover del equipo"
+                      >
+                        <i class="feather icon-user-minus"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+}
+
+<!-- Modal para agregar miembro -->
+<ng-template #addMemberModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Agregar Miembro al Equipo</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (loadingUnassigned()) {
+      <div class="text-center py-3">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Cargando usuarios disponibles...</p>
+      </div>
+    }
+
+    @if (!loadingUnassigned() && unassignedUsers().length === 0) {
+      <div class="alert alert-info">
+        <i class="feather icon-info me-2"></i>
+        No hay usuarios sin equipo asignado.
+      </div>
+    }
+
+    @if (!loadingUnassigned() && unassignedUsers().length > 0) {
+      <p class="text-muted mb-3">Seleccione un usuario para agregar al equipo:</p>
+      <div class="list-group">
+        @for (user of unassignedUsers(); track user.id) {
+          <label
+            class="list-group-item list-group-item-action d-flex align-items-center"
+            [class.active]="selectedUserId() === user.id"
+          >
+            <input
+              type="radio"
+              class="form-check-input me-3"
+              name="selectedUser"
+              [value]="user.id"
+              [checked]="selectedUserId() === user.id"
+              (change)="selectedUserId.set(user.id)"
+            />
+            <img
+              [src]="getAvatarUrl(user)"
+              class="rounded-circle me-2"
+              width="40"
+              height="40"
+              [alt]="user.nombre_completo"
+              style="object-fit: cover;"
+            />
+            <div>
+              <div class="fw-medium">{{ user.nombre_completo }}</div>
+              <small class="text-muted">{{ user.email }}</small>
+              @if (user.rol) {
+                <span class="badge bg-light text-dark ms-2">{{ user.rol.nombre }}</span>
+              }
+            </div>
+          </label>
+        }
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!selectedUserId() || loadingUnassigned()"
+      (click)="confirmAddMember()"
+    >
+      <i class="feather icon-user-plus me-1"></i> Agregar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal para remover miembro -->
+<ng-template #removeMemberModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Confirmar Remoción</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedMember()) {
+      <p>¿Está seguro que desea remover a <strong>{{ selectedMember()!.nombre_completo }}</strong> de este equipo?</p>
+      <p class="text-muted small">El usuario quedará sin equipo asignado pero mantendrá su cuenta activa.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger" (click)="confirmRemoveMember()">
+      <i class="feather icon-user-minus me-1"></i> Remover
+    </button>
+  </div>
+</ng-template>

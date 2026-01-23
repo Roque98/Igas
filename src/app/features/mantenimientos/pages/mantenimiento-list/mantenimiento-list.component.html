@@ -1,0 +1,288 @@
+<!-- ============================================================================
+  Mantenimiento List Component - Template
+============================================================================= -->
+
+<div class="row">
+  <div class="col-12">
+    <app-card [hidHeader]="true">
+      <!-- Header -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">Mantenimientos</h4>
+          <p class="text-muted mb-0">Gestión de mantenimientos preventivos y correctivos</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-primary" (click)="goToCalendar()">
+            <i class="feather icon-calendar me-1"></i>Calendario
+          </button>
+          <button type="button" class="btn btn-primary" (click)="newMantenimiento()">
+            <i class="feather icon-plus me-1"></i>Nuevo Mantenimiento
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="row g-3 mb-4">
+        <!-- Búsqueda -->
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text"><i class="feather icon-search"></i></span>
+            <input type="text" class="form-control" placeholder="Buscar por folio o cliente..."
+                   [(ngModel)]="searchTerm" (keyup.enter)="onSearch()">
+            @if (searchTerm()) {
+              <button type="button" class="btn btn-outline-secondary" (click)="searchTerm.set(''); onSearch()">
+                <i class="feather icon-x"></i>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Cliente -->
+        <div class="col-md-2">
+          <select class="form-select" [ngModel]="selectedClienteId()" (ngModelChange)="selectedClienteId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los clientes</option>
+            @for (cliente of clientes(); track cliente.id) {
+              <option [value]="cliente.id">{{ cliente.razon_social }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Tipo -->
+        <div class="col-md-2">
+          <select class="form-select" [ngModel]="selectedTipoId()" (ngModelChange)="selectedTipoId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los tipos</option>
+            @for (tipo of tipos(); track tipo.id) {
+              <option [value]="tipo.id">{{ tipo.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Estatus -->
+        <div class="col-md-2">
+          <select class="form-select" [ngModel]="selectedEstatusId()" (ngModelChange)="selectedEstatusId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los estatus</option>
+            @for (est of estatus(); track est.id) {
+              <option [value]="est.id">{{ est.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Técnico -->
+        <div class="col-md-2">
+          <select class="form-select" [ngModel]="selectedTecnicoId()" (ngModelChange)="selectedTecnicoId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los técnicos</option>
+            @for (tec of tecnicos(); track tec.id) {
+              <option [value]="tec.id">{{ tec.nombre_completo }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Filtros adicionales -->
+      <div class="row g-3 mb-4">
+        <!-- Fecha desde -->
+        <div class="col-md-2">
+          <input type="date" class="form-control" placeholder="Desde"
+                 [ngModel]="fechaDesde()" (ngModelChange)="fechaDesde.set($event); onFilterChange()">
+        </div>
+
+        <!-- Fecha hasta -->
+        <div class="col-md-2">
+          <input type="date" class="form-control" placeholder="Hasta"
+                 [ngModel]="fechaHasta()" (ngModelChange)="fechaHasta.set($event); onFilterChange()">
+        </div>
+
+        <!-- Resultado -->
+        <div class="col-md-2">
+          <select class="form-select" [ngModel]="selectedResultado()" (ngModelChange)="selectedResultado.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los resultados</option>
+            @for (res of resultados; track res) {
+              <option [value]="res">{{ res }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Mis mantenimientos -->
+        <div class="col-md-2">
+          <div class="form-check form-check-inline mt-2">
+            <input type="checkbox" class="form-check-input" id="misMtn"
+                   [checked]="soloMisMantenimientos()" (change)="soloMisMantenimientos.set(!soloMisMantenimientos()); onFilterChange()">
+            <label class="form-check-label" for="misMtn">Solo mis mantenimientos</label>
+          </div>
+        </div>
+
+        <!-- Limpiar filtros -->
+        @if (hasActiveFilters()) {
+          <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+              <i class="feather icon-x me-1"></i>Limpiar filtros
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="mt-2 text-muted">Cargando mantenimientos...</p>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="alert alert-danger">
+          <i class="feather icon-alert-circle me-2"></i>{{ error() }}
+        </div>
+      }
+
+      <!-- Tabla -->
+      @if (!loading() && !error()) {
+        @if (mantenimientos().length === 0) {
+          <div class="text-center py-5">
+            <i class="feather icon-tool" style="font-size: 3rem; color: #6c757d;"></i>
+            <p class="mt-3 text-muted">No se encontraron mantenimientos</p>
+            <button type="button" class="btn btn-primary" (click)="newMantenimiento()">
+              <i class="feather icon-plus me-1"></i>Crear primer mantenimiento
+            </button>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th class="cursor-pointer" (click)="onSort('folio')">
+                    Folio <i [class]="getSortIcon('folio')"></i>
+                  </th>
+                  <th class="cursor-pointer" (click)="onSort('fecha_programada')">
+                    Fecha <i [class]="getSortIcon('fecha_programada')"></i>
+                  </th>
+                  <th>Cliente</th>
+                  <th>Tipo</th>
+                  <th>Técnico</th>
+                  <th>Checklist</th>
+                  <th>Estatus</th>
+                  <th>Resultado</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of mantenimientos(); track m.id) {
+                  <tr class="cursor-pointer" (click)="viewMantenimiento(m)">
+                    <td>
+                      <strong class="text-primary">{{ m.folio }}</strong>
+                    </td>
+                    <td>
+                      {{ formatDate(m.fecha_programada) }}
+                      @if (m.hora_programada) {
+                        <small class="text-muted d-block">{{ formatTime(m.hora_programada) }}</small>
+                      }
+                    </td>
+                    <td>
+                      <span [ngbTooltip]="m.cliente_nombre">
+                        {{ m.cliente_nombre_comercial || m.cliente_nombre }}
+                      </span>
+                      @if (m.sucursal_nombre) {
+                        <small class="text-muted d-block">{{ m.sucursal_nombre }}</small>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge" [style.backgroundColor]="m.tipo_mantenimiento_color">
+                        {{ m.tipo_mantenimiento_nombre }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (m.tecnico_nombre) {
+                        <div class="d-flex align-items-center">
+                          @if (m.tecnico_avatar) {
+                            <img [src]="m.tecnico_avatar" class="rounded-circle me-2" width="24" height="24">
+                          } @else {
+                            <div class="avatar-sm bg-light-primary rounded-circle me-2">
+                              <i class="feather icon-user"></i>
+                            </div>
+                          }
+                          {{ m.tecnico_nombre }}
+                        </div>
+                      } @else {
+                        <span class="text-muted">Sin asignar</span>
+                      }
+                    </td>
+                    <td>
+                      @if (m.checklist_total && m.checklist_total > 0) {
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                            <div class="progress-bar" [class]="getProgressClass(getChecklistProgress(m))"
+                                 [style.width.%]="getChecklistProgress(m)"></div>
+                          </div>
+                          <small>{{ m.checklist_completados }}/{{ m.checklist_total }}</small>
+                        </div>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                    <td>
+                      <span class="badge" [style.backgroundColor]="m.estatus_color">
+                        {{ m.estatus_nombre }}
+                      </span>
+                    </td>
+                    <td>
+                      @if (m.resultado) {
+                        <span class="badge" [style.backgroundColor]="resultadoConfig[m.resultado].color">
+                          <i class="feather icon-{{ resultadoConfig[m.resultado].icon }} me-1"></i>
+                          {{ m.resultado }}
+                        </span>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                    <td class="text-center" (click)="$event.stopPropagation()">
+                      <div ngbDropdown container="body">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" ngbDropdownToggle>
+                          <i class="feather icon-more-vertical"></i>
+                        </button>
+                        <div ngbDropdownMenu>
+                          <button ngbDropdownItem [routerLink]="['/mantenimientos', m.id]">
+                            <i class="feather icon-eye me-2"></i>Ver detalle
+                          </button>
+                          @if (!m.estatus_es_final) {
+                            <button ngbDropdownItem [routerLink]="['/mantenimientos', m.id, 'ejecutar']">
+                              <i class="feather icon-play me-2"></i>Ejecutar
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginación -->
+          <div class="d-flex flex-wrap justify-content-between align-items-center mt-4">
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-muted">Mostrar</span>
+              <select class="form-select form-select-sm" style="width: auto;"
+                      [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)">
+                <option [value]="10">10</option>
+                <option [value]="25">25</option>
+                <option [value]="50">50</option>
+              </select>
+              <span class="text-muted">de {{ totalItems() }} registros</span>
+            </div>
+            <ngb-pagination
+              [collectionSize]="totalItems()"
+              [page]="currentPage()"
+              [pageSize]="pageSize()"
+              [maxSize]="5"
+              [rotate]="true"
+              (pageChange)="onPageChange($event)">
+            </ngb-pagination>
+          </div>
+        }
+      }
+    </app-card>
+  </div>
+</div>

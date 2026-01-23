@@ -1,0 +1,130 @@
+// ============================================================================
+// Dashboard Component Styles - iGAS Corporate Colors
+// ============================================================================
+
+@use "sass:color";
+
+// Colores Corporativos iGAS
+$igas-yellow-primary: #F9B000;
+$igas-yellow-alt: #FDB913;
+$igas-gray-dark: #58585A;
+$igas-gray-text: #3E3E3E;
+
+// Colores Funcionales (Semáforo SLA)
+$sla-green: #4CAF50;
+$sla-yellow: #FFC107;
+$sla-red: #F44336;
+
+// ============================================================================
+// Card de Bienvenida - iGAS Yellow
+// ============================================================================
+.card.bg-primary {
+  background: linear-gradient(135deg, $igas-yellow-primary 0%, $igas-yellow-alt 100%) !important;
+  border: none;
+}
+
+// ============================================================================
+// Stats Cards - iGAS Corporativo
+// ============================================================================
+.card.bg-igas-yellow {
+  background: linear-gradient(135deg, $igas-yellow-primary 0%, $igas-yellow-alt 100%);
+  border: none;
+  color: #fff;
+  h3, span { color: #fff; }
+}
+
+.card.bg-igas-gray {
+  background: linear-gradient(135deg, $igas-gray-dark 0%, color.adjust($igas-gray-dark, $lightness: 10%) 100%);
+  border: none;
+  color: #fff;
+  h3, span { color: #fff; }
+}
+
+.card.bg-sla-green {
+  background: linear-gradient(135deg, $sla-green 0%, color.adjust($sla-green, $lightness: 8%) 100%);
+  border: none;
+  color: #fff;
+  h3, span { color: #fff; }
+}
+
+.card.bg-sla-yellow {
+  background: linear-gradient(135deg, color.adjust($sla-yellow, $lightness: -5%) 0%, $sla-yellow 100%);
+  border: none;
+  color: #fff;
+  h3, span { color: #fff; }
+}
+
+.card.bg-sla-red {
+  background: linear-gradient(135deg, $sla-red 0%, color.adjust($sla-red, $lightness: 10%) 100%);
+  border: none;
+  color: #fff;
+  h3, span { color: #fff; }
+}
+
+// ============================================================================
+// Override existentes
+// ============================================================================
+.card.bg-success { background: linear-gradient(135deg, $sla-green 0%, color.adjust($sla-green, $lightness: 8%) 100%) !important; }
+.card.bg-danger { background: linear-gradient(135deg, $sla-red 0%, color.adjust($sla-red, $lightness: 10%) 100%) !important; }
+.card.bg-warning { background: linear-gradient(135deg, color.adjust($sla-yellow, $lightness: -5%) 0%, $sla-yellow 100%) !important; }
+.card.bg-info { background: linear-gradient(135deg, $igas-gray-dark 0%, color.adjust($igas-gray-dark, $lightness: 15%) 100%) !important; }
+.card.bg-secondary { background: linear-gradient(135deg, color.adjust($igas-gray-dark, $lightness: 20%) 0%, color.adjust($igas-gray-dark, $lightness: 30%) 100%) !important; }
+
+// Cards de Clientes
+.card.bg-c-blue { background: linear-gradient(135deg, $igas-gray-dark 0%, color.adjust($igas-gray-dark, $lightness: 15%) 100%) !important; }
+.card.bg-c-green { background: linear-gradient(135deg, $sla-green 0%, color.adjust($sla-green, $lightness: 8%) 100%) !important; }
+.card.bg-c-yellow { background: linear-gradient(135deg, color.adjust($sla-yellow, $lightness: -5%) 0%, $sla-yellow 100%) !important; }
+.card.bg-c-red { background: linear-gradient(135deg, $sla-red 0%, color.adjust($sla-red, $lightness: 10%) 100%) !important; }
+
+// ============================================================================
+// Card Hover y Avatares
+// ============================================================================
+.card-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  &:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); }
+}
+
+.avatar {
+  display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;
+  &.bg-light-primary { background-color: rgba($igas-yellow-primary, 0.15) !important; i { color: $igas-yellow-primary !important; } }
+  &.bg-light-warning { background-color: rgba($sla-yellow, 0.15) !important; i { color: color.adjust($sla-yellow, $lightness: -10%) !important; } }
+  &.bg-light-danger { background-color: rgba($sla-red, 0.15) !important; i { color: $sla-red !important; } }
+  &.bg-light-info { background-color: rgba($igas-gray-dark, 0.1) !important; i { color: $igas-gray-dark !important; } }
+  &.bg-light-success { background-color: rgba($sla-green, 0.15) !important; i { color: $sla-green !important; } }
+}
+
+// ============================================================================
+// Textos
+// ============================================================================
+.text-primary { color: $igas-yellow-primary !important; }
+.text-success { color: $sla-green !important; }
+.text-warning { color: color.adjust($sla-yellow, $lightness: -10%) !important; }
+.text-danger { color: $sla-red !important; }
+.text-info { color: $igas-gray-dark !important; }
+
+// Progress bars
+.progress-bar.bg-success { background-color: $sla-green !important; }
+.progress-bar.bg-warning { background-color: $sla-yellow !important; }
+.progress-bar.bg-danger { background-color: $sla-red !important; }
+
+// Botones Outline
+.btn-outline-primary { color: $igas-yellow-primary; border-color: $igas-yellow-primary; &:hover { background-color: $igas-yellow-primary; border-color: $igas-yellow-primary; color: #fff; } }
+.btn-outline-warning { color: color.adjust($sla-yellow, $lightness: -15%); border-color: $sla-yellow; &:hover { background-color: $sla-yellow; border-color: $sla-yellow; color: #fff; } }
+.btn-outline-info { color: $igas-gray-dark; border-color: $igas-gray-dark; &:hover { background-color: $igas-gray-dark; border-color: $igas-gray-dark; color: #fff; } }
+
+// Badges
+.badge.bg-danger { background-color: $sla-red !important; }
+.badge.bg-warning { background-color: $sla-yellow !important; color: #333 !important; }
+.badge.bg-success { background-color: $sla-green !important; }
+
+// Tablas
+.table-danger { --bs-table-bg: rgba($sla-red, 0.1); --bs-table-border-color: rgba($sla-red, 0.2); }
+.table-warning { --bs-table-bg: rgba($sla-yellow, 0.15); --bs-table-border-color: rgba($sla-yellow, 0.3); }
+
+// Cards con borde
+.card.border-danger { border: 2px solid $sla-red !important; }
+.card.border-warning { border: 2px solid $sla-yellow !important; }
+
+// Spinner
+.spinner-border.text-primary { color: $igas-yellow-primary !important; }

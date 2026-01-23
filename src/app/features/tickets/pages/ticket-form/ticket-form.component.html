@@ -1,0 +1,199 @@
+<!-- Loading State -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando ticket...</p>
+  </div>
+}
+
+@if (!loading()) {
+  <app-card [options]="false" [cardTitle]="pageTitle()">
+    <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Columna izquierda: Información principal -->
+        <div class="col-lg-8">
+          <!-- Título (opcional) -->
+          <div class="mb-3">
+            <label class="form-label">Título <span class="text-muted small">(opcional)</span></label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="titulo"
+              placeholder="Breve resumen del problema..."
+              [class.is-invalid]="isFieldInvalid('titulo')"
+            />
+            @if (isFieldInvalid('titulo')) {
+              <div class="invalid-feedback">{{ getFieldError('titulo') }}</div>
+            }
+          </div>
+
+          <!-- Descripción -->
+          <div class="mb-3">
+            <label class="form-label">Descripción <span class="text-danger">*</span></label>
+            <textarea
+              class="form-control"
+              formControlName="descripcion"
+              rows="6"
+              placeholder="Describe detalladamente el problema o solicitud (mínimo 20 caracteres)..."
+              [class.is-invalid]="isFieldInvalid('descripcion')"
+            ></textarea>
+            @if (isFieldInvalid('descripcion')) {
+              <div class="invalid-feedback">{{ getFieldError('descripcion') }}</div>
+            }
+            <div class="form-text">
+              {{ ticketForm.get('descripcion')?.value?.length || 0 }} / 5000 caracteres
+            </div>
+          </div>
+
+          <!-- Adjuntos -->
+          <div class="mb-4">
+            <label class="form-label">Adjuntos</label>
+            <div
+              class="dropzone"
+              (click)="fileInput.click()"
+              (dragover)="$event.preventDefault()"
+              (drop)="$event.preventDefault(); onFilesSelected($event)"
+            >
+              <i class="feather icon-upload-cloud"></i>
+              <p class="mb-1">Arrastra archivos aquí o haz clic para seleccionar</p>
+              <small class="text-muted">Máx. 5MB por archivo. Formatos: imágenes, PDF, txt, log</small>
+            </div>
+            <input
+              #fileInput
+              type="file"
+              class="d-none"
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.pdf,.txt,.log,.doc,.docx,.xls,.xlsx"
+              (change)="onFilesSelected($event)"
+            />
+
+            <!-- Lista de archivos seleccionados -->
+            @if (selectedFiles().length > 0) {
+              <div class="selected-files mt-3">
+                @for (file of selectedFiles(); track $index) {
+                  <div class="file-item">
+                    <div class="file-icon">
+                      <i [class]="'feather icon-' + getFileIcon(file)"></i>
+                    </div>
+                    <div class="file-info">
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeFile($index)"
+                    >
+                      <i class="feather icon-x"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Columna derecha: Configuración -->
+        <div class="col-lg-4">
+          <!-- Categoría -->
+          <div class="mb-3">
+            <label class="form-label">Categoría <span class="text-danger">*</span></label>
+            <select
+              class="form-select"
+              formControlName="categoria_id"
+              [class.is-invalid]="isFieldInvalid('categoria_id')"
+            >
+              <option value="">Selecciona una categoría...</option>
+              @for (cat of categorias(); track cat.id) {
+                <option [value]="cat.id">
+                  {{ cat.nombre }}
+                  @if (cat.sla_minutos) {
+                    (SLA: {{ cat.sla_minutos }}min)
+                  }
+                </option>
+              }
+            </select>
+            @if (isFieldInvalid('categoria_id')) {
+              <div class="invalid-feedback">{{ getFieldError('categoria_id') }}</div>
+            }
+          </div>
+
+          <!-- Prioridad -->
+          <div class="mb-3">
+            <label class="form-label">Prioridad <span class="text-danger">*</span></label>
+            <div class="priority-options">
+              @for (pri of prioridades; track pri.value) {
+                <label
+                  class="priority-option"
+                  [class.selected]="ticketForm.get('prioridad')?.value === pri.value"
+                >
+                  <input
+                    type="radio"
+                    [value]="pri.value"
+                    formControlName="prioridad"
+                    class="d-none"
+                  />
+                  <div class="priority-content">
+                    <app-prioridad-badge [prioridad]="pri.value" [showIcon]="true"></app-prioridad-badge>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Canal -->
+          <div class="mb-3">
+            <label class="form-label">Canal de contacto <span class="text-danger">*</span></label>
+            <select
+              class="form-select"
+              formControlName="canal"
+              [class.is-invalid]="isFieldInvalid('canal')"
+            >
+              @for (canal of canales(); track canal.id) {
+                <option [value]="canal.nombre">{{ canal.nombre }}</option>
+              }
+              @if (canales().length === 0) {
+                <option value="Teléfono">Teléfono</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Correo">Correo</option>
+                <option value="Portal">Portal</option>
+              }
+            </select>
+            @if (isFieldInvalid('canal')) {
+              <div class="invalid-feedback">{{ getFieldError('canal') }}</div>
+            }
+          </div>
+
+          <!-- Info adicional -->
+          <div class="info-box mt-4">
+            <h6><i class="feather icon-info me-2"></i>Información</h6>
+            <ul class="mb-0">
+              <li>El folio se generará automáticamente</li>
+              <li>El ticket se asignará según la categoría</li>
+              <li>El SLA se calculará según la prioridad y categoría</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="saving() || ticketForm.invalid"
+        >
+          @if (saving()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          }
+          {{ isEditMode() ? 'Guardar Cambios' : 'Crear Ticket' }}
+        </button>
+      </div>
+    </form>
+  </app-card>
+}

@@ -1,0 +1,303 @@
+<!-- ============================================================================
+  Mantenimiento Detail Component - Template
+============================================================================= -->
+
+<div class="row">
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="col-12">
+      <div class="alert alert-danger">
+        <i class="feather icon-alert-circle me-2"></i>{{ error() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-3" (click)="goBack()">
+          Volver a la lista
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Contenido -->
+  @if (!loading() && !error() && mantenimiento()) {
+    <!-- Header -->
+    <div class="col-12 mb-4">
+      <app-card [hidHeader]="true">
+        <div class="d-flex flex-wrap justify-content-between align-items-start">
+          <div>
+            <button type="button" class="btn btn-link text-muted p-0 mb-2" (click)="goBack()">
+              <i class="feather icon-arrow-left me-1"></i>Volver a la lista
+            </button>
+            <h3 class="mb-1">
+              <span class="badge me-2" [style.backgroundColor]="mantenimiento()!.tipo_mantenimiento_color">
+                <i [class]="mantenimiento()!.tipo_mantenimiento_icono + ' me-1'"></i>
+                {{ mantenimiento()!.tipo_mantenimiento_nombre }}
+              </span>
+              {{ mantenimiento()!.folio }}
+            </h3>
+            <p class="text-muted mb-0">
+              {{ mantenimiento()!.cliente_nombre }}
+              @if (mantenimiento()!.sucursal_nombre) {
+                - {{ mantenimiento()!.sucursal_nombre }}
+              }
+            </p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <!-- Estatus -->
+            <span class="badge badge-lg" [style.backgroundColor]="mantenimiento()!.estatus_color">
+              {{ mantenimiento()!.estatus_nombre }}
+            </span>
+
+            <!-- Resultado -->
+            @if (mantenimiento()!.resultado) {
+              <span class="badge badge-lg" [style.backgroundColor]="resultadoConfig[mantenimiento()!.resultado!].color">
+                <i class="feather icon-{{ resultadoConfig[mantenimiento()!.resultado!].icon }} me-1"></i>
+                {{ mantenimiento()!.resultado }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="d-flex gap-2 mt-3 flex-wrap">
+          @if (!mantenimiento()!.estatus_es_final) {
+            @if (mantenimiento()!.estatus_nombre === 'Programado') {
+              <button type="button" class="btn btn-primary" (click)="iniciarMantenimiento()">
+                <i class="feather icon-play me-1"></i>Iniciar Mantenimiento
+              </button>
+            }
+            @if (mantenimiento()!.estatus_nombre === 'En proceso') {
+              <button type="button" class="btn btn-success" (click)="openFinalizarModal(finalizarModal)"
+                      [disabled]="!canFinalizar()"
+                      [ngbTooltip]="!canFinalizar() ? 'Completa todos los items obligatorios del checklist' : ''">
+                <i class="feather icon-check me-1"></i>Finalizar Mantenimiento
+              </button>
+            }
+            <button type="button" class="btn btn-outline-primary" (click)="editMantenimiento()">
+              <i class="feather icon-edit me-1"></i>Editar
+            </button>
+          }
+          @if (mantenimiento()!.resultado === 'Requiere acción' && !mantenimiento()!.ticket_generado_id) {
+            <button type="button" class="btn btn-warning" (click)="generarTicket()">
+              <i class="feather icon-file-plus me-1"></i>Generar Ticket
+            </button>
+          }
+          @if (mantenimiento()!.ticket_generado_id) {
+            <a [routerLink]="['/tickets', mantenimiento()!.ticket_generado_id]" class="btn btn-outline-info">
+              <i class="feather icon-external-link me-1"></i>Ver Ticket Generado
+            </a>
+          }
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Info y Tabs -->
+    <div class="col-12 col-lg-4 mb-4">
+      <app-card cardTitle="Información" [options]="false">
+        <table class="table table-borderless mb-0">
+          <tbody>
+            <tr>
+              <td class="text-muted">Fecha programada</td>
+              <td class="fw-medium">
+                {{ formatDate(mantenimiento()!.fecha_programada) }}
+                @if (mantenimiento()!.hora_programada) {
+                  a las {{ formatTime(mantenimiento()!.hora_programada) }}
+                }
+              </td>
+            </tr>
+            <tr>
+              <td class="text-muted">Técnico</td>
+              <td>
+                @if (mantenimiento()!.tecnico_nombre) {
+                  <div class="d-flex align-items-center">
+                    @if (mantenimiento()!.tecnico_avatar) {
+                      <img [src]="mantenimiento()!.tecnico_avatar" class="rounded-circle me-2" width="24" height="24">
+                    }
+                    {{ mantenimiento()!.tecnico_nombre }}
+                  </div>
+                } @else {
+                  <span class="text-muted">Sin asignar</span>
+                }
+              </td>
+            </tr>
+            @if (mantenimiento()!.fecha_inicio) {
+              <tr>
+                <td class="text-muted">Iniciado</td>
+                <td>{{ formatDateTime(mantenimiento()!.fecha_inicio) }}</td>
+              </tr>
+            }
+            @if (mantenimiento()!.fecha_fin) {
+              <tr>
+                <td class="text-muted">Finalizado</td>
+                <td>{{ formatDateTime(mantenimiento()!.fecha_fin) }}</td>
+              </tr>
+            }
+            @if (mantenimiento()!.contacto_cliente) {
+              <tr>
+                <td class="text-muted">Contacto</td>
+                <td>
+                  {{ mantenimiento()!.contacto_cliente }}
+                  @if (mantenimiento()!.telefono_contacto) {
+                    <br><small class="text-muted">{{ mantenimiento()!.telefono_contacto }}</small>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <!-- Progreso del checklist -->
+        @if (mantenimiento()!.checklist_total && mantenimiento()!.checklist_total! > 0) {
+          <hr>
+          <div class="mb-2 d-flex justify-content-between">
+            <span>Checklist</span>
+            <span class="fw-medium">{{ mantenimiento()!.checklist_completados }}/{{ mantenimiento()!.checklist_total }}</span>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar bg-success" [style.width.%]="getChecklistProgress()"></div>
+          </div>
+        }
+      </app-card>
+
+      <!-- Notas internas -->
+      @if (mantenimiento()!.notas_internas) {
+        <app-card cardTitle="Notas Internas" [options]="false" class="mt-4">
+          <p class="mb-0" style="white-space: pre-wrap;">{{ mantenimiento()!.notas_internas }}</p>
+        </app-card>
+      }
+
+      <!-- Observaciones y Recomendaciones -->
+      @if (mantenimiento()!.observaciones || mantenimiento()!.recomendaciones) {
+        <app-card cardTitle="Resultado" [options]="false" class="mt-4">
+          @if (mantenimiento()!.observaciones) {
+            <h6>Observaciones</h6>
+            <p style="white-space: pre-wrap;">{{ mantenimiento()!.observaciones }}</p>
+          }
+          @if (mantenimiento()!.recomendaciones) {
+            <h6>Recomendaciones</h6>
+            <p class="mb-0" style="white-space: pre-wrap;">{{ mantenimiento()!.recomendaciones }}</p>
+          }
+        </app-card>
+      }
+    </div>
+
+    <!-- Tabs de checklist y evidencias -->
+    <div class="col-12 col-lg-8">
+      <app-card [hidHeader]="true">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+          <li [ngbNavItem]="1">
+            <button ngbNavLink>
+              <i class="feather icon-check-square me-1"></i>
+              Checklist
+              @if (mantenimiento()!.checklist_total) {
+                <span class="badge bg-light-secondary ms-1">{{ mantenimiento()!.checklist_total }}</span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              @if (loadingChecklist()) {
+                <div class="text-center py-4">
+                  <div class="spinner-border spinner-border-sm text-primary"></div>
+                </div>
+              } @else if (checklist().length === 0) {
+                <div class="text-center py-4 text-muted">
+                  <i class="feather icon-check-square" style="font-size: 2rem;"></i>
+                  <p class="mt-2 mb-0">No hay checklist para este mantenimiento</p>
+                </div>
+              } @else {
+                <app-checklist-execution
+                  [checklistItems]="checklistItems"
+                  [isDisabled]="mantenimiento()!.estatus_es_final || mantenimiento()!.estatus_nombre === 'Programado'"
+                  (itemExecuted)="onChecklistItemExecuted($event)"
+                  (uploadEvidencia)="onChecklistUploadEvidencia($event)">
+                </app-checklist-execution>
+              }
+            </ng-template>
+          </li>
+          <li [ngbNavItem]="3">
+            <button ngbNavLink>
+              <i class="feather icon-image me-1"></i>
+              Evidencias
+              @if (mantenimiento()!.total_evidencias) {
+                <span class="badge bg-light-secondary ms-1">{{ mantenimiento()!.total_evidencias }}</span>
+              }
+            </button>
+            <ng-template ngbNavContent>
+              <app-evidencias-upload
+                [evidenciasList]="evidenciasList"
+                [isDisabled]="mantenimiento()!.estatus_es_final"
+                [checklistItemId]="currentChecklistItemId() || undefined"
+                (uploadFile)="onUploadEvidencia($event)"
+                (deleteFile)="onDeleteEvidencia($event)">
+              </app-evidencias-upload>
+            </ng-template>
+          </li>
+        </ul>
+        <div [ngbNavOutlet]="nav" class="mt-3"></div>
+      </app-card>
+    </div>
+  }
+</div>
+
+<!-- Modal Finalizar -->
+<ng-template #finalizarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Finalizar Mantenimiento</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Resultado -->
+    <div class="mb-3">
+      <label class="form-label">Resultado <span class="text-danger">*</span></label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (res of resultados; track res) {
+          <button type="button" class="btn"
+                  [class.btn-outline-secondary]="finalizarResultado() !== res"
+                  [style.backgroundColor]="finalizarResultado() === res ? resultadoConfig[res].color : ''"
+                  [style.color]="finalizarResultado() === res ? 'white' : ''"
+                  (click)="finalizarResultado.set(res)">
+            <i class="feather icon-{{ resultadoConfig[res].icon }} me-1"></i>
+            {{ res }}
+          </button>
+        }
+      </div>
+      @if (finalizarResultado() === 'Requiere acción') {
+        <small class="text-warning mt-2 d-block">
+          <i class="feather icon-alert-triangle me-1"></i>
+          Se podrá generar un ticket de seguimiento después de finalizar
+        </small>
+      }
+    </div>
+
+    <!-- Observaciones -->
+    <div class="mb-3">
+      <label class="form-label">Observaciones</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="finalizarObservaciones"
+                placeholder="Describe lo realizado durante el mantenimiento..."></textarea>
+    </div>
+
+    <!-- Recomendaciones -->
+    <div class="mb-3">
+      <label class="form-label">Recomendaciones</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="finalizarRecomendaciones"
+                placeholder="Recomendaciones para el cliente o próximo mantenimiento..."></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-success" [disabled]="savingFinalizar()"
+            (click)="confirmFinalizar()">
+      @if (savingFinalizar()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Finalizar Mantenimiento
+    </button>
+  </div>
+</ng-template>

@@ -9,17 +9,35 @@
     <div class="card">
       <div class="card-body text-center">
         <form (ngSubmit)="onSubmit($event)">
+          <!-- Logo iGAS -->
           <div class="mb-4">
-            <i class="feather icon-unlock auth-icon"></i>
+            <img src="assets/images/logo-igas.png" alt="iGAS" style="height: 60px; margin-bottom: 20px;" />
           </div>
-          <h3 class="mb-4">Login</h3>
+          <h3 class="mb-2 text-igas-gray">Bienvenido</h3>
+          <p class="text-muted mb-4">Sistema de Mesa de Ayuda iGAS</p>
+          @if (inactivityMessage()) {
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+              <i class="feather icon-clock me-2"></i>
+              <div>
+                {{ inactivityMessage() }}
+              </div>
+            </div>
+          }
+          @if (error()) {
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+              <i class="feather icon-alert-circle me-2"></i>
+              <div>
+                <strong>Error:</strong> {{ error() }}
+              </div>
+            </div>
+          }
           <div class="input-group mb-3">
             <input
               type="email"
               class="form-control"
               id="floatingInput"
               [class.is-invalid]="submitted() && loginForm.email().invalid()"
-              placeholder="Email Address"
+              placeholder="Correo Electrónico"
               [field]="loginForm.email"
             />
             @if (submitted() && loginForm.email().invalid()) {
@@ -38,7 +56,7 @@
                 class="form-control"
                 [field]="loginForm.password"
                 [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             } @else {
               <input
@@ -47,7 +65,7 @@
                 class="form-control"
                 [field]="loginForm.password"
                 [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Password (min. 8 characters)"
+                placeholder="Contraseña (mín. 8 caracteres)"
               />
             }
             <i
@@ -65,20 +83,29 @@
           </div>
           <div class="form-group text-start">
             <div class="checkbox checkbox-fill d-inline">
-              <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="" />
-              <label for="checkbox-fill-a1" class="cr">Save Details</label>
+              <input
+                type="checkbox"
+                name="checkbox-fill-1"
+                id="checkbox-fill-a1"
+                [checked]="rememberMe()"
+                (change)="rememberMe.set(!rememberMe())"
+              />
+              <label for="checkbox-fill-a1" class="cr">Recordar datos</label>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mb-4">Login</button>
+          <button type="submit" class="btn btn-primary mb-4" [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Iniciando sesión...
+            } @else {
+              Iniciar Sesión
+            }
+          </button>
           <p class="mb-2 text-muted">
-            Forgot password?
-            <a [routerLink]="['#']">Reset</a>
+            ¿Olvidaste tu contraseña?
+            <a [routerLink]="['/forgot-password']">Recuperar</a>
           </p>
         </form>
-        <p class="mb-0 text-muted">
-          Don’t have an account?
-          <a [routerLink]="['/register']">Sign up</a>
-        </p>
       </div>
     </div>
   </div>

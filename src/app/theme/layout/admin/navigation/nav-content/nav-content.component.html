@@ -3,7 +3,7 @@
   <div class="navbar-content">
     <ul class="nav pcoded-inner-navbar" (clickOutside)="fireOutClick()">
       @for (item of navigations; track item) {
-        @if (item.type === 'group') {
+        @if (item.type === 'group' && !item.hidden) {
           <app-nav-group [item]="item" />
         }
       }
