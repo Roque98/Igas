@@ -12,6 +12,7 @@ import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { NotificationPushService } from 'src/app/core/services/notification-push.service';
 import { AuditService } from 'src/app/core/services/audit.service';
+import { UserService } from 'src/app/core/services/user.service';
 import { Notification } from 'src/app/core/models';
 
 @Component({
@@ -27,6 +28,7 @@ export class NavRightComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private notificationPushService = inject(NotificationPushService);
   private auditService = inject(AuditService);
+  private userService = inject(UserService);
 
   // Observable para el usuario actual
   currentUser$ = this.supabase.currentUser$;
@@ -37,7 +39,7 @@ export class NavRightComponent implements OnInit {
   recentNotifications = computed(() => this.notifications().slice(0, 5));
   loadingNotifications = signal(false);
 
-  // Datos del perfil del usuario
+  // Datos del perfil del usuario (usando el estado global)
   userProfile = signal<{
     nombre_completo: string;
     avatar_url: string | null;
@@ -51,31 +53,18 @@ export class NavRightComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadUserProfile();
-
-    // Suscribirse a cambios de usuario para recargar el perfil
-    this.currentUser$.subscribe(user => {
-      if (user) {
-        this.loadUserProfile();
+    // Suscribirse al perfil global del usuario (se actualiza cuando cambia el avatar)
+    this.userService.currentProfile$.subscribe(profile => {
+      if (profile) {
+        this.userProfile.set({
+          nombre_completo: profile.nombre_completo,
+          avatar_url: profile.avatar_url,
+          email: profile.email
+        });
       } else {
         this.userProfile.set(null);
       }
     });
-  }
-
-  private async loadUserProfile(): Promise<void> {
-    const { data: { user } } = await this.supabase.client.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await this.supabase.client
-      .from('profiles')
-      .select('nombre_completo, avatar_url, email')
-      .eq('id', user.id)
-      .single();
-
-    if (!error && data) {
-      this.userProfile.set(data);
-    }
   }
 
   getAvatarUrl(): string {
@@ -140,9 +129,7 @@ export class NavRightComponent implements OnInit {
   }
 
   viewAllNotifications(): void {
-    // Por ahora redirigir al listado de tickets
-    // TODO: Crear página de notificaciones cuando sea necesario
-    this.router.navigate(['/tickets/lista']);
+    this.router.navigate(['/notificaciones']);
   }
 
   getNotificationIcon(tipo: string): string {

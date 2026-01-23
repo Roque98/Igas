@@ -225,6 +225,81 @@ export class UserListComponent implements OnInit {
   }
 
   // ============================================================================
+  // Exportación CSV
+  // ============================================================================
+
+  exporting = signal(false);
+
+  async exportToCSV(): Promise<void> {
+    this.exporting.set(true);
+    try {
+      const users = await this.userService.getAllUsersForExport();
+
+      if (users.length === 0) {
+        this.notificationService.warning('No hay usuarios para exportar');
+        return;
+      }
+
+      // Definir columnas
+      const headers = [
+        'Nombre Completo',
+        'Email',
+        'Teléfono',
+        'Rol',
+        'Equipo',
+        'Horario',
+        'Estatus',
+        'Disponibilidad',
+        'Fecha de Creación'
+      ];
+
+      // Convertir datos
+      const rows = users.map(user => [
+        user.nombre_completo || '',
+        user.email || '',
+        user.telefono || '',
+        user.rol?.nombre || 'Sin rol',
+        user.equipo?.nombre || 'Sin equipo',
+        user.horario?.nombre || 'Sin horario',
+        user.estatus || '',
+        user.disponibilidad || '',
+        user.created_at ? new Date(user.created_at).toLocaleDateString('es-MX') : ''
+      ]);
+
+      // Crear contenido CSV
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row =>
+          row.map(cell => {
+            // Escapar comillas y envolver en comillas si contiene coma o comilla
+            const escaped = String(cell).replace(/"/g, '""');
+            return /[,"\n]/.test(escaped) ? `"${escaped}"` : escaped;
+          }).join(',')
+        )
+      ].join('\n');
+
+      // Crear y descargar archivo
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.notificationService.success(`Se exportaron ${users.length} usuarios correctamente`);
+    } catch (error) {
+      console.error('Error exporting users:', error);
+      this.notificationService.error('Error al exportar usuarios');
+    } finally {
+      this.exporting.set(false);
+    }
+  }
+
+  // ============================================================================
   // Helpers de UI
   // ============================================================================
 

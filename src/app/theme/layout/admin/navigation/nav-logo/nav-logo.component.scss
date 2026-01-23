@@ -5,19 +5,20 @@
 .b-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 15px 20px;
+  gap: 10px;
+  padding: 12px 15px;
   text-decoration: none;
 
   .logo-igas {
-    height: 40px;
+    height: 36px;
     width: auto;
     object-fit: contain;
     transition: transform 0.3s ease;
     background-color: #ffffff;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
 
     &:hover {
       transform: scale(1.05);
@@ -25,21 +26,35 @@
   }
 
   .b-title {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
-    color: #58585A;
+    color: #ffffff;
     white-space: nowrap;
     transition: opacity 0.3s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
-// Cuando el sidebar está colapsado
+// Cuando el sidebar está colapsado - usar transform en lugar de width
+// para permitir que la animación de hover funcione correctamente
 :host-context(.navbar-collapsed) {
   .b-brand {
     .b-title {
+      transform: rotateY(-90deg);
+      transform-origin: 0 0;
       opacity: 0;
-      width: 0;
-      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+  }
+}
+
+// Mostrar título en hover cuando está colapsado
+:host-context(.navbar-collapsed:hover) {
+  .b-brand {
+    .b-title {
+      transform: rotateY(0deg);
+      opacity: 1;
     }
   }
 }

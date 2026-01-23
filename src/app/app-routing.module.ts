@@ -88,13 +88,43 @@ const routes: Routes = [
       {
         path: 'tickets',
         loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES)
-      }
+      },
 
-      // TODO: Agregar más rutas de la aplicación aquí
-      // {
-      //   path: 'clientes',
-      //   loadChildren: () => import('./features/clientes/clientes.routes').then((m) => m.CLIENTES_ROUTES)
-      // }
+      // Gestión de Casos (Escalamientos)
+      {
+        path: 'casos',
+        loadChildren: () => import('./features/casos/casos.routes').then((m) => m.CASOS_ROUTES)
+      },
+
+      // Gestión de Clientes
+      {
+        path: 'clientes',
+        loadChildren: () => import('./features/clientes/clientes.routes').then((m) => m.CLIENTES_ROUTES)
+      },
+
+      // Gestión de Mantenimientos
+      {
+        path: 'mantenimientos',
+        loadChildren: () => import('./features/mantenimientos/mantenimientos.routes').then((m) => m.MANTENIMIENTOS_ROUTES)
+      },
+
+      // Gestión de Instalaciones
+      {
+        path: 'instalaciones',
+        loadChildren: () => import('./features/instalaciones/instalaciones.routes').then((m) => m.INSTALACIONES_ROUTES)
+      },
+
+      // Reportes y Estadísticas
+      {
+        path: 'reportes',
+        loadChildren: () => import('./features/reportes/reportes.routes').then((m) => m.REPORTES_ROUTES)
+      },
+
+      // Centro de Notificaciones
+      {
+        path: 'notificaciones',
+        loadChildren: () => import('./features/notificaciones/notificaciones.routes').then((m) => m.NOTIFICACIONES_ROUTES)
+      }
     ]
   },
 

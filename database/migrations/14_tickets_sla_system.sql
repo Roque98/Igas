@@ -670,7 +670,7 @@ BEGIN
     v.responsable_nombre,
     v.semaforo,
     v.porcentaje_sla,
-    v.minutos_restantes
+    v.minutos_restantes::DOUBLE PRECISION
   FROM v_tickets_con_sla v
   WHERE v.estatus_es_final = false
     AND v.semaforo IN ('amarillo', 'rojo')

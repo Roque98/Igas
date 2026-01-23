@@ -39,6 +39,7 @@ export const ErrorMessages = {
     `Credenciales incorrectas. Te ${attempts === 1 ? 'queda' : 'quedan'} ${attempts} ${attempts === 1 ? 'intento' : 'intentos'} antes de que tu cuenta sea bloqueada temporalmente.`,
   samePassword: () => 'La nueva contraseña debe ser diferente a la contraseña actual.',
   passwordReused: () => 'No puedes reutilizar una contraseña reciente. Por favor, elige una contraseña diferente.',
+  emailNotConfirmed: () => 'El correo electrónico no ha sido confirmado. Por favor, revisa tu bandeja de entrada.',
 
   // Errores de red
   networkError: () => 'Error de conexión. Verifica tu conexión a internet e intenta nuevamente.',
@@ -84,7 +85,11 @@ export function getErrorMessage(error: any): string {
       return ErrorMessages.userNotFound();
     }
 
-    if (message.includes('invalid email') || message.includes('email')) {
+    if (message.includes('email not confirmed') || message.includes('email_not_confirmed')) {
+      return ErrorMessages.emailNotConfirmed();
+    }
+
+    if (message.includes('invalid email')) {
       return ErrorMessages.invalidEmail();
     }
 

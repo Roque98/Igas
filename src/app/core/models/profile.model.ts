@@ -47,6 +47,14 @@ export interface ProfileWithRelations extends Profile {
   horario?: Horario;
 }
 
+// Perfil básico para selects y referencias
+export interface ProfileBasic {
+  id: string;
+  nombre_completo: string;
+  email: string;
+  avatar_url?: string;
+}
+
 // DTO para crear un usuario (admin)
 export interface CreateUserDTO {
   email: string;
@@ -88,7 +96,7 @@ export interface UserFilters {
 export interface PaginationOptions {
   page: number;
   pageSize: number;
-  sortBy?: keyof Profile;
+  sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
 

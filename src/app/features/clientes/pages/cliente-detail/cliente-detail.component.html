@@ -1,0 +1,1111 @@
+<!-- Loading State -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando cliente...</p>
+  </div>
+}
+
+<!-- Error State -->
+@if (error() && !loading()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="feather icon-alert-circle me-2"></i>
+    {{ error() }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="goBack()">
+      <i class="feather icon-arrow-left me-1"></i> Volver
+    </button>
+  </div>
+}
+
+<!-- Content -->
+@if (!loading() && !error() && cliente()) {
+  <!-- Header Card -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex align-items-start gap-3">
+            <div class="avatar-lg bg-light-primary rounded-circle d-flex align-items-center justify-content-center">
+              <i class="feather icon-briefcase" style="font-size: 24px;"></i>
+            </div>
+            <div>
+              <h4 class="mb-1">{{ cliente()!.razon_social }}</h4>
+              @if (cliente()!.nombre_comercial && cliente()!.nombre_comercial !== cliente()!.razon_social) {
+                <p class="text-muted mb-2">{{ cliente()!.nombre_comercial }}</p>
+              }
+              <div class="d-flex gap-2 flex-wrap">
+                @if (cliente()!.codigo_cliente) {
+                  <span class="badge bg-light text-dark">
+                    <i class="feather icon-hash me-1"></i>
+                    {{ cliente()!.codigo_cliente }}
+                  </span>
+                }
+                <span class="badge" [class.bg-success]="cliente()!.tipo_cliente === 'Cliente'"
+                      [class.bg-info]="cliente()!.tipo_cliente === 'Prospecto'"
+                      [class.bg-secondary]="cliente()!.tipo_cliente === 'Inactivo'">
+                  {{ cliente()!.tipo_cliente }}
+                </span>
+                <span class="badge" [style.background-color]="getEstatusColor(cliente()!.estatus_cliente)">
+                  {{ cliente()!.estatus_cliente }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <button class="btn btn-outline-secondary me-2" (click)="goBack()">
+            <i class="feather icon-arrow-left me-1"></i> Volver
+          </button>
+          <button class="btn btn-primary" (click)="editCliente()">
+            <i class="feather icon-edit-2 me-1"></i> Editar
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Info -->
+      <div class="row mt-4 pt-3 border-top">
+        <div class="col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="feather icon-phone text-primary me-2"></i>
+            <div>
+              <small class="text-muted d-block">Teléfono</small>
+              @if (cliente()!.telefono) {
+                <span class="cursor-pointer" (click)="copyToClipboard(cliente()!.telefono)" ngbTooltip="Clic para copiar">
+                  {{ cliente()!.telefono }}
+                </span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="feather icon-mail text-primary me-2"></i>
+            <div>
+              <small class="text-muted d-block">Email</small>
+              @if (cliente()!.email) {
+                <span class="cursor-pointer" (click)="copyToClipboard(cliente()!.email)" ngbTooltip="Clic para copiar">
+                  {{ cliente()!.email }}
+                </span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="feather icon-file-text text-primary me-2"></i>
+            <div>
+              <small class="text-muted d-block">RFC</small>
+              @if (cliente()!.rfc) {
+                <span class="cursor-pointer" (click)="copyToClipboard(cliente()!.rfc)" ngbTooltip="Clic para copiar">
+                  {{ cliente()!.rfc }}
+                </span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex align-items-center">
+            <i class="feather icon-monitor text-primary me-2"></i>
+            <div>
+              <small class="text-muted d-block">AnyDesk</small>
+              @if (cliente()!.anydesk) {
+                <span class="cursor-pointer" (click)="copyToClipboard(cliente()!.anydesk)" ngbTooltip="Clic para copiar">
+                  {{ cliente()!.anydesk }}
+                </span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="card">
+    <div class="card-body">
+      <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+        <!-- Tab Sucursales -->
+        <li [ngbNavItem]="1">
+          <button ngbNavLink>
+            <i class="feather icon-map-pin me-1"></i>
+            Sucursales
+            <span class="badge bg-secondary ms-1">{{ sucursales().length }}</span>
+          </button>
+          <ng-template ngbNavContent>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Sucursales del cliente</h6>
+              <button class="btn btn-primary btn-sm" (click)="openCreateSucursalModal(sucursalFormModal)">
+                <i class="feather icon-plus me-1"></i> Nueva Sucursal
+              </button>
+            </div>
+            @if (loadingSucursales()) {
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            } @else if (sucursales().length === 0) {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-map-pin" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay sucursales registradas</p>
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Dirección</th>
+                      <th>Contacto</th>
+                      <th class="text-center">Estatus</th>
+                      <th class="text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (sucursal of sucursales(); track sucursal.id) {
+                      <tr>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            @if (sucursal.es_matriz) {
+                              <span class="badge bg-primary me-2">Matriz</span>
+                            }
+                            <span class="fw-medium">{{ sucursal.nombre }}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div class="small">
+                            @if (sucursal.calle) {
+                              {{ sucursal.calle }}
+                              @if (sucursal.numero_exterior) { #{{ sucursal.numero_exterior }} }
+                              @if (sucursal.numero_interior) { Int. {{ sucursal.numero_interior }} }
+                              <br>
+                            }
+                            @if (sucursal.colonia) { {{ sucursal.colonia }}, }
+                            @if (sucursal.ciudad) { {{ sucursal.ciudad }}, }
+                            @if (sucursal.estado) { {{ sucursal.estado }} }
+                            @if (sucursal.codigo_postal) { CP {{ sucursal.codigo_postal }} }
+                            @if (!sucursal.calle && !sucursal.colonia && !sucursal.ciudad) {
+                              <span class="text-muted">Sin dirección</span>
+                            }
+                          </div>
+                        </td>
+                        <td>
+                          <div class="small">
+                            @if (sucursal.telefono) {
+                              <div><i class="feather icon-phone me-1"></i>{{ sucursal.telefono }}</div>
+                            }
+                            @if (sucursal.email) {
+                              <div><i class="feather icon-mail me-1"></i>{{ sucursal.email }}</div>
+                            }
+                            @if (sucursal.contacto_local) {
+                              <div class="text-muted"><i class="feather icon-user me-1"></i>{{ sucursal.contacto_local }}</div>
+                            }
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge" [class.bg-success]="sucursal.estatus === 'Activa'" [class.bg-secondary]="sucursal.estatus === 'Inactiva'">
+                            {{ sucursal.estatus }}
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-primary me-1" ngbTooltip="Editar"
+                                  (click)="openEditSucursalModal(sucursalFormModal, sucursal)">
+                            <i class="feather icon-edit-2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger" ngbTooltip="Eliminar"
+                                  (click)="openDeleteSucursalModal(deleteSucursalModal, sucursal)">
+                            <i class="feather icon-trash-2"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <!-- Tab Contactos -->
+        <li [ngbNavItem]="2">
+          <button ngbNavLink>
+            <i class="feather icon-users me-1"></i>
+            Contactos
+            <span class="badge bg-secondary ms-1">{{ contactos().length }}</span>
+          </button>
+          <ng-template ngbNavContent>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Contactos del cliente</h6>
+              <button class="btn btn-primary btn-sm" (click)="openCreateContactoModal(contactoFormModal)">
+                <i class="feather icon-plus me-1"></i> Nuevo Contacto
+              </button>
+            </div>
+            @if (loadingContactos()) {
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            } @else if (contactos().length === 0) {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-users" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay contactos registrados</p>
+              </div>
+            } @else {
+              <div class="row">
+                @for (contacto of contactos(); track contacto.id) {
+                  <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100" [class.border-primary]="contacto.es_contacto_principal">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                          <h6 class="card-title mb-0">{{ contacto.nombre_completo }}</h6>
+                          @if (contacto.es_contacto_principal) {
+                            <span class="badge bg-primary">Principal</span>
+                          }
+                        </div>
+                        <p class="text-muted small mb-2">
+                          <span class="badge bg-light text-dark">{{ getTipoContactoLabel(contacto.tipo) }}</span>
+                          @if (contacto.puesto) {
+                            <span class="ms-2">{{ contacto.puesto }}</span>
+                          }
+                        </p>
+                        <div class="small">
+                          @if (contacto.telefono) {
+                            <div class="mb-1">
+                              <i class="feather icon-phone me-1"></i>
+                              <span class="cursor-pointer" (click)="copyToClipboard(contacto.telefono)">{{ contacto.telefono }}</span>
+                            </div>
+                          }
+                          @if (contacto.celular) {
+                            <div class="mb-1">
+                              <i class="feather icon-smartphone me-1"></i>
+                              <span class="cursor-pointer" (click)="copyToClipboard(contacto.celular)">{{ contacto.celular }}</span>
+                            </div>
+                          }
+                          @if (contacto.email) {
+                            <div>
+                              <i class="feather icon-mail me-1"></i>
+                              <span class="cursor-pointer" (click)="copyToClipboard(contacto.email)">{{ contacto.email }}</span>
+                            </div>
+                          }
+                        </div>
+                        @if (contacto.sucursal_nombre) {
+                          <div class="mt-2 pt-2 border-top small text-muted">
+                            <i class="feather icon-map-pin me-1"></i>{{ contacto.sucursal_nombre }}
+                          </div>
+                        }
+                        <div class="mt-2 pt-2 border-top">
+                          <button class="btn btn-sm btn-outline-primary me-1" ngbTooltip="Editar"
+                                  (click)="openEditContactoModal(contactoFormModal, contacto)">
+                            <i class="feather icon-edit-2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger" ngbTooltip="Eliminar"
+                                  (click)="openDeleteContactoModal(deleteContactoModal, contacto)">
+                            <i class="feather icon-trash-2"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <!-- Tab Datos Fiscales -->
+        <li [ngbNavItem]="3">
+          <button ngbNavLink>
+            <i class="feather icon-file-text me-1"></i>
+            Datos Fiscales
+            @if (datosFiscales()) {
+              <i class="feather icon-check-circle text-success ms-1"></i>
+            }
+          </button>
+          <ng-template ngbNavContent>
+            @if (loadingFiscales()) {
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            } @else if (!datosFiscales()) {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-file-text" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay datos fiscales registrados</p>
+              </div>
+            } @else {
+              <div class="row">
+                <div class="col-md-6">
+                  <h6 class="text-muted mb-3">Información Fiscal</h6>
+                  <dl class="row">
+                    <dt class="col-sm-4">Razón Social:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.razon_social_fiscal }}</dd>
+
+                    <dt class="col-sm-4">RFC:</dt>
+                    <dd class="col-sm-8">
+                      <span class="cursor-pointer" (click)="copyToClipboard(datosFiscales()!.rfc)">
+                        {{ datosFiscales()!.rfc }}
+                      </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Régimen Fiscal:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.regimen_fiscal }}</dd>
+
+                    <dt class="col-sm-4">Uso CFDI:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.uso_cfdi_default || '-' }}</dd>
+                  </dl>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="text-muted mb-3">Dirección Fiscal</h6>
+                  <dl class="row">
+                    <dt class="col-sm-4">Dirección:</dt>
+                    <dd class="col-sm-8">
+                      @if (datosFiscales()!.calle_fiscal) {
+                        {{ datosFiscales()!.calle_fiscal }}
+                        @if (datosFiscales()!.numero_exterior_fiscal) { #{{ datosFiscales()!.numero_exterior_fiscal }} }
+                        @if (datosFiscales()!.numero_interior_fiscal) { Int. {{ datosFiscales()!.numero_interior_fiscal }} }
+                      } @else {
+                        -
+                      }
+                    </dd>
+
+                    <dt class="col-sm-4">Colonia:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.colonia_fiscal || '-' }}</dd>
+
+                    <dt class="col-sm-4">Municipio:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.municipio_fiscal || '-' }}</dd>
+
+                    <dt class="col-sm-4">Estado:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.estado_fiscal || '-' }}</dd>
+
+                    <dt class="col-sm-4">CP:</dt>
+                    <dd class="col-sm-8">{{ datosFiscales()!.codigo_postal_fiscal }}</dd>
+                  </dl>
+                </div>
+                <div class="col-12 border-top pt-3 mt-3">
+                  <h6 class="text-muted mb-3">Facturación</h6>
+                  <dl class="row">
+                    <dt class="col-sm-2">Email:</dt>
+                    <dd class="col-sm-4">{{ datosFiscales()!.email_facturacion }}</dd>
+
+                    <dt class="col-sm-2">Forma Pago:</dt>
+                    <dd class="col-sm-4">{{ datosFiscales()!.forma_pago_preferida || '-' }}</dd>
+
+                    <dt class="col-sm-2">Método Pago:</dt>
+                    <dd class="col-sm-4">{{ datosFiscales()!.metodo_pago_preferido || '-' }}</dd>
+
+                    @if (datosFiscales()!.emails_copia && datosFiscales()!.emails_copia!.length > 0) {
+                      <dt class="col-sm-2">Emails CC:</dt>
+                      <dd class="col-sm-10">{{ datosFiscales()!.emails_copia!.join(', ') }}</dd>
+                    }
+                  </dl>
+                </div>
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <!-- Tab Licencias -->
+        <li [ngbNavItem]="4">
+          <button ngbNavLink>
+            <i class="feather icon-key me-1"></i>
+            Licencias HASP
+            <span class="badge bg-secondary ms-1">{{ licencias().length }}</span>
+          </button>
+          <ng-template ngbNavContent>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Licencias del cliente</h6>
+              <button class="btn btn-primary btn-sm" (click)="openCreateLicenciaModal(licenciaFormModal)">
+                <i class="feather icon-plus me-1"></i> Nueva Licencia
+              </button>
+            </div>
+            @if (loadingLicencias()) {
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            } @else if (licencias().length === 0) {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-key" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay licencias registradas</p>
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Tipo / Producto</th>
+                      <th>Folio / Serie</th>
+                      <th>Sucursal</th>
+                      <th class="text-center">Vencimiento</th>
+                      <th class="text-center">Días</th>
+                      <th class="text-center">Estatus</th>
+                      <th class="text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (licencia of licencias(); track licencia.id) {
+                      <tr [class.table-danger]="licencia.estado_calculado === 'Vencida'" [class.table-warning]="licencia.estado_calculado === 'Por vencer'">
+                        <td>
+                          <div>
+                            <span class="fw-medium">{{ licencia.tipo }}</span>
+                            @if (licencia.producto) {
+                              <br><small class="text-muted">{{ licencia.producto }}</small>
+                            }
+                            @if (licencia.version) {
+                              <small class="text-muted"> v{{ licencia.version }}</small>
+                            }
+                          </div>
+                        </td>
+                        <td>
+                          <div class="small">
+                            @if (licencia.folio) {
+                              <div><strong>Folio:</strong> {{ licencia.folio }}</div>
+                            }
+                            @if (licencia.numero_serie) {
+                              <div><strong>Serie:</strong> {{ licencia.numero_serie }}</div>
+                            }
+                          </div>
+                        </td>
+                        <td>{{ licencia.sucursal_nombre || 'General' }}</td>
+                        <td class="text-center">{{ formatDate(licencia.fecha_vencimiento) }}</td>
+                        <td class="text-center">
+                          @if (licencia.dias_restantes !== undefined && licencia.dias_restantes !== null) {
+                            <span [class]="getDiasClass(licencia.dias_restantes)">
+                              {{ licencia.dias_restantes }} días
+                            </span>
+                          } @else {
+                            <span class="text-muted">-</span>
+                          }
+                        </td>
+                        <td class="text-center">
+                          <span class="badge" [style.background-color]="getLicenciaEstatusColor(licencia.estado_calculado || licencia.estatus)">
+                            {{ licencia.estado_calculado || licencia.estatus }}
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-primary me-1" ngbTooltip="Editar"
+                                  (click)="openEditLicenciaModal(licenciaFormModal, licencia)">
+                            <i class="feather icon-edit-2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-success me-1" ngbTooltip="Renovar"
+                                  (click)="openRenovarLicenciaModal(renovarLicenciaModal, licencia)">
+                            <i class="feather icon-refresh-cw"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-info" ngbTooltip="Historial"
+                                  (click)="openHistorialRenovacionesModal(historialRenovacionesModal, licencia)">
+                            <i class="feather icon-clock"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <!-- Tab Pólizas -->
+        <li [ngbNavItem]="5">
+          <button ngbNavLink>
+            <i class="feather icon-shield me-1"></i>
+            Pólizas de Soporte
+            <span class="badge bg-secondary ms-1">{{ polizas().length }}</span>
+          </button>
+          <ng-template ngbNavContent>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">Pólizas del cliente</h6>
+              <button class="btn btn-primary btn-sm" (click)="openCreatePolizaModal(polizaFormModal)">
+                <i class="feather icon-plus me-1"></i> Nueva Póliza
+              </button>
+            </div>
+            @if (loadingPolizas()) {
+              <div class="text-center py-4">
+                <div class="spinner-border spinner-border-sm text-primary"></div>
+              </div>
+            } @else if (polizas().length === 0) {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-shield" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay pólizas registradas</p>
+              </div>
+            } @else {
+              <div class="row">
+                @for (poliza of polizas(); track poliza.id) {
+                  <div class="col-md-6 mb-3">
+                    <div class="card h-100" [class.border-success]="poliza.estado_calculado === 'Activa'"
+                         [class.border-warning]="poliza.estado_calculado === 'Por vencer'"
+                         [class.border-danger]="poliza.estado_calculado === 'Vencida' || poliza.estado_calculado === 'En cobranza'">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 class="mb-0">
+                            @if (poliza.numero_poliza) {
+                              Póliza #{{ poliza.numero_poliza }}
+                            } @else {
+                              Póliza {{ poliza.tipo }}
+                            }
+                          </h6>
+                          <small class="text-muted">{{ poliza.tipo }}</small>
+                        </div>
+                        <span class="badge" [style.background-color]="getPolizaEstatusColor(poliza.estado_calculado || poliza.estatus)">
+                          {{ poliza.estado_calculado || poliza.estatus }}
+                        </span>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-6">
+                            <small class="text-muted d-block">Inicio</small>
+                            <span>{{ formatDate(poliza.fecha_inicio) }}</span>
+                          </div>
+                          <div class="col-6">
+                            <small class="text-muted d-block">Vencimiento</small>
+                            <span [class]="getDiasClass(poliza.dias_restantes ?? null)">
+                              {{ formatDate(poliza.fecha_vencimiento) }}
+                            </span>
+                            @if (poliza.dias_restantes !== undefined && poliza.dias_restantes !== null) {
+                              <small [class]="getDiasClass(poliza.dias_restantes)">
+                                ({{ poliza.dias_restantes }} días)
+                              </small>
+                            }
+                          </div>
+                        </div>
+                        @if (poliza.horas_incluidas) {
+                          <div class="mt-3">
+                            <div class="d-flex justify-content-between mb-1">
+                              <small class="text-muted">Horas de soporte</small>
+                              <small>{{ poliza.horas_consumidas || 0 }} / {{ poliza.horas_incluidas }} hrs</small>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                              <div
+                                class="progress-bar"
+                                [class.bg-success]="(poliza.porcentaje_horas_consumidas || 0) < 70"
+                                [class.bg-warning]="(poliza.porcentaje_horas_consumidas || 0) >= 70 && (poliza.porcentaje_horas_consumidas || 0) < 90"
+                                [class.bg-danger]="(poliza.porcentaje_horas_consumidas || 0) >= 90"
+                                [style.width.%]="poliza.porcentaje_horas_consumidas || 0"
+                              ></div>
+                            </div>
+                          </div>
+                        }
+                        @if (poliza.cobertura) {
+                          <div class="mt-3">
+                            <small class="text-muted d-block">Cobertura</small>
+                            <p class="mb-0 small">{{ poliza.cobertura }}</p>
+                          </div>
+                        }
+                        <div class="mt-3 pt-2 border-top">
+                          <button class="btn btn-sm btn-outline-primary me-1" ngbTooltip="Editar"
+                                  (click)="openEditPolizaModal(polizaFormModal, poliza)">
+                            <i class="feather icon-edit-2"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-success" ngbTooltip="Renovar"
+                                  (click)="openRenovarPolizaModal(renovarPolizaModal, poliza)">
+                            <i class="feather icon-refresh-cw"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </ng-template>
+        </li>
+
+        <!-- Tab Notas -->
+        <li [ngbNavItem]="6">
+          <button ngbNavLink>
+            <i class="feather icon-edit-3 me-1"></i>
+            Notas
+          </button>
+          <ng-template ngbNavContent>
+            @if (cliente()!.notas) {
+              <div class="p-3 bg-light rounded">
+                <p class="mb-0" style="white-space: pre-wrap;">{{ cliente()!.notas }}</p>
+              </div>
+            } @else {
+              <div class="text-center py-4 text-muted">
+                <i class="feather icon-edit-3" style="font-size: 32px;"></i>
+                <p class="mt-2">No hay notas para este cliente</p>
+              </div>
+            }
+          </ng-template>
+        </li>
+      </ul>
+
+      <div [ngbNavOutlet]="nav" class="mt-4"></div>
+    </div>
+  </div>
+}
+
+<!-- ============================================================================ -->
+<!-- MODALES -->
+<!-- ============================================================================ -->
+
+<!-- Modal Renovar Licencia -->
+<ng-template #renovarLicenciaModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Renovar Licencia</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedLicencia()) {
+      <div class="alert alert-info mb-3">
+        <strong>{{ selectedLicencia()!.tipo }}</strong>
+        @if (selectedLicencia()!.folio) { - Folio: {{ selectedLicencia()!.folio }} }
+        <br>
+        <small>Vencimiento actual: {{ formatDate(selectedLicencia()!.fecha_vencimiento) }}</small>
+      </div>
+    }
+    <div class="mb-3">
+      <label class="form-label">Nueva Fecha de Vencimiento <span class="text-danger">*</span></label>
+      <input type="date" class="form-control" [ngModel]="renovarNuevaFecha()" (ngModelChange)="renovarNuevaFecha.set($event)">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Costo de Renovación</label>
+      <input type="number" class="form-control" [ngModel]="renovarCosto()" (ngModelChange)="renovarCosto.set($event)" placeholder="0.00">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea class="form-control" rows="3" [ngModel]="renovarNotas()" (ngModelChange)="renovarNotas.set($event)" placeholder="Notas sobre la renovación..."></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-success" (click)="confirmRenovarLicencia()" [disabled]="savingAction() || !isRenovarFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      Renovar Licencia
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Renovar Póliza -->
+<ng-template #renovarPolizaModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Renovar Póliza</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedPoliza()) {
+      <div class="alert alert-info mb-3">
+        <strong>{{ selectedPoliza()!.tipo }}</strong>
+        @if (selectedPoliza()!.numero_poliza) { - #{{ selectedPoliza()!.numero_poliza }} }
+        <br>
+        <small>Vencimiento actual: {{ formatDate(selectedPoliza()!.fecha_vencimiento) }}</small>
+      </div>
+    }
+    <div class="mb-3">
+      <label class="form-label">Nueva Fecha de Vencimiento <span class="text-danger">*</span></label>
+      <input type="date" class="form-control" [ngModel]="renovarNuevaFecha()" (ngModelChange)="renovarNuevaFecha.set($event)">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Costo de Renovación</label>
+      <input type="number" class="form-control" [ngModel]="renovarCosto()" (ngModelChange)="renovarCosto.set($event)" placeholder="0.00">
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea class="form-control" rows="3" [ngModel]="renovarNotas()" (ngModelChange)="renovarNotas.set($event)" placeholder="Notas sobre la renovación..."></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-success" (click)="confirmRenovarPoliza()" [disabled]="savingAction() || !isRenovarFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      Renovar Póliza
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Sucursal Form (Create/Edit) -->
+<ng-template #sucursalFormModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ editingSucursal() ? 'Editar Sucursal' : 'Nueva Sucursal' }}</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-md-8 mb-3">
+        <label class="form-label">Nombre <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().nombre" (ngModelChange)="updateSucursalForm('nombre', $event)" placeholder="Nombre de la sucursal">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Es Matriz</label>
+        <div class="form-check form-switch mt-2">
+          <input type="checkbox" class="form-check-input" [ngModel]="sucursalForm().es_matriz" (ngModelChange)="updateSucursalForm('es_matriz', $event)">
+          <label class="form-check-label">{{ sucursalForm().es_matriz ? 'Sí' : 'No' }}</label>
+        </div>
+      </div>
+    </div>
+    <h6 class="text-muted mt-3 mb-3">Dirección</h6>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Calle</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().calle" (ngModelChange)="updateSucursalForm('calle', $event)">
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label">No. Exterior</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().numero_exterior" (ngModelChange)="updateSucursalForm('numero_exterior', $event)">
+      </div>
+      <div class="col-md-3 mb-3">
+        <label class="form-label">No. Interior</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().numero_interior" (ngModelChange)="updateSucursalForm('numero_interior', $event)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Colonia</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().colonia" (ngModelChange)="updateSucursalForm('colonia', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Municipio</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().municipio" (ngModelChange)="updateSucursalForm('municipio', $event)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Ciudad</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().ciudad" (ngModelChange)="updateSucursalForm('ciudad', $event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Estado</label>
+        <select class="form-select" [ngModel]="sucursalForm().estado" (ngModelChange)="updateSucursalForm('estado', $event)">
+          <option value="">Seleccionar...</option>
+          @for (estado of estadosMexico; track estado) {
+            <option [value]="estado">{{ estado }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Código Postal</label>
+        <input type="text" class="form-control" [ngModel]="sucursalForm().codigo_postal" (ngModelChange)="updateSucursalForm('codigo_postal', $event)" maxlength="5">
+      </div>
+    </div>
+    <h6 class="text-muted mt-3 mb-3">Contacto</h6>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" class="form-control" [ngModel]="sucursalForm().telefono" (ngModelChange)="updateSucursalForm('telefono', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" [ngModel]="sucursalForm().email" (ngModelChange)="updateSucursalForm('email', $event)">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Contacto Local</label>
+      <input type="text" class="form-control" [ngModel]="sucursalForm().contacto_local" (ngModelChange)="updateSucursalForm('contacto_local', $event)" placeholder="Nombre del encargado">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-primary" (click)="confirmSaveSucursal()" [disabled]="savingAction() || !isSucursalFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      {{ editingSucursal() ? 'Actualizar' : 'Crear' }} Sucursal
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Delete Sucursal -->
+<ng-template #deleteSucursalModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Eliminar Sucursal</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (deletingSucursal()) {
+      <p>¿Está seguro de eliminar la sucursal <strong>{{ deletingSucursal()!.nombre }}</strong>?</p>
+      <p class="text-muted small">Esta acción no se puede deshacer.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-danger" (click)="confirmDeleteSucursal()" [disabled]="savingAction()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      Eliminar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Contacto Form (Create/Edit) -->
+<ng-template #contactoFormModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ editingContacto() ? 'Editar Contacto' : 'Nuevo Contacto' }}</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-md-8 mb-3">
+        <label class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" [ngModel]="contactoForm().nombre_completo" (ngModelChange)="updateContactoForm('nombre_completo', $event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" [ngModel]="contactoForm().tipo" (ngModelChange)="updateContactoForm('tipo', $event)">
+          @for (tipo of tiposContacto; track tipo.value) {
+            <option [value]="tipo.value">{{ tipo.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Puesto</label>
+        <input type="text" class="form-control" [ngModel]="contactoForm().puesto" (ngModelChange)="updateContactoForm('puesto', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Sucursal</label>
+        <select class="form-select" [ngModel]="contactoForm().sucursal_id" (ngModelChange)="updateContactoForm('sucursal_id', $event)">
+          <option value="">Sin sucursal específica</option>
+          @for (suc of sucursales(); track suc.id) {
+            <option [value]="suc.id">{{ suc.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" class="form-control" [ngModel]="contactoForm().telefono" (ngModelChange)="updateContactoForm('telefono', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Celular</label>
+        <input type="tel" class="form-control" [ngModel]="contactoForm().celular" (ngModelChange)="updateContactoForm('celular', $event)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-8 mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" [ngModel]="contactoForm().email" (ngModelChange)="updateContactoForm('email', $event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Contacto Principal</label>
+        <div class="form-check form-switch mt-2">
+          <input type="checkbox" class="form-check-input" [ngModel]="contactoForm().es_contacto_principal" (ngModelChange)="updateContactoForm('es_contacto_principal', $event)">
+          <label class="form-check-label">{{ contactoForm().es_contacto_principal ? 'Sí' : 'No' }}</label>
+        </div>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea class="form-control" rows="2" [ngModel]="contactoForm().notas" (ngModelChange)="updateContactoForm('notas', $event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-primary" (click)="confirmSaveContacto()" [disabled]="savingAction() || !isContactoFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      {{ editingContacto() ? 'Actualizar' : 'Crear' }} Contacto
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Delete Contacto -->
+<ng-template #deleteContactoModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Eliminar Contacto</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (deletingContacto()) {
+      <p>¿Está seguro de eliminar el contacto <strong>{{ deletingContacto()!.nombre_completo }}</strong>?</p>
+      <p class="text-muted small">El contacto será desactivado y no aparecerá en las listas.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-danger" (click)="confirmDeleteContacto()" [disabled]="savingAction()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      Eliminar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Licencia Form (Create/Edit) -->
+<ng-template #licenciaFormModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ editingLicencia() ? 'Editar Licencia' : 'Nueva Licencia' }}</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" [ngModel]="licenciaForm().tipo" (ngModelChange)="updateLicenciaForm('tipo', $event)" placeholder="Ej: HASP, Software, etc.">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Producto</label>
+        <input type="text" class="form-control" [ngModel]="licenciaForm().producto" (ngModelChange)="updateLicenciaForm('producto', $event)" placeholder="Nombre del producto">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Folio</label>
+        <input type="text" class="form-control" [ngModel]="licenciaForm().folio" (ngModelChange)="updateLicenciaForm('folio', $event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Número de Serie</label>
+        <input type="text" class="form-control" [ngModel]="licenciaForm().numero_serie" (ngModelChange)="updateLicenciaForm('numero_serie', $event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Versión</label>
+        <input type="text" class="form-control" [ngModel]="licenciaForm().version" (ngModelChange)="updateLicenciaForm('version', $event)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Sucursal</label>
+        <select class="form-select" [ngModel]="licenciaForm().sucursal_id" (ngModelChange)="updateLicenciaForm('sucursal_id', $event)">
+          <option value="">General (Todas las sucursales)</option>
+          @for (suc of sucursales(); track suc.id) {
+            <option [value]="suc.id">{{ suc.nombre }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Días de Alerta Previa</label>
+        <input type="number" class="form-control" [ngModel]="licenciaForm().dias_alerta_previa" (ngModelChange)="updateLicenciaForm('dias_alerta_previa', $event)" min="1" max="365">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de Activación</label>
+        <input type="date" class="form-control" [ngModel]="licenciaForm().fecha_activacion" (ngModelChange)="updateLicenciaForm('fecha_activacion', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de Vencimiento</label>
+        <input type="date" class="form-control" [ngModel]="licenciaForm().fecha_vencimiento" (ngModelChange)="updateLicenciaForm('fecha_vencimiento', $event)">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea class="form-control" rows="2" [ngModel]="licenciaForm().notas" (ngModelChange)="updateLicenciaForm('notas', $event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-primary" (click)="confirmSaveLicencia()" [disabled]="savingAction() || !isLicenciaFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      {{ editingLicencia() ? 'Actualizar' : 'Crear' }} Licencia
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Historial Renovaciones -->
+<ng-template #historialRenovacionesModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Historial de Renovaciones</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedLicencia()) {
+      <div class="alert alert-info mb-3">
+        <strong>{{ selectedLicencia()!.tipo }}</strong>
+        @if (selectedLicencia()!.folio) { - Folio: {{ selectedLicencia()!.folio }} }
+      </div>
+    }
+    @if (loadingHistorial()) {
+      <div class="text-center py-4">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+      </div>
+    } @else if (historialRenovaciones().length === 0) {
+      <div class="text-center py-4 text-muted">
+        <i class="feather icon-clock" style="font-size: 32px;"></i>
+        <p class="mt-2">No hay renovaciones registradas</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Vencimiento Anterior</th>
+              <th>Vencimiento Nuevo</th>
+              <th>Costo</th>
+              <th>Renovado Por</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ren of historialRenovaciones(); track ren.id) {
+              <tr>
+                <td>{{ formatDate(ren.fecha_renovacion) }}</td>
+                <td>{{ formatDate(ren.fecha_vencimiento_anterior) }}</td>
+                <td>{{ formatDate(ren.fecha_vencimiento_nueva) }}</td>
+                <td>{{ ren.costo ? ('$' + ren.costo.toFixed(2)) : '-' }}</td>
+                <td>{{ ren.renovado_por_nombre || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cerrar</button>
+  </div>
+</ng-template>
+
+<!-- Modal Póliza Form (Create/Edit) -->
+<ng-template #polizaFormModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">{{ editingPoliza() ? 'Editar Póliza' : 'Nueva Póliza' }}</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Número de Póliza</label>
+        <input type="text" class="form-control" [ngModel]="polizaForm().numero_poliza" (ngModelChange)="updatePolizaForm('numero_poliza', $event)" placeholder="Ej: POL-001">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+        <select class="form-select" [ngModel]="polizaForm().tipo" (ngModelChange)="updatePolizaForm('tipo', $event)">
+          @for (tipo of tiposPoliza; track tipo.value) {
+            <option [value]="tipo.value">{{ tipo.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de Inicio <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" [ngModel]="polizaForm().fecha_inicio" (ngModelChange)="updatePolizaForm('fecha_inicio', $event)">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha de Vencimiento <span class="text-danger">*</span></label>
+        <input type="date" class="form-control" [ngModel]="polizaForm().fecha_vencimiento" (ngModelChange)="updatePolizaForm('fecha_vencimiento', $event)">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Costo</label>
+        <input type="number" class="form-control" [ngModel]="polizaForm().costo" (ngModelChange)="updatePolizaForm('costo', $event)" placeholder="0.00">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Horas Incluidas</label>
+        <input type="number" class="form-control" [ngModel]="polizaForm().horas_incluidas" (ngModelChange)="updatePolizaForm('horas_incluidas', $event)" placeholder="0">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="form-label">Días Alerta Previa</label>
+        <input type="number" class="form-control" [ngModel]="polizaForm().dias_alerta_previa" (ngModelChange)="updatePolizaForm('dias_alerta_previa', $event)" min="1" max="365">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Cobertura</label>
+      <textarea class="form-control" rows="2" [ngModel]="polizaForm().cobertura" (ngModelChange)="updatePolizaForm('cobertura', $event)" placeholder="Descripción de la cobertura..."></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Notas</label>
+      <textarea class="form-control" rows="2" [ngModel]="polizaForm().notas" (ngModelChange)="updatePolizaForm('notas', $event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button class="btn btn-primary" (click)="confirmSavePoliza()" [disabled]="savingAction() || !isPolizaFormValid()">
+      @if (savingAction()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+      {{ editingPoliza() ? 'Actualizar' : 'Crear' }} Póliza
+    </button>
+  </div>
+</ng-template>

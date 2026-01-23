@@ -1,0 +1,146 @@
+<app-card [options]="false" [cardTitle]="isEditMode() ? 'Editar Equipo' : 'Nuevo Equipo'">
+
+  <!-- Indicador de carga -->
+  @if (loadingData()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando datos...</p>
+    </div>
+  }
+
+  <!-- Formulario -->
+  @if (!loadingData()) {
+    <form [formGroup]="equipoForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Nombre -->
+        <div class="col-md-6 mb-3">
+          <label for="nombre" class="form-label">
+            Nombre del Equipo <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="nombre"
+            class="form-control"
+            formControlName="nombre"
+            [class.is-invalid]="isFieldInvalid('nombre')"
+            placeholder="Ej: Soporte Técnico"
+          />
+          @if (isFieldInvalid('nombre')) {
+            <div class="invalid-feedback">{{ getFieldError('nombre') }}</div>
+          }
+        </div>
+
+        <!-- Supervisor -->
+        <div class="col-md-6 mb-3">
+          <label for="supervisor_id" class="form-label">
+            Supervisor
+          </label>
+          <select
+            id="supervisor_id"
+            class="form-select"
+            formControlName="supervisor_id"
+          >
+            <option value="">Sin supervisor asignado</option>
+            @for (supervisor of supervisores(); track supervisor.id) {
+              <option [value]="supervisor.id">
+                {{ supervisor.nombre_completo }}
+                @if (supervisor.rol) {
+                  - {{ supervisor.rol.nombre }}
+                }
+              </option>
+            }
+          </select>
+          <div class="form-text">El supervisor es responsable del equipo</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Descripción -->
+        <div class="col-md-8 mb-3">
+          <label for="descripcion" class="form-label">
+            Descripción
+          </label>
+          <textarea
+            id="descripcion"
+            class="form-control"
+            formControlName="descripcion"
+            [class.is-invalid]="isFieldInvalid('descripcion')"
+            rows="3"
+            placeholder="Descripción de las funciones del equipo..."
+          ></textarea>
+          @if (isFieldInvalid('descripcion')) {
+            <div class="invalid-feedback">{{ getFieldError('descripcion') }}</div>
+          }
+          <div class="form-text">Máximo 500 caracteres</div>
+        </div>
+
+        <!-- Estatus -->
+        <div class="col-md-4 mb-3">
+          <label for="estatus" class="form-label">
+            Estatus <span class="text-danger">*</span>
+          </label>
+          <select
+            id="estatus"
+            class="form-select"
+            formControlName="estatus"
+            [class.is-invalid]="isFieldInvalid('estatus')"
+          >
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+          @if (isFieldInvalid('estatus')) {
+            <div class="invalid-feedback">{{ getFieldError('estatus') }}</div>
+          }
+        </div>
+      </div>
+
+      <!-- Información del equipo actual (solo en edición) -->
+      @if (isEditMode() && currentEquipo()) {
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="alert alert-info">
+              <i class="feather icon-info me-2"></i>
+              <strong>Información del equipo:</strong>
+              <span class="ms-2">
+                Creado el {{ currentEquipo()!.created_at | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+              @if (currentEquipo()!._count) {
+                <span class="ms-3">
+                  <i class="feather icon-users me-1"></i>
+                  {{ currentEquipo()!._count!.miembros }} miembros asignados
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Botones de acción -->
+      <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancel()"
+          [disabled]="submitting()"
+        >
+          <i class="feather icon-x me-1"></i> Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="submitting() || equipoForm.invalid"
+        >
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Guardando...
+          } @else {
+            <i class="feather icon-save me-1"></i>
+            {{ isEditMode() ? 'Actualizar' : 'Crear' }} Equipo
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-card>

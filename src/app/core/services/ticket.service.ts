@@ -7,6 +7,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, from, map } from 'rxjs';
 import { SupabaseService } from './supabase.service';
+import { compressImage, IMAGE_PRESETS } from '../helpers/image.utils';
 import {
   Ticket,
   TicketConSLA,
@@ -492,14 +493,24 @@ export class TicketService {
       return { data: null, error: 'Usuario no autenticado', success: false };
     }
 
+    // Comprimir imagen si es una imagen
+    let processedFile = file;
+    if (file.type.startsWith('image/')) {
+      try {
+        processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
+        console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`);
+      } catch (err) {
+        console.warn('No se pudo comprimir la imagen:', err);
+      }
+    }
+
     // Generar ruta única
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${ticketId}/${Date.now()}_${file.name}`;
+    const fileName = `${ticketId}/${Date.now()}_${processedFile.name}`;
 
     // Subir archivo a storage
     const { error: uploadError } = await this.supabase.client.storage
       .from('ticket-attachments')
-      .upload(fileName, file);
+      .upload(fileName, processedFile);
 
     if (uploadError) {
       console.error('Error uploading file:', uploadError);
@@ -511,10 +522,10 @@ export class TicketService {
       .from('ticket_adjuntos')
       .insert({
         ticket_id: ticketId,
-        nombre_archivo: file.name,
+        nombre_archivo: processedFile.name,
         ruta_storage: fileName,
-        tipo_archivo: file.type,
-        tamanio_bytes: file.size,
+        tipo_archivo: processedFile.type,
+        tamanio_bytes: processedFile.size,
         subido_por: userId
       })
       .select()

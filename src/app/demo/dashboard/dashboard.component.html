@@ -1,161 +1,554 @@
-<div class="row">
-  @for (sale of sales; track sale) {
-    <div class="{{ sale.design }} col-xl-4">
-      <app-card [hidHeader]="true">
-        <h6 class="mb-4">{{ sale.title }}</h6>
-        <div class="row d-flex align-items-center">
-          <div class="col-9">
-            <h3 class="f-w-300 d-flex align-items-center m-b-0">
-              <i class="feather {{ sale.icon }} f-30 m-r-10"></i>
-              {{ sale.amount }}
-            </h3>
-          </div>
-          <div class="col-3 text-end">
-            <p class="m-b-0">{{ sale.percentage }}</p>
+<!-- ============================================================================
+  Dashboard - Panel Principal de Administración
+============================================================================ -->
+
+<!-- Indicador de carga -->
+@if (loading()) {
+  <div class="row">
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3 text-muted">Cargando estadísticas...</p>
+    </div>
+  </div>
+} @else {
+  <!-- Mensaje de bienvenida -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card bg-primary text-white">
+        <div class="card-body py-4">
+          <div class="row align-items-center">
+            <div class="col-auto">
+              <i class="feather icon-home f-40"></i>
+            </div>
+            <div class="col">
+              <h4 class="mb-1">Bienvenido, {{ userName() }}</h4>
+              <p class="mb-0 opacity-75">Panel de administración de iGAS Helpdesk</p>
+            </div>
+            <div class="col-auto">
+              <a routerLink="/usuarios" class="btn btn-light">
+                <i class="feather icon-users me-2"></i>Ver Usuarios
+              </a>
+            </div>
           </div>
         </div>
-        <div class="m-t-30">
-          <ngb-progressbar type="progress-bar {{ sale.progress_bg }}" height="7px" [value]="sale.progress"></ngb-progressbar>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================== -->
+  <!-- FASE 6A: Estadísticas de Tickets y Casos -->
+  <!-- ========================================================================== -->
+  @if (ticketCasoStats()) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <h5 class="mb-3">
+          <i class="feather icon-activity me-2"></i>Soporte Activo
+        </h5>
+      </div>
+      <!-- Tickets Hoy -->
+      <div class="col-xl col-md-4 col-6">
+        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div class="avatar bg-light-primary rounded p-2">
+                  <i class="feather icon-plus-circle text-primary f-24"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-0">{{ ticketCasoStats()!.ticketsHoy }}</h4>
+                <small class="text-muted">Tickets Hoy</small>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Tickets Abiertos -->
+      <div class="col-xl col-md-4 col-6">
+        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div class="avatar bg-light-warning rounded p-2">
+                  <i class="feather icon-inbox text-warning f-24"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-0">{{ ticketCasoStats()!.ticketsAbiertos }}</h4>
+                <small class="text-muted">Tickets Abiertos</small>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Tickets en Rojo -->
+      <div class="col-xl col-md-4 col-6">
+        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.ticketsEnRojo > 0">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div class="avatar bg-light-danger rounded p-2">
+                  <i class="feather icon-alert-triangle text-danger f-24"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-0" [class.text-danger]="ticketCasoStats()!.ticketsEnRojo > 0">{{ ticketCasoStats()!.ticketsEnRojo }}</h4>
+                <small class="text-muted">En SLA Rojo</small>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Casos Abiertos -->
+      <div class="col-xl col-md-6 col-6">
+        <a routerLink="/casos/lista" class="card card-hover mb-3 text-decoration-none">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div class="avatar bg-light-info rounded p-2">
+                  <i class="feather icon-trending-up text-info f-24"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-0">{{ ticketCasoStats()!.casosAbiertos }}</h4>
+                <small class="text-muted">Casos Abiertos</small>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <!-- Casos Vencidos -->
+      <div class="col-xl col-md-6 col-6">
+        <a routerLink="/casos/lista" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.casosVencidos > 0">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0 me-3">
+                <div class="avatar bg-light-danger rounded p-2">
+                  <i class="feather icon-clock text-danger f-24"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1">
+                <h4 class="mb-0" [class.text-danger]="ticketCasoStats()!.casosVencidos > 0">{{ ticketCasoStats()!.casosVencidos }}</h4>
+                <small class="text-muted">Casos Vencidos</small>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- Cards de estadísticas principales -->
+  <div class="row">
+    @for (card of statsCards(); track card.title) {
+      <div class="col-xl-3 col-md-6">
+        <div class="card {{ card.bgClass }} {{ card.textClass }}">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <i class="{{ card.icon }} f-36"></i>
+              </div>
+              <div class="col text-end">
+                <h3 class="mb-0 {{ card.textClass }}">{{ card.value }}</h3>
+                <span class="d-block opacity-75">{{ card.title }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Gráficas principales -->
+  <div class="row">
+    <!-- Usuarios por Rol -->
+    <div class="col-xl-6 col-md-6">
+      <app-card cardTitle="Distribución por Rol">
+        @if (roleChartOptions) {
+          <apx-chart
+            [series]="roleChartOptions.series!"
+            [chart]="roleChartOptions.chart!"
+            [labels]="roleChartOptions.labels!"
+            [colors]="roleChartOptions.colors!"
+            [legend]="roleChartOptions.legend!"
+            [dataLabels]="roleChartOptions.dataLabels!"
+            [responsive]="roleChartOptions.responsive!"
+          ></apx-chart>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-pie-chart f-40 mb-3 d-block"></i>
+            <p>No hay datos de roles disponibles</p>
+          </div>
+        }
+      </app-card>
+    </div>
+
+    <!-- Usuarios por Equipo -->
+    <div class="col-xl-6 col-md-6">
+      <app-card cardTitle="Usuarios por Equipo">
+        @if (teamChartOptions) {
+          <apx-chart
+            [series]="teamChartOptions.series!"
+            [chart]="teamChartOptions.chart!"
+            [xaxis]="teamChartOptions.xaxis!"
+            [yaxis]="teamChartOptions.yaxis!"
+            [plotOptions]="teamChartOptions.plotOptions!"
+            [dataLabels]="teamChartOptions.dataLabels!"
+            [colors]="teamChartOptions.colors!"
+            [fill]="teamChartOptions.fill!"
+          ></apx-chart>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-bar-chart-2 f-40 mb-3 d-block"></i>
+            <p>No hay datos de equipos disponibles</p>
+          </div>
+        }
+      </app-card>
+    </div>
+  </div>
+
+  <!-- Segunda fila de información -->
+  <div class="row">
+    <!-- Estado de usuarios (Activos vs Inactivos) -->
+    <div class="col-xl-4 col-md-6">
+      <app-card cardTitle="Estado de Usuarios">
+        @if (stats()) {
+          <div class="row align-items-center mb-4">
+            <div class="col-6 text-center">
+              <h2 class="text-success mb-1">{{ stats()!.activos }}</h2>
+              <span class="text-muted">Activos</span>
+            </div>
+            <div class="col-6 text-center">
+              <h2 class="text-secondary mb-1">{{ stats()!.inactivos }}</h2>
+              <span class="text-muted">Inactivos</span>
+            </div>
+          </div>
+          <div class="progress" style="height: 20px;">
+            <div
+              class="progress-bar bg-success"
+              role="progressbar"
+              [style.width.%]="getActivePercentage()"
+              [attr.aria-valuenow]="getActivePercentage()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              {{ getActivePercentage() }}% Activos
+            </div>
+            <div
+              class="progress-bar bg-secondary"
+              role="progressbar"
+              [style.width.%]="100 - getActivePercentage()"
+              [attr.aria-valuenow]="100 - getActivePercentage()"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+            </div>
+          </div>
+          <p class="text-center text-muted mt-3 mb-0">
+            {{ getActivePercentage() }}% de usuarios están activos
+          </p>
+        }
+      </app-card>
+    </div>
+
+    <!-- Disponibilidad actual -->
+    <div class="col-xl-4 col-md-6">
+      <app-card cardTitle="Disponibilidad Actual">
+        @if (statusChartOptions) {
+          <apx-chart
+            [series]="statusChartOptions.series!"
+            [chart]="statusChartOptions.chart!"
+            [labels]="statusChartOptions.labels!"
+            [colors]="statusChartOptions.colors!"
+            [legend]="statusChartOptions.legend!"
+            [dataLabels]="statusChartOptions.dataLabels!"
+            [responsive]="statusChartOptions.responsive!"
+          ></apx-chart>
+        } @else {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-activity f-40 mb-3 d-block"></i>
+            <p>No hay datos de disponibilidad</p>
+          </div>
+        }
+      </app-card>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="col-xl-4 col-md-12">
+      <app-card cardTitle="Accesos Rápidos">
+        <div class="d-grid gap-3">
+          <a routerLink="/usuarios/nuevo" class="btn btn-outline-primary text-start">
+            <i class="feather icon-user-plus me-2"></i>
+            Crear Nuevo Usuario
+          </a>
+          <a routerLink="/usuarios" class="btn btn-outline-secondary text-start">
+            <i class="feather icon-users me-2"></i>
+            Ver Lista de Usuarios
+          </a>
+          <a routerLink="/equipos" class="btn btn-outline-info text-start">
+            <i class="feather icon-briefcase me-2"></i>
+            Gestionar Equipos
+          </a>
+          <a routerLink="/horarios" class="btn btn-outline-warning text-start">
+            <i class="feather icon-clock me-2"></i>
+            Gestionar Horarios
+          </a>
+          <a routerLink="/auditoria" class="btn btn-outline-dark text-start">
+            <i class="feather icon-file-text me-2"></i>
+            Ver Auditoría
+          </a>
         </div>
       </app-card>
     </div>
-  }
-  <div class="col-xl-8 col-md-6">
-    <app-card cardTitle="Users From United States">
-      <div id="world-low" style="height: 450px"></div>
-    </app-card>
   </div>
-  <div class="col-xl-4 col-md-6">
-    <div class="card bg-c-blue">
-      <div class="card-header borderless">
-        <h5 class="text-white">Earnings</h5>
-      </div>
-      <div class="card-block" style="padding: 0 25px">
-        <div class="earning-text mb-0">
-          <h3 class="mb-2 text-white f-w-300">
-            $4295.36
-            <i class="feather icon-arrow-up teal accent-3"></i>
-          </h3>
-          <span class="text-uppercase text-white d-block">Total Earnings</span>
-        </div>
-        <div id="widget-line-chart" class="WidgetlineChart2 ChartShadow" style="height: 180px"></div>
-      </div>
-    </div>
-    <div class="card">
-      @for (list of card; track list) {
-        <div class="card-block {{ list.design }}">
-          <div class="row d-flex align-items-center">
-            <div class="col-auto">
-              <i class="feather {{ list.icon }} f-30"></i>
-            </div>
-            <div class="col">
-              <h3 class="f-w-300">{{ list.number }}</h3>
-              <span class="d-block text-uppercase">{{ list.text }}</span>
-            </div>
+
+  <!-- Resumen de roles -->
+  @if (stats() && stats()!.porRol.length > 0) {
+    <div class="row">
+      <div class="col-12">
+        <app-card cardTitle="Resumen de Usuarios por Rol">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Rol</th>
+                  <th class="text-center">Usuarios</th>
+                  <th>Porcentaje</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rol of stats()!.porRol; track rol.nombre) {
+                  <tr>
+                    <td>
+                      <span class="badge me-2" [style.background-color]="rol.color">&nbsp;</span>
+                      {{ rol.nombre }}
+                    </td>
+                    <td class="text-center">
+                      <strong>{{ rol.cantidad }}</strong>
+                    </td>
+                    <td style="width: 50%;">
+                      <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1" style="height: 8px;">
+                          <div
+                            class="progress-bar"
+                            [style.background-color]="rol.color"
+                            [style.width.%]="stats()!.total > 0 ? (rol.cantidad / stats()!.total) * 100 : 0"
+                          ></div>
+                        </div>
+                        <span class="ms-3 text-muted" style="min-width: 50px;">
+                          {{ stats()!.total > 0 ? ((rol.cantidad / stats()!.total) * 100).toFixed(1) : 0 }}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
-        </div>
-      }
-    </div>
-  </div>
-  @for (list of social_card; track list) {
-    <div class="{{ list.design }} col-xl-4">
-      <div class="card card-social">
-        <div class="card-block border-bottom">
-          <div class="row align-items-center justify-content-center">
-            <div class="col-auto">
-              <i class="{{ list.icon }} f-36"></i>
-            </div>
-            <div class="col text-end">
-              <h3>{{ list.amount }}</h3>
-              <h5 class="{{ list.color }} mb-0">
-                {{ list.percentage }}
-                <span class="text-muted">Total Likes</span>
-              </h5>
-            </div>
-          </div>
-        </div>
-        <div class="card-block">
-          <div class="row align-items-center justify-content-center card-active">
-            <div class="col-6">
-              <h6 class="text-center m-b-10">
-                <span class="text-muted m-r-5">Target:</span>
-                {{ list.target }}
-              </h6>
-              <ngb-progressbar type="progress-bar {{ list.progress_bg }}" height="6px" [value]="list.progress"></ngb-progressbar>
-            </div>
-            <div class="col-6">
-              <h6 class="text-center m-b-10">
-                <span class="text-muted m-r-5">Duration:</span>
-                {{ list.duration }}
-              </h6>
-              <ngb-progressbar type="progress-bar {{ list.progress_bg_2 }}" height="6px" [value]="list.progress2"></ngb-progressbar>
-            </div>
-          </div>
-        </div>
+        </app-card>
       </div>
     </div>
   }
-  <div class="col-xl-4 col-md-6">
-    <app-card cardTitle="Rating">
-      <div class="row align-items-center justify-content-center m-b-20">
-        <div class="col-6">
-          <h2 class="f-w-300 d-flex align-items-center float-start m-0">
-            4.7
-            <i class="fas fa-star f-10 m-l-10 text-c-yellow"></i>
-          </h2>
-        </div>
-        <div class="col-6">
-          <h6 class="d-flex align-items-center float-end m-0">
-            0.4
-            <i class="fas fa-caret-up text-c-green f-22 m-l-10"></i>
-          </h6>
+
+  <!-- ========================================================================== -->
+  <!-- FASE 6: Estadísticas de Clientes y Alertas de Vencimiento -->
+  <!-- ========================================================================== -->
+
+  <!-- Cards de estadísticas de clientes -->
+  @if (clienteStats()) {
+    <div class="row mt-4">
+      <div class="col-12">
+        <h5 class="mb-3">
+          <i class="feather icon-briefcase me-2"></i>Clientes y Vencimientos
+        </h5>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card bg-c-blue text-white">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <i class="feather icon-briefcase f-36"></i>
+              </div>
+              <div class="col text-end">
+                <h3 class="mb-0 text-white">{{ clienteStats()!.total_clientes }}</h3>
+                <span class="d-block opacity-75">Clientes Total</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="row">
-        @for (list of progressing; track list; let last = $last) {
-          <div class="col-xl-12">
-            <h6 class="align-items-center float-start">
-              <i class="fas fa-star f-10 m-r-10 text-c-yellow"></i>
-              {{ list.number }}
-            </h6>
-            <h6 class="align-items-center float-end">{{ list.amount }}</h6>
-            <div class="m-t-30" [ngClass]="{ 'm-b-20': !last }">
-              <ngb-progressbar type="progress-bar {{ list.progress_bg }}" height="6px" [value]="list.progress"></ngb-progressbar>
+      <div class="col-xl-3 col-md-6">
+        <div class="card bg-c-green text-white">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <i class="feather icon-check-circle f-36"></i>
+              </div>
+              <div class="col text-end">
+                <h3 class="mb-0 text-white">{{ clienteStats()!.clientes_activos }}</h3>
+                <span class="d-block opacity-75">Activos</span>
+              </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card bg-c-yellow text-white">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <i class="feather icon-alert-triangle f-36"></i>
+              </div>
+              <div class="col text-end">
+                <h3 class="mb-0 text-white">{{ clienteStats()!.licencias_por_vencer + clienteStats()!.polizas_por_vencer }}</h3>
+                <span class="d-block opacity-75">Por Vencer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6">
+        <div class="card bg-c-red text-white">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <i class="feather icon-x-circle f-36"></i>
+              </div>
+              <div class="col text-end">
+                <h3 class="mb-0 text-white">{{ clienteStats()!.licencias_vencidas + clienteStats()!.polizas_vencidas }}</h3>
+                <span class="d-block opacity-75">Vencidas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detalle de vencimientos -->
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="feather icon-key text-primary f-30 mb-2"></i>
+            <h4 class="mb-1">{{ clienteStats()!.licencias_por_vencer }}</h4>
+            <p class="text-muted mb-0">Licencias por vencer</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="feather icon-key text-danger f-30 mb-2"></i>
+            <h4 class="mb-1">{{ clienteStats()!.licencias_vencidas }}</h4>
+            <p class="text-muted mb-0">Licencias vencidas</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="feather icon-shield text-primary f-30 mb-2"></i>
+            <h4 class="mb-1">{{ clienteStats()!.polizas_por_vencer }}</h4>
+            <p class="text-muted mb-0">Pólizas por vencer</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="feather icon-shield text-danger f-30 mb-2"></i>
+            <h4 class="mb-1">{{ clienteStats()!.polizas_vencidas }}</h4>
+            <p class="text-muted mb-0">Pólizas vencidas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Widget de Alertas de Vencimiento -->
+  <div class="row">
+    <div class="col-12">
+      <app-card cardTitle="Alertas de Vencimiento">
+        <div class="d-flex justify-content-between align-items-center mb-3" slot="header">
+          <span class="badge bg-danger">{{ alertasVencimiento().length }} pendientes</span>
+          <a routerLink="/clientes" class="btn btn-sm btn-outline-primary">
+            Ver todos los clientes
+          </a>
+        </div>
+        @if (loadingAlertas()) {
+          <div class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+          </div>
+        } @else if (alertasVencimiento().length === 0) {
+          <div class="text-center py-5 text-muted">
+            <i class="feather icon-check-circle f-40 mb-3 d-block text-success"></i>
+            <p class="mb-0">No hay alertas pendientes</p>
+            <small>Todas las licencias y pólizas están al día</small>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Cliente</th>
+                  <th>Tipo</th>
+                  <th class="text-center">Vence en</th>
+                  <th class="text-center">Prioridad</th>
+                  <th class="text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (alerta of alertasVencimiento(); track alerta.id) {
+                  <tr [class.table-danger]="alerta.dias_para_vencer !== undefined && alerta.dias_para_vencer < 0"
+                      [class.table-warning]="alerta.dias_para_vencer !== undefined && alerta.dias_para_vencer >= 0 && alerta.dias_para_vencer <= 7">
+                    <td>
+                      <a href="javascript:void(0)" (click)="navigateToCliente(alerta.cliente_id)" class="text-primary">
+                        {{ alerta.cliente_nombre || 'Cliente' }}
+                      </a>
+                    </td>
+                    <td>
+                      <i [class]="getTipoAlertaIcon(alerta.tipo)" class="me-1"></i>
+                      {{ getTipoAlertaLabel(alerta.tipo) }}
+                    </td>
+                    <td class="text-center">
+                      @if (alerta.dias_para_vencer !== undefined && alerta.dias_para_vencer !== null) {
+                        <span [class]="getDiasClass(alerta.dias_para_vencer)">
+                          @if (alerta.dias_para_vencer < 0) {
+                            Vencido hace {{ Math.abs(alerta.dias_para_vencer) }} días
+                          } @else if (alerta.dias_para_vencer === 0) {
+                            Vence hoy
+                          } @else {
+                            {{ alerta.dias_para_vencer }} días
+                          }
+                        </span>
+                      } @else {
+                        <span class="text-muted">-</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      <span class="badge" [style.background-color]="getPrioridadColor(alerta.prioridad)">
+                        {{ getPrioridadLabel(alerta.prioridad) }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button class="btn btn-sm btn-outline-primary me-1" (click)="navigateToCliente(alerta.cliente_id)"
+                              ngbTooltip="Ver cliente">
+                        <i class="feather icon-eye"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-success" (click)="marcarAlertaAtendida(alerta)"
+                              ngbTooltip="Marcar como atendida">
+                        <i class="feather icon-check"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         }
-      </div>
-    </app-card>
+      </app-card>
+    </div>
   </div>
-  <div class="col-xl-8 col-md-6">
-    <app-card cardTitle="Recent Users" cardClass="Recent-Users table-card" blockClass="p-0">
-      <div class="table-responsive">
-        <table class="table table-hover mb-0">
-          <tbody>
-            @for (table of tables; track table) {
-              <tr class="unread">
-                <td>
-                  <img class="rounded-circle" style="width: 40px" src="{{ table.src }}" alt="activity-user" />
-                </td>
-                <td>
-                  <h6 class="mb-1">{{ table.title }}</h6>
-                  <p class="m-0">{{ table.text }}</p>
-                </td>
-                <td>
-                  <h6 class="text-muted">
-                    <i class="fas fa-circle {{ table.color }} f-10 m-r-15"></i>
-                    {{ table.time }}
-                  </h6>
-                </td>
-                <td>
-                  <a href="javascript:void(0)" class="badge me-2 theme-bg2 text-white f-12">Reject</a>
-                  <a href="javascript:void(0)" class="badge me-2 theme-bg text-white f-12">Approve</a>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </app-card>
-  </div>
-</div>
+}

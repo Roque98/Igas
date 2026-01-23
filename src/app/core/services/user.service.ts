@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map, catchError, of } from 'rxjs';
+import { Observable, from, map, catchError, of, BehaviorSubject, tap } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import {
   Profile,
@@ -18,12 +18,83 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { compressImage, IMAGE_PRESETS } from '../helpers/image.utils';
+
+// Interfaz para el perfil del usuario actual (navbar, etc.)
+export interface CurrentUserProfile {
+  id: string;
+  nombre_completo: string;
+  avatar_url: string | null;
+  email: string;
+  rol_id: string;
+  rol_nombre?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private supabase = inject(SupabaseService);
+
+  // ============================================================================
+  // Estado global del perfil del usuario actual
+  // ============================================================================
+  private currentProfileSubject = new BehaviorSubject<CurrentUserProfile | null>(null);
+  public currentProfile$ = this.currentProfileSubject.asObservable();
+
+  constructor() {
+    // Cargar perfil cuando el usuario se autentique
+    this.supabase.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadCurrentProfile();
+      } else {
+        this.currentProfileSubject.next(null);
+      }
+    });
+  }
+
+  /**
+   * Carga el perfil del usuario actual
+   */
+  async loadCurrentProfile(): Promise<void> {
+    const userId = this.supabase.user?.id;
+    if (!userId) return;
+
+    const { data, error } = await this.supabase.client
+      .from('profiles')
+      .select('id, nombre_completo, avatar_url, email, rol_id, roles(nombre)')
+      .eq('id', userId)
+      .single();
+
+    if (!error && data) {
+      const profile: CurrentUserProfile = {
+        id: data.id,
+        nombre_completo: data.nombre_completo,
+        avatar_url: data.avatar_url,
+        email: data.email,
+        rol_id: data.rol_id,
+        rol_nombre: (data.roles as any)?.nombre
+      };
+      this.currentProfileSubject.next(profile);
+    }
+  }
+
+  /**
+   * Actualiza el perfil en el estado global (para uso interno)
+   */
+  updateCurrentProfileState(updates: Partial<CurrentUserProfile>): void {
+    const current = this.currentProfileSubject.value;
+    if (current) {
+      this.currentProfileSubject.next({ ...current, ...updates });
+    }
+  }
+
+  /**
+   * Obtiene el perfil actual de forma síncrona
+   */
+  get currentProfile(): CurrentUserProfile | null {
+    return this.currentProfileSubject.value;
+  }
 
   // ============================================================================
   // READ Operations
@@ -52,17 +123,110 @@ export class UserService {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // Construir query base con relaciones
+    // Usar función RPC para evitar problemas con RLS
+    // La función get_all_users() tiene SECURITY DEFINER y maneja permisos internamente
+    const { data: rpcData, error: rpcError } = await this.supabase.client
+      .rpc('get_all_users');
+
+    if (rpcError) {
+      console.error('Error fetching users via RPC:', rpcError);
+      // Fallback a consulta directa si la función RPC no existe
+      return this.fetchUsersDirectQuery(filters, pagination);
+    }
+
+    // Si la función RPC existe, procesar los datos
+    let users = rpcData as ProfileWithRelations[];
+
+    // Obtener relaciones para cada usuario
+    const userIds = users.map(u => u.id);
+
+    // Obtener roles, equipos y horarios en paralelo
+    const [rolesResult, equiposResult, horariosResult] = await Promise.all([
+      this.supabase.client.from('roles').select('*'),
+      this.supabase.client.from('equipos').select('*'),
+      this.supabase.client.from('horarios').select('*')
+    ]);
+
+    const rolesMap = new Map((rolesResult.data || []).map(r => [r.id, r]));
+    const equiposMap = new Map((equiposResult.data || []).map(e => [e.id, e]));
+    const horariosMap = new Map((horariosResult.data || []).map(h => [h.id, h]));
+
+    // Agregar relaciones a cada usuario
+    users = users.map(user => ({
+      ...user,
+      rol: rolesMap.get(user.rol_id) || null,
+      equipo: equiposMap.get(user.area_equipo_id) || null,
+      horario: horariosMap.get(user.turno_horario_id) || null
+    }));
+
+    // Aplicar filtros en memoria
+    if (filters) {
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        users = users.filter(u =>
+          u.nombre_completo?.toLowerCase().includes(searchLower) ||
+          u.email?.toLowerCase().includes(searchLower)
+        );
+      }
+      if (filters.rol_id) {
+        users = users.filter(u => u.rol_id === filters.rol_id);
+      }
+      if (filters.area_equipo_id) {
+        users = users.filter(u => u.area_equipo_id === filters.area_equipo_id);
+      }
+      if (filters.estatus) {
+        users = users.filter(u => u.estatus === filters.estatus);
+      }
+      if (filters.disponibilidad) {
+        users = users.filter(u => u.disponibilidad === filters.disponibilidad);
+      }
+    }
+
+    // Ordenar
+    users.sort((a, b) => {
+      const aVal = (a as any)[sortBy] ?? '';
+      const bVal = (b as any)[sortBy] ?? '';
+      const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    // Paginar
+    const total = users.length;
+    const paginatedUsers = users.slice(from, to + 1);
+
+    return {
+      data: paginatedUsers,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize)
+    };
+  }
+
+  /**
+   * Fallback: consulta directa a profiles (usa RLS estándar)
+   */
+  private async fetchUsersDirectQuery(
+    filters?: UserFilters,
+    pagination?: PaginationOptions
+  ): Promise<PaginatedResponse<ProfileWithRelations>> {
+    const page = pagination?.page ?? 1;
+    const pageSize = pagination?.pageSize ?? 10;
+    const sortBy = pagination?.sortBy ?? 'created_at';
+    const sortOrder = pagination?.sortOrder ?? 'desc';
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
     let query = this.supabase.client
       .from('profiles')
       .select(`
         *,
         rol:roles(*),
-        equipo:equipos(*),
+        equipo:equipos!profiles_area_equipo_id_fkey(*),
         horario:horarios(*)
       `, { count: 'exact' });
 
-    // Aplicar filtros
     if (filters) {
       if (filters.search) {
         query = query.or(`nombre_completo.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
@@ -81,7 +245,6 @@ export class UserService {
       }
     }
 
-    // Aplicar ordenamiento y paginación
     query = query
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(from, to);
@@ -122,7 +285,7 @@ export class UserService {
       .select(`
         *,
         rol:roles(*),
-        equipo:equipos(*),
+        equipo:equipos!profiles_area_equipo_id_fkey(*),
         horario:horarios(*)
       `)
       .eq('id', id)
@@ -162,13 +325,14 @@ export class UserService {
 
   private async createUserAsync(userData: CreateUserDTO): Promise<ServiceResponse<Profile>> {
     try {
-      // 1. Crear usuario en auth.users con metadata
-      const { data: authData, error: authError } = await this.supabase.client.auth.admin.createUser({
+      // 1. Crear usuario en auth.users usando signUp
+      const { data: authData, error: authError } = await this.supabase.client.auth.signUp({
         email: userData.email,
         password: userData.password,
-        email_confirm: true, // Auto-confirmar email
-        user_metadata: {
-          nombre_completo: userData.nombre_completo
+        options: {
+          data: {
+            nombre_completo: userData.nombre_completo
+          }
         }
       });
 
@@ -181,17 +345,19 @@ export class UserService {
         return { data: null, error: 'No se pudo crear el usuario', success: false };
       }
 
-      // 2. Actualizar el profile con los datos adicionales
-      // (el trigger ya creó el profile base)
+      // 2. Crear el profile directamente (sin depender del trigger)
       const { data: profileData, error: profileError } = await this.supabase.client
         .from('profiles')
-        .update({
+        .insert({
+          id: authData.user.id,
+          nombre_completo: userData.nombre_completo,
+          email: userData.email,
           rol_id: userData.rol_id,
           area_equipo_id: userData.area_equipo_id,
           telefono: userData.telefono,
-          turno_horario_id: userData.turno_horario_id
+          turno_horario_id: userData.turno_horario_id,
+          estatus: 'Activo'
         })
-        .eq('id', authData.user.id)
         .select()
         .single();
 
@@ -338,16 +504,26 @@ export class UserService {
 
   private async uploadAvatarAsync(userId: string, file: File): Promise<ServiceResponse<string>> {
     try {
-      // Generar nombre único para el archivo
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/avatar.${fileExt}`;
+      // Comprimir imagen antes de subir (máx 200x200px)
+      let processedFile = file;
+      if (file.type.startsWith('image/')) {
+        try {
+          processedFile = await compressImage(file, IMAGE_PRESETS.avatar);
+          console.log(`Avatar comprimido: ${file.size} bytes -> ${processedFile.size} bytes`);
+        } catch (compressionError) {
+          console.warn('No se pudo comprimir la imagen, usando original:', compressionError);
+        }
+      }
+
+      // Usar siempre .jpg ya que comprimimos a JPEG
+      const fileName = `${userId}/avatar.jpg`;
 
       // Subir archivo al storage
       const { data: uploadData, error: uploadError } = await this.supabase.client.storage
         .from('avatars')
-        .upload(fileName, file, {
+        .upload(fileName, processedFile, {
           upsert: true, // Sobrescribir si existe
-          contentType: file.type
+          contentType: processedFile.type
         });
 
       if (uploadError) {
@@ -355,15 +531,19 @@ export class UserService {
         return { data: null, error: 'Error al subir imagen', success: false };
       }
 
-      // Obtener URL pública
+      // Obtener URL pública con cache-busting
       const { data: urlData } = this.supabase.client.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
-      const avatarUrl = urlData.publicUrl;
+      // Agregar timestamp para evitar caché del navegador
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
 
       // Actualizar el profile con la nueva URL
       await this.updateProfileAsync(userId, { avatar_url: avatarUrl });
+
+      // Actualizar el estado global del perfil para que se refleje en toda la app
+      this.updateCurrentProfileState({ avatar_url: avatarUrl });
 
       return { data: avatarUrl, error: null, success: true };
     } catch (error: any) {
@@ -410,6 +590,9 @@ export class UserService {
 
       // Actualizar profile para quitar avatar_url
       await this.updateProfileAsync(userId, { avatar_url: undefined });
+
+      // Actualizar el estado global del perfil
+      this.updateCurrentProfileState({ avatar_url: null });
 
       return { data: true, error: null, success: true };
     } catch (error: any) {
@@ -510,6 +693,114 @@ export class UserService {
       }),
       catchError(() => of(false))
     );
+  }
+
+  // ============================================================================
+  // Statistics Methods
+  // ============================================================================
+
+  /**
+   * Obtiene estadísticas de usuarios para el dashboard
+   */
+  async getUserStats(): Promise<{
+    total: number;
+    activos: number;
+    inactivos: number;
+    porRol: { nombre: string; cantidad: number; color: string }[];
+    porEquipo: { nombre: string; cantidad: number }[];
+    porDisponibilidad: { estado: string; cantidad: number }[];
+  }> {
+    try {
+      // Obtener todos los usuarios
+      const { data: users } = await this.supabase.client.rpc('get_all_users');
+
+      if (!users || users.length === 0) {
+        return {
+          total: 0,
+          activos: 0,
+          inactivos: 0,
+          porRol: [],
+          porEquipo: [],
+          porDisponibilidad: []
+        };
+      }
+
+      // Obtener roles y equipos para nombres
+      const [rolesResult, equiposResult] = await Promise.all([
+        this.supabase.client.from('roles').select('*'),
+        this.supabase.client.from('equipos').select('*')
+      ]);
+
+      const rolesMap = new Map((rolesResult.data || []).map(r => [r.id, r.nombre]));
+      const equiposMap = new Map((equiposResult.data || []).map(e => [e.id, e.nombre]));
+
+      // Colores para roles
+      const roleColors: Record<string, string> = {
+        'Administrador': '#4680ff',
+        'Supervisor': '#fc6180',
+        'Técnico': '#93be52',
+        'Analista': '#ffba57'
+      };
+
+      // Calcular estadísticas
+      const total = users.length;
+      const activos = users.filter((u: any) => u.estatus === 'Activo').length;
+      const inactivos = total - activos;
+
+      // Por rol
+      const rolCount = new Map<string, number>();
+      users.forEach((u: any) => {
+        const rolNombre = rolesMap.get(u.rol_id) || 'Sin rol';
+        rolCount.set(rolNombre, (rolCount.get(rolNombre) || 0) + 1);
+      });
+      const porRol = Array.from(rolCount.entries()).map(([nombre, cantidad]) => ({
+        nombre,
+        cantidad,
+        color: roleColors[nombre] || '#6c757d'
+      }));
+
+      // Por equipo
+      const equipoCount = new Map<string, number>();
+      users.forEach((u: any) => {
+        const equipoNombre = equiposMap.get(u.area_equipo_id) || 'Sin equipo';
+        equipoCount.set(equipoNombre, (equipoCount.get(equipoNombre) || 0) + 1);
+      });
+      const porEquipo = Array.from(equipoCount.entries()).map(([nombre, cantidad]) => ({
+        nombre,
+        cantidad
+      }));
+
+      // Por disponibilidad
+      const dispCount = new Map<string, number>();
+      users.forEach((u: any) => {
+        const disp = u.disponibilidad || 'Sin estado';
+        dispCount.set(disp, (dispCount.get(disp) || 0) + 1);
+      });
+      const porDisponibilidad = Array.from(dispCount.entries()).map(([estado, cantidad]) => ({
+        estado,
+        cantidad
+      }));
+
+      return { total, activos, inactivos, porRol, porEquipo, porDisponibilidad };
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      return {
+        total: 0,
+        activos: 0,
+        inactivos: 0,
+        porRol: [],
+        porEquipo: [],
+        porDisponibilidad: []
+      };
+    }
+  }
+
+  /**
+   * Obtiene todos los usuarios para exportación (sin paginación)
+   */
+  async getAllUsersForExport(): Promise<ProfileWithRelations[]> {
+    const result = await this.fetchUsers(undefined, { page: 1, pageSize: 10000 });
+    return result.data;
   }
 
   // ============================================================================

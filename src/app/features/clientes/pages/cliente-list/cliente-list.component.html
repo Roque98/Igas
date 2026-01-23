@@ -1,0 +1,300 @@
+<app-card [options]="false" cardTitle="Gestión de Clientes">
+
+  <!-- Barra de herramientas -->
+  <div class="row mb-4">
+    <!-- Búsqueda -->
+    <div class="col-md-4 mb-2">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nombre, RFC, teléfono..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
+          <i class="feather icon-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="col-md-5 mb-2">
+      <div class="d-flex gap-2 flex-wrap">
+        <!-- Tipo cliente -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedTipoCliente()"
+          (ngModelChange)="selectedTipoCliente.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Tipo cliente</option>
+          @for (tipo of tiposCliente; track tipo.value) {
+            <option [ngValue]="tipo.value">{{ tipo.label }}</option>
+          }
+        </select>
+
+        <!-- Estatus -->
+        <select
+          class="form-select form-select-sm"
+          style="width: auto;"
+          [ngModel]="selectedEstatus()"
+          (ngModelChange)="selectedEstatus.set($event); onFilterChange()"
+        >
+          <option [ngValue]="null">Estatus</option>
+          @for (estatus of estatusCliente; track estatus.value) {
+            <option [ngValue]="estatus.value">{{ estatus.label }}</option>
+          }
+        </select>
+
+        <!-- Filtros de checkbox -->
+        <div class="btn-group" role="group">
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnPolizaActiva"
+            [checked]="conPolizaActiva()"
+            (change)="conPolizaActiva.set(!conPolizaActiva()); onFilterChange()"
+          />
+          <label class="btn btn-outline-success btn-sm" for="btnPolizaActiva">
+            <i class="feather icon-shield me-1"></i> Con póliza
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnLicenciasVencer"
+            [checked]="conLicenciasPorVencer()"
+            (change)="conLicenciasPorVencer.set(!conLicenciasPorVencer()); onFilterChange()"
+          />
+          <label class="btn btn-outline-warning btn-sm" for="btnLicenciasVencer">
+            <i class="feather icon-key me-1"></i> Lic. por vencer
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnAlertas"
+            [checked]="conAlertas()"
+            (change)="conAlertas.set(!conAlertas()); onFilterChange()"
+          />
+          <label class="btn btn-outline-danger btn-sm" for="btnAlertas">
+            <i class="feather icon-bell me-1"></i> Alertas
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="col-md-3 mb-2 text-end">
+      @if (hasActiveFilters()) {
+        <button class="btn btn-outline-secondary btn-sm me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
+          <i class="feather icon-x"></i> Limpiar
+        </button>
+      }
+      <button class="btn btn-primary" (click)="createCliente()">
+        <i class="feather icon-plus me-1"></i> Nuevo Cliente
+      </button>
+    </div>
+  </div>
+
+  <!-- Indicador de carga -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando clientes...</p>
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">
+      <i class="feather icon-alert-circle me-2"></i>
+      {{ error() }}
+      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadClientes()">
+        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Tabla de clientes -->
+  @if (!loading() && !error()) {
+    @if (clientes().length === 0) {
+      <div class="text-center py-5">
+        <i class="feather icon-users" style="font-size: 48px; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No se encontraron clientes</p>
+        @if (hasActiveFilters()) {
+          <button class="btn btn-outline-primary me-2" (click)="clearFilters()">
+            Limpiar filtros
+          </button>
+        }
+        <button class="btn btn-primary" (click)="createCliente()">
+          <i class="feather icon-plus me-1"></i> Crear primer cliente
+        </button>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="sortable" (click)="onSort('codigo_cliente')" style="width: 100px;">
+                Código
+                <i [class]="getSortIcon('codigo_cliente')"></i>
+              </th>
+              <th class="sortable" (click)="onSort('razon_social')">
+                Razón Social / Nombre Comercial
+                <i [class]="getSortIcon('razon_social')"></i>
+              </th>
+              <th>Contacto</th>
+              <th class="text-center">Tipo</th>
+              <th class="text-center">Estatus</th>
+              <th class="text-center">Sucursales</th>
+              <th class="text-center">Licencias</th>
+              <th class="text-center">Póliza</th>
+              <th class="text-center" style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cliente of clientes(); track cliente.id) {
+              <tr class="cursor-pointer" (click)="viewCliente(cliente)">
+                <td>
+                  <span class="fw-medium text-primary">
+                    {{ cliente.codigo_cliente || '-' }}
+                  </span>
+                </td>
+                <td>
+                  <div>
+                    <span class="fw-medium">{{ cliente.razon_social }}</span>
+                    @if (cliente.nombre_comercial && cliente.nombre_comercial !== cliente.razon_social) {
+                      <br>
+                      <small class="text-muted">{{ cliente.nombre_comercial }}</small>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="small">
+                    @if (cliente.telefono) {
+                      <div>
+                        <i class="feather icon-phone me-1"></i>
+                        {{ cliente.telefono }}
+                      </div>
+                    }
+                    @if (cliente.email) {
+                      <div class="text-muted">
+                        <i class="feather icon-mail me-1"></i>
+                        {{ cliente.email }}
+                      </div>
+                    }
+                    @if (!cliente.telefono && !cliente.email) {
+                      <span class="text-muted">-</span>
+                    }
+                  </div>
+                </td>
+                <td class="text-center">
+                  <span class="badge" [class]="getTipoClienteClass(cliente.tipo_cliente)">
+                    {{ cliente.tipo_cliente }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge" [style.background-color]="getEstatusColor(cliente.estatus_cliente)">
+                    {{ cliente.estatus_cliente }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-light text-dark">
+                    <i class="feather icon-map-pin me-1"></i>
+                    {{ cliente.total_sucursales || 0 }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  @if (cliente.total_licencias && cliente.total_licencias > 0) {
+                    <span
+                      class="badge"
+                      [class.bg-success]="!cliente.licencias_vencidas && !cliente.licencias_por_vencer"
+                      [class.bg-warning]="cliente.licencias_por_vencer && cliente.licencias_por_vencer > 0 && !cliente.licencias_vencidas"
+                      [class.bg-danger]="cliente.licencias_vencidas && cliente.licencias_vencidas > 0"
+                      ngbTooltip="Total: {{ cliente.total_licencias }} | Por vencer: {{ cliente.licencias_por_vencer || 0 }} | Vencidas: {{ cliente.licencias_vencidas || 0 }}"
+                    >
+                      <i class="feather icon-key me-1"></i>
+                      {{ cliente.total_licencias }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td class="text-center">
+                  @if (cliente.poliza_estatus) {
+                    <span
+                      class="badge"
+                      [class.bg-success]="cliente.poliza_estatus === 'Activa'"
+                      [class.bg-warning]="cliente.poliza_estatus === 'Por vencer'"
+                      [class.bg-danger]="cliente.poliza_estatus === 'Vencida' || cliente.poliza_estatus === 'En cobranza'"
+                      [class.bg-secondary]="cliente.poliza_estatus === 'Suspendida' || cliente.poliza_estatus === 'Cancelada'"
+                      ngbTooltip="Vence: {{ cliente.poliza_vencimiento | date:'dd/MM/yyyy' }}"
+                    >
+                      <i class="feather icon-shield me-1"></i>
+                      {{ cliente.poliza_estatus }}
+                    </span>
+                  } @else {
+                    <span class="badge bg-light text-muted">Sin póliza</span>
+                  }
+                </td>
+                <td class="text-center" (click)="$event.stopPropagation()">
+                  <div class="btn-group btn-group-sm">
+                    <button
+                      class="btn btn-outline-primary"
+                      (click)="viewCliente(cliente)"
+                      ngbTooltip="Ver detalles"
+                    >
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary"
+                      (click)="editCliente(cliente)"
+                      ngbTooltip="Editar"
+                    >
+                      <i class="feather icon-edit-2"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <div class="text-muted">
+          Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+          {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
+          de {{ totalItems() }} clientes
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <select
+            class="form-select form-select-sm"
+            style="width: auto;"
+            [ngModel]="pageSize()"
+            (ngModelChange)="onPageSizeChange($event)"
+          >
+            <option [value]="15">15 por página</option>
+            <option [value]="30">30 por página</option>
+            <option [value]="50">50 por página</option>
+          </select>
+          <ngb-pagination
+            [collectionSize]="totalItems()"
+            [page]="currentPage()"
+            [pageSize]="pageSize()"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="onPageChange($event)"
+          ></ngb-pagination>
+        </div>
+      </div>
+    }
+  }
+</app-card>

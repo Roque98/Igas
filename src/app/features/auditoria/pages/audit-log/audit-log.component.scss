@@ -1,0 +1,71 @@
+// ============================================================================
+// Audit Log Component Styles
+// ============================================================================
+
+.card-header-tabs {
+  margin-bottom: -1px;
+  border-bottom: 0;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6c757d;
+  padding: 0.75rem 1.25rem;
+
+  &:hover {
+    border-color: transparent;
+    color: #495057;
+  }
+
+  &.active {
+    color: #4680ff;
+    border-bottom-color: #4680ff;
+    background: transparent;
+  }
+}
+
+.table {
+  th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+  }
+
+  td {
+    vertical-align: middle;
+  }
+}
+
+.badge {
+  font-weight: 500;
+}
+
+pre {
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+// Stats cards
+.card.bg-primary,
+.card.bg-success,
+.card.bg-info,
+.card.bg-danger {
+  .card-body {
+    padding: 1.25rem;
+
+    h6 {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+  }
+}

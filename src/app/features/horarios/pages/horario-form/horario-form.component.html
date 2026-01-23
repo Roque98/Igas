@@ -1,0 +1,212 @@
+<app-card [options]="false" [cardTitle]="isEditMode() ? 'Editar Horario' : 'Nuevo Horario'">
+
+  <!-- Indicador de carga -->
+  @if (loadingData()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando datos...</p>
+    </div>
+  }
+
+  <!-- Formulario -->
+  @if (!loadingData()) {
+    <form [formGroup]="horarioForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Nombre -->
+        <div class="col-md-6 mb-3">
+          <label for="nombre" class="form-label">
+            Nombre del Horario <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="nombre"
+            class="form-control"
+            formControlName="nombre"
+            [class.is-invalid]="isFieldInvalid('nombre')"
+            placeholder="Ej: Turno Matutino"
+          />
+          @if (isFieldInvalid('nombre')) {
+            <div class="invalid-feedback">{{ getFieldError('nombre') }}</div>
+          }
+        </div>
+
+        <!-- Estatus -->
+        <div class="col-md-3 mb-3">
+          <label for="estatus" class="form-label">
+            Estatus <span class="text-danger">*</span>
+          </label>
+          <select
+            id="estatus"
+            class="form-select"
+            formControlName="estatus"
+            [class.is-invalid]="isFieldInvalid('estatus')"
+          >
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+          @if (isFieldInvalid('estatus')) {
+            <div class="invalid-feedback">{{ getFieldError('estatus') }}</div>
+          }
+        </div>
+
+        <!-- Es horario hábil -->
+        <div class="col-md-3 mb-3">
+          <label class="form-label d-block">Horario Hábil</label>
+          <div class="form-check form-switch mt-2">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="es_horario_habil"
+              formControlName="es_horario_habil"
+            />
+            <label class="form-check-label" for="es_horario_habil">
+              {{ horarioForm.get('es_horario_habil')?.value ? 'Sí, es hábil' : 'No es hábil' }}
+            </label>
+          </div>
+          <div class="form-text">Define si cuenta para cálculo de SLA</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Hora inicio -->
+        <div class="col-md-3 mb-3">
+          <label for="hora_inicio" class="form-label">
+            Hora de Inicio <span class="text-danger">*</span>
+          </label>
+          <input
+            type="time"
+            id="hora_inicio"
+            class="form-control"
+            formControlName="hora_inicio"
+            [class.is-invalid]="isFieldInvalid('hora_inicio')"
+          />
+          @if (isFieldInvalid('hora_inicio')) {
+            <div class="invalid-feedback">{{ getFieldError('hora_inicio') }}</div>
+          }
+        </div>
+
+        <!-- Hora fin -->
+        <div class="col-md-3 mb-3">
+          <label for="hora_fin" class="form-label">
+            Hora de Fin <span class="text-danger">*</span>
+          </label>
+          <input
+            type="time"
+            id="hora_fin"
+            class="form-control"
+            formControlName="hora_fin"
+            [class.is-invalid]="isFieldInvalid('hora_fin')"
+          />
+          @if (isFieldInvalid('hora_fin')) {
+            <div class="invalid-feedback">{{ getFieldError('hora_fin') }}</div>
+          }
+        </div>
+
+        <!-- Descripción -->
+        <div class="col-md-6 mb-3">
+          <label for="descripcion" class="form-label">
+            Descripción
+          </label>
+          <input
+            type="text"
+            id="descripcion"
+            class="form-control"
+            formControlName="descripcion"
+            [class.is-invalid]="isFieldInvalid('descripcion')"
+            placeholder="Descripción opcional del horario"
+          />
+          @if (isFieldInvalid('descripcion')) {
+            <div class="invalid-feedback">{{ getFieldError('descripcion') }}</div>
+          }
+        </div>
+      </div>
+
+      <!-- Días de la semana -->
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            Días de la Semana <span class="text-danger">*</span>
+          </label>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            @for (dia of diasSemana; track dia.value) {
+              <button
+                type="button"
+                class="btn"
+                [class.btn-primary]="isDiaSelected(dia.value)"
+                [class.btn-outline-secondary]="!isDiaSelected(dia.value)"
+                (click)="toggleDia(dia.value)"
+                style="min-width: 80px;"
+              >
+                {{ dia.short }}
+              </button>
+            }
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-primary" (click)="selectLunesViernes()">
+              Lun-Vie
+            </button>
+            <button type="button" class="btn btn-outline-primary" (click)="selectTodosDias()">
+              Todos
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="clearDias()">
+              Limpiar
+            </button>
+          </div>
+          @if (selectedDias().size === 0) {
+            <div class="text-danger small mt-1">
+              Debe seleccionar al menos un día
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Información del horario actual (solo en edición) -->
+      @if (isEditMode() && currentHorario()) {
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="alert alert-info">
+              <i class="feather icon-info me-2"></i>
+              <strong>Información del horario:</strong>
+              <span class="ms-2">
+                Creado el {{ currentHorario()!.created_at | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+              @if (currentHorario()!._count) {
+                <span class="ms-3">
+                  <i class="feather icon-users me-1"></i>
+                  {{ currentHorario()!._count!.usuarios }} usuarios asignados
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Botones de acción -->
+      <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancel()"
+          [disabled]="submitting()"
+        >
+          <i class="feather icon-x me-1"></i> Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="submitting() || horarioForm.invalid || selectedDias().size === 0"
+        >
+          @if (submitting()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Guardando...
+          } @else {
+            <i class="feather icon-save me-1"></i>
+            {{ isEditMode() ? 'Actualizar' : 'Crear' }} Horario
+          }
+        </button>
+      </div>
+    </form>
+  }
+</app-card>

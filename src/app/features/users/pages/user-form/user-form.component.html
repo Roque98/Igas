@@ -1,7 +1,4 @@
-<app-card [options]="false">
-  <div class="card-header-right">
-    <h5>{{ isEditMode() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h5>
-  </div>
+<app-card [options]="false" [cardTitle]="isEditMode() ? 'Editar Usuario' : 'Nuevo Usuario'">
 
   <!-- Indicador de carga -->
   @if (loadingData()) {

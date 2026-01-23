@@ -1,394 +1,371 @@
-// angular import
-import { Component, OnInit } from '@angular/core';
+// ============================================================================
+// Dashboard Component
+// ============================================================================
+// Dashboard principal con estadísticas de usuarios del sistema
+// ============================================================================
+
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { NgApexchartsModule } from 'ng-apexcharts';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
-// project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
+import { UserService } from 'src/app/core/services/user.service';
+import { SupabaseService } from 'src/app/core/services/supabase.service';
+import { ClienteService } from 'src/app/core/services/cliente.service';
+import { ReporteService } from 'src/app/core/services/reporte.service';
+import { AlertaVencimiento, ClienteStats, PRIORIDAD_ALERTA } from 'src/app/core/models';
 
-declare const AmCharts;
+import {
+  ApexChart,
+  ApexNonAxisChartSeries,
+  ApexResponsive,
+  ApexDataLabels,
+  ApexPlotOptions,
+  ApexLegend,
+  ApexXAxis,
+  ApexYAxis,
+  ApexAxisChartSeries,
+  ApexFill
+} from 'ng-apexcharts';
 
-import '../../../assets/charts/amchart/amcharts.js';
-import '../../../assets/charts/amchart/gauge.js';
-import '../../../assets/charts/amchart/serial.js';
-import '../../../assets/charts/amchart/light.js';
-import '../../../assets/charts/amchart/pie.min.js';
-import '../../../assets/charts/amchart/ammap.min.js';
-import '../../../assets/charts/amchart/usaLow.js';
-import '../../../assets/charts/amchart/radar.js';
-import '../../../assets/charts/amchart/worldLow.js';
+export type PieChartOptions = {
+  series: ApexNonAxisChartSeries;
+  chart: ApexChart;
+  labels: string[];
+  colors: string[];
+  responsive: ApexResponsive[];
+  legend: ApexLegend;
+  dataLabels: ApexDataLabels;
+};
 
-import dataJson from 'src/fake-data/map_data';
-import mapColor from 'src/fake-data/map-color-data.json';
+export type BarChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  yaxis: ApexYAxis;
+  plotOptions: ApexPlotOptions;
+  dataLabels: ApexDataLabels;
+  colors: string[];
+  fill: ApexFill;
+};
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, SharedModule],
+  standalone: true,
+  imports: [CommonModule, SharedModule, NgApexchartsModule, RouterLink, NgbTooltipModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  // life cycle event
-  ngOnInit() {
-    setTimeout(() => {
-      const latlong = dataJson;
+  private userService = inject(UserService);
+  private supabase = inject(SupabaseService);
+  private clienteService = inject(ClienteService);
+  private reporteService = inject(ReporteService);
+  private router = inject(Router);
 
-      const mapData = mapColor;
+  // Estado
+  loading = signal(true);
+  userName = signal('');
 
-      const minBulletSize = 3;
-      const maxBulletSize = 70;
-      let min = Infinity;
-      let max = -Infinity;
-      let i;
-      let value;
-      for (i = 0; i < mapData.length; i++) {
-        value = mapData[i].value;
-        if (value < min) {
-          min = value;
-        }
-        if (value > max) {
-          max = value;
-        }
-      }
+  // FASE 6A: Estadísticas de Tickets y Casos
+  ticketCasoStats = signal<{
+    ticketsHoy: number;
+    ticketsAbiertos: number;
+    ticketsEnRojo: number;
+    casosAbiertos: number;
+    casosVencidos: number;
+  } | null>(null);
 
-      const maxSquare = maxBulletSize * maxBulletSize * 2 * Math.PI;
-      const minSquare = minBulletSize * minBulletSize * 2 * Math.PI;
+  // FASE 6: Alertas de vencimiento
+  alertasVencimiento = signal<AlertaVencimiento[]>([]);
+  clienteStats = signal<ClienteStats | null>(null);
+  loadingAlertas = signal(false);
+  prioridadAlerta = PRIORIDAD_ALERTA;
+  Math = Math; // For template access
 
-      const images = [];
-      for (i = 0; i < mapData.length; i++) {
-        const dataItem = mapData[i];
-        value = dataItem.value;
+  // Estadísticas de usuarios
+  stats = signal<{
+    total: number;
+    activos: number;
+    inactivos: number;
+    porRol: { nombre: string; cantidad: number; color: string }[];
+    porEquipo: { nombre: string; cantidad: number }[];
+    porDisponibilidad: { estado: string; cantidad: number }[];
+  } | null>(null);
 
-        let square = ((value - min) / (max - min)) * (maxSquare - minSquare) + minSquare;
-        if (square < minSquare) {
-          square = minSquare;
-        }
-        const size = Math.sqrt(square / (Math.PI * 8));
-        const id = dataItem.code;
+  // Configuración de gráficas
+  roleChartOptions: Partial<PieChartOptions> | null = null;
+  teamChartOptions: Partial<BarChartOptions> | null = null;
+  statusChartOptions: Partial<PieChartOptions> | null = null;
 
-        images.push({
-          type: 'circle',
-          theme: 'light',
-          width: size,
-          height: size,
-          color: dataItem.color,
-          longitude: latlong[id].longitude,
-          latitude: latlong[id].latitude,
-          title: dataItem.name + '</br> [ ' + value + ' ]',
-          value: value
-        });
-      }
+  // Cards de estadísticas
+  statsCards = signal<{
+    title: string;
+    value: number;
+    icon: string;
+    bgClass: string;
+    textClass: string;
+  }[]>([]);
 
-      // world-low chart
-      AmCharts.makeChart('world-low', {
-        type: 'map',
-        projection: 'eckert6',
-
-        dataProvider: {
-          map: 'worldLow',
-          images: images
-        },
-        export: {
-          enabled: true
-        }
-      });
-
-      const chartDatac = [
-        {
-          day: 'Mon',
-          value: 60
-        },
-        {
-          day: 'Tue',
-          value: 45
-        },
-        {
-          day: 'Wed',
-          value: 70
-        },
-        {
-          day: 'Thu',
-          value: 55
-        },
-        {
-          day: 'Fri',
-          value: 70
-        },
-        {
-          day: 'Sat',
-          value: 55
-        },
-        {
-          day: 'Sun',
-          value: 70
-        }
-      ];
-
-      // widget-line-chart
-      AmCharts.makeChart('widget-line-chart', {
-        type: 'serial',
-        addClassNames: true,
-        defs: {
-          filter: [
-            {
-              x: '-50%',
-              y: '-50%',
-              width: '200%',
-              height: '200%',
-              id: 'blur',
-              feGaussianBlur: {
-                in: 'SourceGraphic',
-                stdDeviation: '30'
-              }
-            },
-            {
-              id: 'shadow',
-              x: '-10%',
-              y: '-10%',
-              width: '120%',
-              height: '120%',
-              feOffset: {
-                result: 'offOut',
-                in: 'SourceAlpha',
-                dx: '0',
-                dy: '20'
-              },
-              feGaussianBlur: {
-                result: 'blurOut',
-                in: 'offOut',
-                stdDeviation: '10'
-              },
-              feColorMatrix: {
-                result: 'blurOut',
-                type: 'matrix',
-                values: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .2 0'
-              },
-              feBlend: {
-                in: 'SourceGraphic',
-                in2: 'blurOut',
-                mode: 'normal'
-              }
-            }
-          ]
-        },
-        fontSize: 15,
-        dataProvider: chartDatac,
-        autoMarginOffset: 0,
-        marginRight: 0,
-        categoryField: 'day',
-        categoryAxis: {
-          color: '#fff',
-          gridAlpha: 0,
-          axisAlpha: 0,
-          lineAlpha: 0,
-          offset: -20,
-          inside: true
-        },
-        valueAxes: [
-          {
-            fontSize: 0,
-            inside: true,
-            gridAlpha: 0,
-            axisAlpha: 0,
-            lineAlpha: 0,
-            minimum: 0,
-            maximum: 100
-          }
-        ],
-        chartCursor: {
-          valueLineEnabled: false,
-          valueLineBalloonEnabled: false,
-          cursorAlpha: 0,
-          zoomable: false,
-          valueZoomable: false,
-          cursorColor: '#fff',
-          categoryBalloonColor: '#51b4e6',
-          valueLineAlpha: 0
-        },
-        graphs: [
-          {
-            id: 'g1',
-            type: 'line',
-            valueField: 'value',
-            lineColor: '#ffffff',
-            lineAlpha: 1,
-            lineThickness: 3,
-            fillAlphas: 0,
-            showBalloon: true,
-            balloon: {
-              drop: true,
-              adjustBorderColor: false,
-              color: '#222',
-              fillAlphas: 0.2,
-              bullet: 'round',
-              bulletBorderAlpha: 1,
-              bulletSize: 5,
-              hideBulletsCount: 50,
-              lineThickness: 2,
-              useLineColorForBulletBorder: true,
-              valueField: 'value',
-              balloonText: '<span style="font-size:18px;">[[value]]</span>'
-            }
-          }
-        ]
-      });
-    }, 500);
+  ngOnInit(): void {
+    this.loadUserName();
+    this.loadStats();
+    this.loadAlertas();
+    this.loadClienteStats();
+    this.loadTicketCasoStats();
   }
 
-  // public method
-  sales = [
-    {
-      title: 'Daily Sales',
-      icon: 'icon-arrow-up text-c-green',
-      amount: '$249.95',
-      percentage: '67%',
-      progress: 50,
-      design: 'col-md-6',
-      progress_bg: 'progress-c-theme'
-    },
-    {
-      title: 'Monthly Sales',
-      icon: 'icon-arrow-down text-c-red',
-      amount: '$2,942.32',
-      percentage: '36%',
-      progress: 35,
-      design: 'col-md-6',
-      progress_bg: 'progress-c-theme2'
-    },
-    {
-      title: 'Yearly Sales',
-      icon: 'icon-arrow-up text-c-green',
-      amount: '$8,638.32',
-      percentage: '80%',
-      progress: 70,
-      design: 'col-md-12',
-      progress_bg: 'progress-c-theme'
+  private loadUserName(): void {
+    const user = this.supabase.user;
+    if (user) {
+      this.userService.getUserById(user.id).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.userName.set(response.data.nombre_completo || 'Usuario');
+          }
+        }
+      });
     }
-  ];
+  }
 
-  card = [
-    {
-      design: 'border-bottom',
-      number: '235',
-      text: 'TOTAL IDEAS',
-      icon: 'icon-zap text-c-green'
-    },
-    {
-      number: '26',
-      text: 'TOTAL LOCATIONS',
-      icon: 'icon-map-pin text-c-blue'
-    }
-  ];
+  private async loadStats(): Promise<void> {
+    try {
+      const stats = await this.userService.getUserStats();
+      this.stats.set(stats);
 
-  social_card = [
-    {
-      design: 'col-md-12',
-      icon: 'fab fa-facebook-f text-primary',
-      amount: '12,281',
-      percentage: '+7.2%',
-      color: 'text-c-green',
-      target: '35,098',
-      progress: 60,
-      duration: '3,539',
-      progress2: 45,
-      progress_bg: 'progress-c-theme',
-      progress_bg_2: 'progress-c-theme2'
-    },
-    {
-      design: 'col-md-6',
-      icon: 'fab fa-twitter text-c-blue',
-      amount: '11,200',
-      percentage: '+6.2%',
-      color: 'text-c-purple',
-      target: '34,185',
-      progress: 40,
-      duration: '4,567',
-      progress2: 70,
-      progress_bg: 'progress-c-theme',
-      progress_bg_2: 'progress-c-theme2'
-    },
-    {
-      design: 'col-md-6',
-      icon: 'fab fa-google-plus-g text-c-red',
-      amount: '10,500',
-      percentage: '+5.9%',
-      color: 'text-c-blue',
-      target: '25,998',
-      progress: 80,
-      duration: '7,753',
-      progress2: 50,
-      progress_bg: 'progress-c-theme',
-      progress_bg_2: 'progress-c-theme2'
-    }
-  ];
+      // Configurar cards de estadísticas con colores corporativos iGAS
+      this.statsCards.set([
+        {
+          title: 'Total Usuarios',
+          value: stats.total,
+          icon: 'feather icon-users',
+          bgClass: 'bg-igas-yellow',
+          textClass: 'text-white'
+        },
+        {
+          title: 'Usuarios Activos',
+          value: stats.activos,
+          icon: 'feather icon-user-check',
+          bgClass: 'bg-sla-green',
+          textClass: 'text-white'
+        },
+        {
+          title: 'Usuarios Inactivos',
+          value: stats.inactivos,
+          icon: 'feather icon-user-x',
+          bgClass: 'bg-igas-gray',
+          textClass: 'text-white'
+        },
+        {
+          title: 'Roles Definidos',
+          value: stats.porRol.length,
+          icon: 'feather icon-shield',
+          bgClass: 'bg-info',
+          textClass: 'text-white'
+        }
+      ]);
 
-  progressing = [
-    {
-      number: '5',
-      amount: '384',
-      progress: 70,
-      progress_bg: 'progress-c-theme'
-    },
-    {
-      number: '4',
-      amount: '145',
-      progress: 35,
-      progress_bg: 'progress-c-theme'
-    },
-    {
-      number: '3',
-      amount: '24',
-      progress: 25,
-      progress_bg: 'progress-c-theme'
-    },
-    {
-      number: '2',
-      amount: '1',
-      progress: 10,
-      progress_bg: 'progress-c-theme'
-    },
-    {
-      number: '1',
-      amount: '0',
-      progress: 0,
-      progress_bg: 'progress-c-theme'
-    }
-  ];
+      // Configurar gráfica de roles (pie chart)
+      if (stats.porRol.length > 0) {
+        this.roleChartOptions = {
+          series: stats.porRol.map(r => r.cantidad),
+          chart: {
+            type: 'donut',
+            height: 320,
+            fontFamily: 'inherit'
+          },
+          labels: stats.porRol.map(r => r.nombre),
+          colors: stats.porRol.map(r => r.color),
+          legend: {
+            position: 'bottom',
+            horizontalAlign: 'center'
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: (val: number) => val.toFixed(0) + '%'
+          },
+          responsive: [{
+            breakpoint: 480,
+            options: {
+              chart: { width: 280 },
+              legend: { position: 'bottom' }
+            }
+          }]
+        };
+      }
 
-  tables = [
-    {
-      src: 'assets/images/user/avatar-1.jpg',
-      title: 'Isabella Christensen',
-      text: 'Requested account activation',
-      time: '11 MAY 12:56',
-      color: 'text-c-green'
-    },
-    {
-      src: 'assets/images/user/avatar-2.jpg',
-      title: 'Ida Jorgensen',
-      text: 'Pending document verification',
-      time: '11 MAY 10:35',
-      color: 'text-c-red'
-    },
-    {
-      src: 'assets/images/user/avatar-3.jpg',
-      title: 'Mathilda Andersen',
-      text: 'Completed profile setup',
-      time: '9 MAY 17:38',
-      color: 'text-c-green'
-    },
-    {
-      src: 'assets/images/user/avatar-1.jpg',
-      title: 'Karla Soreness',
-      text: 'Requires additional information',
-      time: '19 MAY 12:56',
-      color: 'text-c-red'
-    },
-    {
-      src: 'assets/images/user/avatar-2.jpg',
-      title: 'Albert Andersen',
-      text: 'Approved and verified account',
-      time: '21 July 12:56',
-      color: 'text-c-green'
+      // Configurar gráfica de equipos (bar chart)
+      if (stats.porEquipo.length > 0) {
+        this.teamChartOptions = {
+          series: [{
+            name: 'Usuarios',
+            data: stats.porEquipo.map(e => e.cantidad)
+          }],
+          chart: {
+            type: 'bar',
+            height: 320,
+            fontFamily: 'inherit',
+            toolbar: { show: false }
+          },
+          xaxis: {
+            categories: stats.porEquipo.map(e => e.nombre),
+            labels: {
+              style: { fontSize: '12px' }
+            }
+          },
+          yaxis: {
+            title: { text: 'Usuarios' }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              borderRadius: 4,
+              columnWidth: '60%'
+            }
+          },
+          dataLabels: {
+            enabled: true
+          },
+          colors: ['#F9B000'], // iGAS Yellow
+          fill: {
+            opacity: 1
+          }
+        };
+      }
+
+      // Configurar gráfica de disponibilidad (pie chart)
+      if (stats.porDisponibilidad.length > 0) {
+        // Colores corporativos iGAS para disponibilidad
+        const dispColors: Record<string, string> = {
+          'En línea': '#4CAF50',      // SLA Green
+          'Ocupado': '#FFC107',        // SLA Yellow
+          'Fuera de turno': '#58585A', // iGAS Gray
+          'Sin estado': '#adb5bd'
+        };
+
+        this.statusChartOptions = {
+          series: stats.porDisponibilidad.map(d => d.cantidad),
+          chart: {
+            type: 'pie',
+            height: 280,
+            fontFamily: 'inherit'
+          },
+          labels: stats.porDisponibilidad.map(d => d.estado),
+          colors: stats.porDisponibilidad.map(d => dispColors[d.estado] || '#6c757d'),
+          legend: {
+            position: 'bottom',
+            horizontalAlign: 'center'
+          },
+          dataLabels: {
+            enabled: true
+          },
+          responsive: [{
+            breakpoint: 480,
+            options: {
+              chart: { width: 280 },
+              legend: { position: 'bottom' }
+            }
+          }]
+        };
+      }
+
+      this.loading.set(false);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      this.loading.set(false);
     }
-  ];
+  }
+
+  // Helpers para calcular porcentajes
+  getActivePercentage(): number {
+    const s = this.stats();
+    if (!s || s.total === 0) return 0;
+    return Math.round((s.activos / s.total) * 100);
+  }
+
+  // ============================================================================
+  // FASE 6: Alertas y Estadísticas de Clientes
+  // ============================================================================
+
+  private loadAlertas(): void {
+    this.loadingAlertas.set(true);
+    this.clienteService.getAlertas({ atendido: false }, 10).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.alertasVencimiento.set(response.data);
+        }
+        this.loadingAlertas.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading alertas:', err);
+        this.loadingAlertas.set(false);
+      }
+    });
+  }
+
+  private async loadClienteStats(): Promise<void> {
+    try {
+      const stats = await this.clienteService.getClienteStats();
+      this.clienteStats.set(stats);
+    } catch (error) {
+      console.error('Error loading cliente stats:', error);
+    }
+  }
+
+  getPrioridadColor(prioridad: string): string {
+    const found = this.prioridadAlerta.find(p => p.value === prioridad);
+    return found?.color || '#6c757d';
+  }
+
+  getPrioridadLabel(prioridad: string): string {
+    const found = this.prioridadAlerta.find(p => p.value === prioridad);
+    return found?.label || prioridad;
+  }
+
+  getTipoAlertaIcon(tipo: string): string {
+    return tipo === 'licencia' ? 'feather icon-key' : 'feather icon-shield';
+  }
+
+  getTipoAlertaLabel(tipo: string): string {
+    return tipo === 'licencia' ? 'Licencia' : 'Póliza';
+  }
+
+  getDiasClass(dias: number | undefined): string {
+    if (dias === undefined || dias === null) return '';
+    if (dias < 0) return 'text-danger';
+    if (dias <= 7) return 'text-danger fw-bold';
+    if (dias <= 30) return 'text-warning';
+    return 'text-success';
+  }
+
+  navigateToCliente(clienteId: string | undefined): void {
+    if (clienteId) {
+      this.router.navigate(['/clientes', clienteId]);
+    }
+  }
+
+  marcarAlertaAtendida(alerta: AlertaVencimiento): void {
+    this.clienteService.marcarAlertaAtendida(alerta.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.loadAlertas();
+        }
+      }
+    });
+  }
+
+  // ============================================================================
+  // FASE 6A: Estadísticas de Tickets y Casos
+  // ============================================================================
+
+  private async loadTicketCasoStats(): Promise<void> {
+    try {
+      const stats = await this.reporteService.getDashboardStats();
+      this.ticketCasoStats.set(stats);
+    } catch (error) {
+      console.error('Error loading ticket/caso stats:', error);
+    }
+  }
 }

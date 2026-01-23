@@ -1,0 +1,105 @@
+// ============================================================================
+// Notification Center Styles
+// ============================================================================
+
+.notification-item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f1f3f5;
+    border-color: #dee2e6;
+  }
+
+  &.unread {
+    background: #fff;
+    border-left: 3px solid #4680ff;
+  }
+
+  &.selected {
+    background: #e7f1ff;
+    border-color: #4680ff;
+  }
+
+  .notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    i {
+      color: #fff;
+      font-size: 16px;
+    }
+  }
+
+  .notification-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover .notification-actions {
+    opacity: 1;
+  }
+}
+
+.notification-group {
+  h6 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// Badge de nueva notificación
+.badge.bg-primary {
+  font-size: 10px;
+  padding: 3px 6px;
+}
+
+// Nav tabs personalización
+::ng-deep .nav-tabs {
+  .nav-link {
+    color: #6c757d;
+    border: none;
+    padding: 0.5rem 1rem;
+    position: relative;
+
+    &:hover {
+      color: #4680ff;
+    }
+
+    &.active {
+      color: #4680ff;
+      background: transparent;
+      border: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #4680ff;
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .notification-item {
+    .notification-actions {
+      opacity: 1;
+    }
+  }
+}

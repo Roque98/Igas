@@ -76,6 +76,114 @@ export const NavigationItems: NavigationItem[] = [
             url: '/tickets/nuevo'
           }
         ]
+      },
+      {
+        id: 'casos',
+        title: 'Casos',
+        type: 'collapse',
+        icon: 'feather icon-trending-up',
+        children: [
+          {
+            id: 'casos-dashboard',
+            title: 'Dashboard',
+            type: 'item',
+            url: '/casos',
+            exactMatch: true
+          },
+          {
+            id: 'casos-lista',
+            title: 'Lista de Casos',
+            type: 'item',
+            url: '/casos/lista'
+          }
+        ]
+      },
+      {
+        id: 'clientes',
+        title: 'Clientes',
+        type: 'collapse',
+        icon: 'feather icon-briefcase',
+        children: [
+          {
+            id: 'clientes-lista',
+            title: 'Lista de Clientes',
+            type: 'item',
+            url: '/clientes',
+            exactMatch: true
+          },
+          {
+            id: 'clientes-nuevo',
+            title: 'Nuevo Cliente',
+            type: 'item',
+            url: '/clientes/nuevo'
+          }
+        ]
+      },
+      {
+        id: 'mantenimientos',
+        title: 'Mantenimientos',
+        type: 'collapse',
+        icon: 'feather icon-settings',
+        children: [
+          {
+            id: 'mantenimientos-lista',
+            title: 'Lista',
+            type: 'item',
+            url: '/mantenimientos/lista'
+          },
+          {
+            id: 'mantenimientos-calendario',
+            title: 'Calendario',
+            type: 'item',
+            url: '/mantenimientos/calendario'
+          },
+          {
+            id: 'mantenimientos-nuevo',
+            title: 'Nuevo Mantenimiento',
+            type: 'item',
+            url: '/mantenimientos/nuevo'
+          }
+        ]
+      },
+      {
+        id: 'instalaciones',
+        title: 'Instalaciones',
+        type: 'collapse',
+        icon: 'feather icon-download-cloud',
+        children: [
+          {
+            id: 'instalaciones-lista',
+            title: 'Lista / Pipeline',
+            type: 'item',
+            url: '/instalaciones/lista'
+          },
+          {
+            id: 'instalaciones-nuevo',
+            title: 'Nueva Instalación',
+            type: 'item',
+            url: '/instalaciones/nuevo'
+          }
+        ]
+      },
+      {
+        id: 'reportes',
+        title: 'Reportes',
+        type: 'collapse',
+        icon: 'feather icon-bar-chart-2',
+        children: [
+          {
+            id: 'reporte-tickets',
+            title: 'Reporte de Tickets',
+            type: 'item',
+            url: '/reportes/tickets'
+          },
+          {
+            id: 'reporte-casos',
+            title: 'Reporte de Casos',
+            type: 'item',
+            url: '/reportes/casos'
+          }
+        ]
       }
     ]
   },

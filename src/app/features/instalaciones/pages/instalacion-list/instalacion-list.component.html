@@ -1,0 +1,220 @@
+<!-- ============================================================================
+  Instalacion List Component - Template
+============================================================================= -->
+
+<div class="row">
+  <div class="col-12">
+    <app-card [hidHeader]="true">
+      <!-- Header -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">Instalaciones</h4>
+          <p class="text-muted mb-0">Gestión de instalaciones y configuraciones</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="newInstalacion()">
+          <i class="feather icon-plus me-1"></i>Nueva Instalación
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="row g-3 mb-4">
+        <!-- Búsqueda -->
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text"><i class="feather icon-search"></i></span>
+            <input type="text" class="form-control" placeholder="Buscar por folio o cliente..."
+                   [(ngModel)]="searchTerm" (keyup.enter)="onSearch()">
+            @if (searchTerm()) {
+              <button type="button" class="btn btn-outline-secondary" (click)="searchTerm.set(''); onSearch()">
+                <i class="feather icon-x"></i>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Cliente -->
+        <div class="col-md-3">
+          <select class="form-select" [ngModel]="selectedClienteId()" (ngModelChange)="selectedClienteId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los clientes</option>
+            @for (cliente of clientes(); track cliente.id) {
+              <option [value]="cliente.id">{{ cliente.razon_social }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Técnico -->
+        <div class="col-md-3">
+          <select class="form-select" [ngModel]="selectedTecnicoId()" (ngModelChange)="selectedTecnicoId.set($event); onFilterChange()">
+            <option [ngValue]="null">Todos los técnicos</option>
+            @for (tec of tecnicos(); track tec.id) {
+              <option [value]="tec.id">{{ tec.nombre_completo }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Mis instalaciones -->
+        <div class="col-md-2">
+          <div class="form-check form-check-inline mt-2">
+            <input type="checkbox" class="form-check-input" id="misInst"
+                   [checked]="soloMisInstalaciones()" (change)="soloMisInstalaciones.set(!soloMisInstalaciones()); onFilterChange()">
+            <label class="form-check-label" for="misInst">Solo mías</label>
+          </div>
+          @if (hasActiveFilters()) {
+            <button type="button" class="btn btn-sm btn-link" (click)="clearFilters()">
+              Limpiar
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Tabs por estatus -->
+      <ul ngbNav #nav="ngbNav" [activeId]="activeTab()" class="nav-tabs pipeline-tabs" (activeIdChange)="onTabChange($event)">
+        <li [ngbNavItem]="'all'">
+          <button ngbNavLink>
+            Todas
+            <span class="badge bg-secondary ms-1">{{ getTotalInstalaciones() }}</span>
+          </button>
+        </li>
+        <li [ngbNavItem]="'Programada'">
+          <button ngbNavLink>
+            <i class="feather icon-calendar me-1"></i>Programada
+            <span class="badge ms-1" [style.backgroundColor]="estatusConfig['Programada'].color">
+              {{ getEstatusCount('Programada') }}
+            </span>
+          </button>
+        </li>
+        <li [ngbNavItem]="'En proceso'">
+          <button ngbNavLink>
+            <i class="feather icon-loader me-1"></i>En proceso
+            <span class="badge ms-1" [style.backgroundColor]="estatusConfig['En proceso'].color">
+              {{ getEstatusCount('En proceso') }}
+            </span>
+          </button>
+        </li>
+        <li [ngbNavItem]="'Pendientes'">
+          <button ngbNavLink>
+            <i class="feather icon-alert-circle me-1"></i>Pendientes
+            <span class="badge ms-1" [style.backgroundColor]="estatusConfig['Pendientes'].color">
+              {{ getEstatusCount('Pendientes') }}
+            </span>
+          </button>
+        </li>
+        <li [ngbNavItem]="'Cerrada'">
+          <button ngbNavLink>
+            <i class="feather icon-check-circle me-1"></i>Cerrada
+            <span class="badge ms-1" [style.backgroundColor]="estatusConfig['Cerrada'].color">
+              {{ getEstatusCount('Cerrada') }}
+            </span>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Loading -->
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="alert alert-danger mt-3">
+          <i class="feather icon-alert-circle me-2"></i>{{ error() }}
+        </div>
+      }
+
+      <!-- Cards de instalaciones -->
+      @if (!loading() && !error()) {
+        @if (instalacionesFiltradas().length === 0) {
+          <div class="text-center py-5">
+            <i class="feather icon-package" style="font-size: 3rem; color: #6c757d;"></i>
+            <p class="mt-3 text-muted">No se encontraron instalaciones</p>
+            <button type="button" class="btn btn-primary" (click)="newInstalacion()">
+              <i class="feather icon-plus me-1"></i>Crear primera instalación
+            </button>
+          </div>
+        } @else {
+          <div class="row g-3 mt-3">
+            @for (inst of instalacionesFiltradas(); track inst.id) {
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="card instalacion-card h-100" (click)="viewInstalacion(inst)">
+                  <div class="card-body">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                        <h6 class="mb-1 text-primary">{{ inst.folio }}</h6>
+                        <span class="badge" [style.backgroundColor]="inst.estatus_color">
+                          {{ inst.estatus_nombre }}
+                        </span>
+                      </div>
+                      @if (inst.tiene_firma) {
+                        <span class="badge bg-success" ngbTooltip="Firmada">
+                          <i class="feather icon-check"></i>
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Cliente -->
+                    <p class="mb-2">
+                      <strong>{{ inst.cliente_nombre_comercial || inst.cliente_nombre }}</strong>
+                      @if (inst.sucursal_nombre) {
+                        <br><small class="text-muted">{{ inst.sucursal_nombre }}</small>
+                      }
+                    </p>
+
+                    <!-- Fecha y técnico -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+                      <span>
+                        <i class="feather icon-calendar me-1"></i>
+                        {{ formatDate(inst.fecha_programada) }}
+                      </span>
+                      @if (inst.tecnico_nombre) {
+                        <span>
+                          <i class="feather icon-user me-1"></i>
+                          {{ inst.tecnico_nombre }}
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Info cards -->
+                    <div class="d-flex gap-2 mb-3">
+                      <!-- Módulos -->
+                      <div class="info-chip">
+                        <i class="feather icon-box"></i>
+                        <span>{{ inst.total_modulos || 0 }} módulos</span>
+                      </div>
+
+                      <!-- Pendientes -->
+                      @if (inst.pendientes_abiertos && inst.pendientes_abiertos > 0) {
+                        <div class="info-chip warning">
+                          <i class="feather icon-alert-circle"></i>
+                          <span>{{ inst.pendientes_abiertos }} pendientes</span>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Progreso checklist -->
+                    @if (inst.checklist_total && inst.checklist_total > 0) {
+                      <div>
+                        <div class="d-flex justify-content-between mb-1 small">
+                          <span>Checklist</span>
+                          <span>{{ inst.checklist_completados }}/{{ inst.checklist_total }}</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                          <div class="progress-bar" [class]="getProgressClass(getChecklistProgress(inst))"
+                               [style.width.%]="getChecklistProgress(inst)"></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    </app-card>
+  </div>
+</div>

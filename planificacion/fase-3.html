@@ -303,8 +303,8 @@
     <div class="header">
         <div class="container">
             <h1>Fase 3: Escalamiento - Módulo de Casos</h1>
-            <span class="badge badge-pendiente">Pendiente</span>
-            <span class="badge badge-proceso">0%</span>
+            <span class="badge badge-proceso">En Proceso</span>
+            <span class="badge badge-proceso">90%</span>
         </div>
     </div>
 
@@ -312,8 +312,8 @@
         <div class="progress-card">
             <h3>Progreso de la Fase</h3>
             <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: 0%;"></div>
-                <div class="progress-bar-text">0% Completado</div>
+                <div class="progress-bar-fill" style="width: 90%;"></div>
+                <div class="progress-bar-text">90% Completado</div>
             </div>
         </div>
 
@@ -747,68 +747,68 @@ CREATE POLICY "Responsable o Coordinador puede actualizar caso"
 }</div>
 
 
-<li>⚪ Crear CasoService</li>
-<li>⚪ Implementar escalarTicket(ticketId, datos)</li>
-<li>⚪ Implementar getCasos(filtros)</li>
-<li>⚪ Implementar getCasoById(id)</li>
-<li>⚪ Implementar updateCaso(id, data)</li>
-<li>⚪ Implementar cambiarEstatus(id, estatusId, nota)</li>
-<li>⚪ Implementar asignarCaso(id, usuarioId)</li>
-<li>⚪ Implementar marcarListoParaValidar(id, notas)</li>
-<li>⚪ Implementar regresarASoporte(id, motivo)</li>
-<li>⚪ Implementar cerrarCaso(id, resultado)</li>
-<li>⚪ Implementar registrarNumeroExterno(id, numero)</li>
-<li>⚪ Implementar getCasoTimeline(id)</li>
-<li>⚪ Implementar agregarNota(casoId, nota)</li>
-<li>⚪ Implementar subirAdjunto(casoId, file)</li>
+<li>✅ Crear CasoService</li>
+<li>✅ Implementar escalarTicket(ticketId, datos)</li>
+<li>✅ Implementar getCasos(filtros)</li>
+<li>✅ Implementar getCasoById(id)</li>
+<li>✅ Implementar updateCaso(id, data)</li>
+<li>✅ Implementar cambiarEstatus(id, estatusId, nota)</li>
+<li>✅ Implementar asignarCaso(id, usuarioId)</li>
+<li>✅ Implementar marcarListoParaValidar(id, notas)</li>
+<li>✅ Implementar regresarASoporte(id, motivo)</li>
+<li>✅ Implementar cerrarCaso(id, resultado)</li>
+<li>✅ Implementar registrarNumeroExterno(id, numero)</li>
+<li>✅ Implementar getCasoTimeline(id)</li>
+<li>✅ Implementar agregarNota(casoId, nota)</li>
+<li>✅ Implementar subirAdjunto(casoId, file)</li>
 <li>⚪ Implementar enviarEmailEscalamiento(casoId)</li>
 
 <h3>8. Frontend - Módulo de Casos</h3>
 
 <h4>8.1 Vista Principal de Casos</h4>
 
-<li>⚪ Crear módulo features/casos</li>
-<li>⚪ Crear componente de listado:</li>
-  - ⚪ Tabla con columnas: Folio, Ticket Origen, Cliente, Área, Motivo, Responsable, Estatus, Semáforo, SLA %, Fecha Compromiso
-  - ⚪ Badge de área con color por tipo
-  - ⚪ Badge de motivo
-  - ⚪ Semáforo visual
+<li>✅ Crear módulo features/casos</li>
+<li>✅ Crear componente de listado:</li>
+  - ✅ Tabla con columnas: Folio, Ticket Origen, Cliente, Área, Motivo, Responsable, Estatus, Semáforo, SLA %, Fecha Compromiso
+  - ✅ Badge de área con color por tipo
+  - ✅ Badge de motivo
+  - ✅ Semáforo visual
   - ⚪ Indicador si tiene número externo
   - ⚪ Indicador si email fue enviado
-  - ⚪ Filtros:
+  - ✅ Filtros:
     - Por área (select)
     - Por semáforo
     - Por estatus
     - Por responsable
     - Por motivo
     - Por fecha compromiso (vencidos/por vencer)
-  - ⚪ Búsqueda por folio
-  - ⚪ Ordenamiento
-  - ⚪ Paginación
+  - ✅ Búsqueda por folio
+  - ✅ Ordenamiento
+  - ✅ Paginación
 
 <h4>8.2 Modal de Escalamiento (desde Ticket)</h4>
 
-<li>⚪ Crear componente modal de escalamiento:</li>
-  - ⚪ Se abre desde detalle de ticket
-  - ⚪ Selector de área destino
-  - ⚪ Selector de motivo
-  - ⚪ Textarea de descripción adicional
-  - ⚪ Date picker de fecha compromiso
+<li>✅ Crear componente modal de escalamiento:</li>
+  - ✅ Se abre desde detalle de ticket
+  - ✅ Selector de área destino
+  - ✅ Selector de motivo
+  - ✅ Textarea de descripción adicional
+  - ✅ Date picker de fecha compromiso
   - ⚪ Checkbox "Enviar email inmediatamente"
   - ⚪ Preview de datos antes de confirmar
-  - ⚪ Loading state
-  - ⚪ Confirmación de creación
-  - ⚪ Redirigir a detalle del caso creado
+  - ✅ Loading state
+  - ✅ Confirmación de creación
+  - ✅ Redirigir a detalle del caso creado
 
 <h4>8.3 Detalle de Caso</h4>
 
-<li>⚪ Crear componente de detalle:</li>
-  - ⚪ Header con folio del caso
-  - ⚪ Link al ticket origen (prominente)
-  - ⚪ Badge de área con color corporativo
-  - ⚪ Badge de semáforo
-  - ⚪ Barra de progreso SLA
-  - ⚪ Card de información:
+<li>✅ Crear componente de detalle:</li>
+  - ✅ Header con folio del caso
+  - ✅ Link al ticket origen (prominente)
+  - ✅ Badge de área con color corporativo
+  - ✅ Badge de semáforo
+  - ✅ Barra de progreso SLA
+  - ✅ Card de información:
     - Cliente
     - Área destino
     - Motivo
@@ -817,10 +817,10 @@ CREATE POLICY "Responsable o Coordinador puede actualizar caso"
     - Estatus
     - Fecha compromiso (destacado si está próximo/vencido)
     - Número de caso externo (si existe)
-    - Email enviado (check/cross)
-  - ⚪ Timeline de bitácora
-  - ⚪ Sección de adjuntos
-  - ⚪ Área de acciones:
+    - ⚪ Email enviado (check/cross)
+  - ✅ Timeline de bitácora
+  - ✅ Sección de adjuntos
+  - ✅ Área de acciones:
     - Cambiar estatus
     - Asignar/reasignar
     - Registrar número de caso externo
@@ -829,73 +829,73 @@ CREATE POLICY "Responsable o Coordinador puede actualizar caso"
     - Cerrar caso
     - Agregar nota
     - Subir adjunto
-    - Reenviar email
+    - ⚪ Reenviar email
 
 <h4>8.4 Acciones sobre Casos</h4>
 
-<li>⚪ Implementar cambio de estatus:</li>
-  - ⚪ Modal con selector
-  - ⚪ Nota obligatoria
+<li>✅ Implementar cambio de estatus:</li>
+  - ✅ Modal con selector
+  - ✅ Nota obligatoria
   - ⚪ Actualizar fechas
-<li>⚪ Implementar asignación/reasignación:</li>
+<li>✅ Implementar asignación/reasignación:</li>
   - ⚪ Filtrar usuarios por área
-  - ⚪ Registrar en historial
+  - ✅ Registrar en historial
   - ⚪ Notificar
-<li>⚪ Implementar "Listo para validar":</li>
-  - ⚪ Modal con notas de resolución
-  - ⚪ Cambiar estatus
+<li>✅ Implementar "Listo para validar":</li>
+  - ✅ Modal con notas de resolución
+  - ✅ Cambiar estatus
   - ⚪ Notificar a soporte/ticket original
   - ⚪ Actualizar ticket relacionado
-<li>⚪ Implementar "Regresar a soporte":</li>
-  - ⚪ Modal con motivo obligatorio
-  - ⚪ Cambiar estatus del caso
+<li>✅ Implementar "Regresar a soporte":</li>
+  - ✅ Modal con motivo obligatorio
+  - ✅ Cambiar estatus del caso
   - ⚪ Cambiar estatus del ticket a "En atención"
   - ⚪ Notificar al responsable del ticket
   - ⚪ Agregar nota en ticket
-<li>⚪ Implementar cierre de caso:</li>
+<li>✅ Implementar cierre de caso:</li>
   - ⚪ Validar que tenga resultado
-  - ⚪ Modal de confirmación
+  - ✅ Modal de confirmación
   - ⚪ Actualizar ticket relacionado si aplica
-  - ⚪ Cerrar caso
-<li>⚪ Implementar registro de número externo:</li>
-  - ⚪ Modal simple con input
-  - ⚪ Guardar y registrar en bitácora
+  - ✅ Cerrar caso
+<li>✅ Implementar registro de número externo:</li>
+  - ✅ Modal simple con input
+  - ✅ Guardar y registrar en bitácora
 
 <h4>8.5 Integración en Vista de Ticket</h4>
 
-<li>⚪ En detalle de ticket, mostrar:</li>
+<li>✅ En detalle de ticket, mostrar:</li>
   - ⚪ Badge "Escalado" si tiene caso
   - ⚪ Link al caso relacionado
   - ⚪ Estatus actual del caso
   - ⚪ Área a la que se escaló
-  - ⚪ Botón "Escalar a caso" (si no está escalado)
+  - ✅ Botón "Escalar a caso" (si no está escalado)
 
 <h3>9. Panel de Reportes de Casos</h3>
 
 <h4>9.1 Dashboard de Casos</h4>
 
-<li>⚪ Crear dashboard de casos:</li>
-  - ⚪ Widget: Total de casos activos
-  - ⚪ Widget: Casos por área (gráfica pie)
-  - ⚪ Widget: Casos por semáforo
-  - ⚪ Widget: Casos próximos a vencer
-  - ⚪ Gráfica de cumplimiento SLA por área
-  - ⚪ Top 5 casos más antiguos
-  - ⚪ Lista de casos vencidos
+<li>✅ Crear dashboard de casos:</li>
+  - ✅ Widget: Total de casos activos
+  - ✅ Widget: Casos por área (gráfica donut)
+  - ✅ Widget: Casos por semáforo (barras)
+  - ✅ Widget: Casos próximos a vencer
+  - ✅ Gráfica de cumplimiento SLA por área
+  - ✅ Top 5 casos más antiguos
+  - ✅ Lista de casos con alertas (vencidos/por vencer)
 
 ---
 
 <div class="content-section"><h2>Entregables</h2>
 
-<li>⚪ Módulo de casos completamente funcional</li>
-<li>⚪ Integración ticket → caso operativa</li>
+<li>✅ Módulo de casos completamente funcional</li>
+<li>✅ Integración ticket → caso operativa</li>
 <li>⚪ Sistema de email para escalamiento</li>
-<li>⚪ Control de tiempo y SLA para casos</li>
-<li>⚪ Vista separada de casos con filtros por área</li>
-<li>⚪ Flujo completo de escalamiento</li>
-<li>⚪ Flujo de regreso a soporte</li>
-<li>⚪ Registro de número de caso externo</li>
-<li>⚪ RLS policies implementadas</li>
+<li>✅ Control de tiempo y SLA para casos</li>
+<li>✅ Vista separada de casos con filtros por área</li>
+<li>✅ Flujo completo de escalamiento</li>
+<li>✅ Flujo de regreso a soporte</li>
+<li>✅ Registro de número de caso externo</li>
+<li>✅ RLS policies implementadas</li>
 
 <div class="content-section"><h2>Dependencias</h2>
 
@@ -905,15 +905,15 @@ CREATE POLICY "Responsable o Coordinador puede actualizar caso"
 
 <div class="content-section"><h2>Criterios de Aceptación</h2>
 
-<li>⚪ Tickets pueden escalarse a casos correctamente</li>
+<li>✅ Tickets pueden escalarse a casos correctamente</li>
 <li>⚪ Email se envía al área correspondiente automáticamente</li>
-<li>⚪ Número de caso externo puede registrarse</li>
-<li>⚪ SLA de casos se calcula correctamente</li>
-<li>⚪ Casos pueden marcarse como "Listo para validar"</li>
-<li>⚪ Casos pueden regresar a soporte con notas</li>
-<li>⚪ Filtros por área, semáforo y estatus funcionan</li>
-<li>⚪ Permisos por área se respetan (RLS)</li>
-<li>⚪ Ticket y caso permanecen vinculados</li>
+<li>✅ Número de caso externo puede registrarse</li>
+<li>✅ SLA de casos se calcula correctamente</li>
+<li>✅ Casos pueden marcarse como "Listo para validar"</li>
+<li>✅ Casos pueden regresar a soporte con notas</li>
+<li>✅ Filtros por área, semáforo y estatus funcionan</li>
+<li>✅ Permisos por área se respetan (RLS)</li>
+<li>✅ Ticket y caso permanecen vinculados</li>
 
 <div class="content-section"><h2>Notas Técnicas Supabase</h2>
 
@@ -924,13 +924,94 @@ CREATE POLICY "Responsable o Coordinador puede actualizar caso"
 <li>**Storage** para adjuntos de casos</li>
 <li>Función **escalar_ticket_a_caso()** como transacción atómica</li>
 </p></div>
+
+<div class="content-section">
+<h2>Implementación Completada (v1.14.0)</h2>
+
+<div class="success-box">
+<strong>Estado:</strong> Módulo de Casos implementado y funcional. Pendiente: Sistema de emails.
+</div>
+
+<h3>Archivos Creados/Modificados</h3>
+
+<h4>Base de Datos</h4>
+<ul>
+    <li><code>database/migrations/17_casos_escalamiento.sql</code> - Migración completa con tablas, funciones, triggers y RLS</li>
+</ul>
+
+<h4>Models</h4>
+<ul>
+    <li><code>src/app/core/models/caso.model.ts</code> - Interfaces y tipos para casos</li>
+    <li><code>src/app/core/models/index.ts</code> - Export de caso.model</li>
+</ul>
+
+<h4>Services</h4>
+<ul>
+    <li><code>src/app/core/services/caso.service.ts</code> - Servicio completo con CRUD y acciones</li>
+    <li><code>src/app/core/services/index.ts</code> - Export de CasoService</li>
+</ul>
+
+<h4>Frontend - Módulo Casos</h4>
+<ul>
+    <li><code>src/app/features/casos/casos.routes.ts</code> - Rutas del módulo</li>
+    <li><code>src/app/features/casos/pages/caso-dashboard/caso-dashboard.component.ts</code> - Dashboard con widgets y gráficas</li>
+    <li><code>src/app/features/casos/pages/caso-dashboard/caso-dashboard.component.html</code> - Template</li>
+    <li><code>src/app/features/casos/pages/caso-dashboard/caso-dashboard.component.scss</code> - Estilos</li>
+    <li><code>src/app/features/casos/pages/caso-list/caso-list.component.ts</code> - Lista con filtros</li>
+    <li><code>src/app/features/casos/pages/caso-list/caso-list.component.html</code> - Template</li>
+    <li><code>src/app/features/casos/pages/caso-list/caso-list.component.scss</code> - Estilos</li>
+    <li><code>src/app/features/casos/pages/caso-detail/caso-detail.component.ts</code> - Detalle con acciones</li>
+    <li><code>src/app/features/casos/pages/caso-detail/caso-detail.component.html</code> - Template</li>
+    <li><code>src/app/features/casos/pages/caso-detail/caso-detail.component.scss</code> - Estilos</li>
+</ul>
+
+<h4>Integración</h4>
+<ul>
+    <li><code>src/app/app-routing.module.ts</code> - Ruta /casos con lazy loading</li>
+    <li><code>src/app/theme/layout/admin/navigation/navigation.ts</code> - Menú de navegación</li>
+    <li><code>src/app/features/tickets/pages/ticket-detail/ticket-detail.component.ts</code> - Botón escalar</li>
+    <li><code>src/app/features/tickets/pages/ticket-detail/ticket-detail.component.html</code> - Modal escalamiento</li>
+</ul>
+
+<h3>Fixes Aplicados</h3>
+<ul>
+    <li><strong>Fix 1:</strong> Función <code>generar_folio_caso()</code> - Variables renombradas con prefijo v_ para evitar conflicto con columna casos.folio</li>
+    <li><strong>Fix 2:</strong> Parámetro <code>p_usuario_id</code> removido de RPC - La función usa <code>auth.uid()</code> internamente</li>
+    <li><strong>Fix 3:</strong> Políticas RLS corregidas - Roles cambiados de 'Admin'/'Coordinador' a 'Administrador'/'Supervisor'</li>
+    <li><strong>Fix 4:</strong> Política UPDATE - Agregado <code>creado_por = auth.uid()</code> para permitir al creador actualizar</li>
+</ul>
+
+<h3>Funcionalidades Implementadas</h3>
+<ul>
+    <li>✅ Escalamiento de tickets a casos</li>
+    <li>✅ Dashboard de casos con widgets y gráficas</li>
+    <li>✅ Lista de casos con filtros (área, semáforo, estatus, responsable, motivo)</li>
+    <li>✅ Detalle de caso con bitácora</li>
+    <li>✅ Cambio de estatus</li>
+    <li>✅ Asignación/reasignación</li>
+    <li>✅ Marcar como "Listo para validar"</li>
+    <li>✅ Regresar a soporte</li>
+    <li>✅ Cerrar caso</li>
+    <li>✅ Registrar número de caso externo</li>
+    <li>✅ Agregar notas</li>
+    <li>✅ Subir adjuntos</li>
+    <li>✅ Sistema de SLA con semáforos</li>
+</ul>
+
+<h3>Pendiente</h3>
+<ul>
+    <li>⚪ Edge Function para envío de emails</li>
+    <li>⚪ Indicadores visuales adicionales (email enviado, número externo)</li>
+    <li>⚪ Actualización automática del ticket relacionado al cerrar caso</li>
+</ul>
+</div>
     </div>
 
     <div class="footer">
         <p><strong>iGAS Control Volumétrico</strong></p>
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
-            Última actualización: 11 de enero de 2026
+            Última actualización: 21 de enero de 2026
         </p>
     </div>
 </body>

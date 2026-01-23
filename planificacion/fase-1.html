@@ -304,7 +304,7 @@
         <div class="container">
             <h1>Fase 1: Autenticación y Gestión de Usuarios</h1>
             <span class="badge badge-en proceso">En Proceso</span>
-            <span class="badge badge-proceso">50%</span>
+            <span class="badge badge-proceso">90%</span>
         </div>
     </div>
 
@@ -312,8 +312,8 @@
         <div class="progress-card">
             <h3>Progreso de la Fase</h3>
             <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: 50%;"></div>
-                <div class="progress-bar-text">50% Completado</div>
+                <div class="progress-bar-fill" style="width: 90%;"></div>
+                <div class="progress-bar-text">90% Completado</div>
             </div>
         </div>
 
@@ -498,7 +498,7 @@ CREATE POLICY "Admins can manage all profiles"
 
 <h3>3. Sistema de Roles y Permisos</h3>
 
-<h4>3.1 Modelo de Datos - Roles</h4>
+<h4>3.1 Modelo de Datos - Roles ✅</h4>
 <div class="code-block">CREATE TABLE public.roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nombre TEXT UNIQUE NOT NULL,
@@ -568,10 +568,10 @@ export const roleGuard: CanActivateFn = (route) => {
 
 
 <li>⚪ Crear PermissionGuard</li>
-<li>⚪ Crear RoleGuard</li>
+<li>✅ Crear RoleGuard <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
 <li>⚪ Crear directiva *hasPermission</li>
-<li>⚪ Crear directiva *hasRole</li>
-<li>⚪ Implementar en rutas protegidas</li>
+<li>✅ Crear directiva *hasRole <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
+<li>✅ Implementar en rutas protegidas <a href="#version-1-14-0" style="font-size: 11px; color: #4CAF50;">[v1.14.0]</a></li>
 
 <h3>4. Gestión de Equipos/Áreas</h3>
 
@@ -595,18 +595,21 @@ INSERT INTO public.equipos (nombre, descripcion) VALUES
   ('Cobranza', 'Equipo de cobranza');</div>
 
 
-<h4>4.2 Backend - Queries Supabase</h4>
+<h4>4.2 Backend - EquipoService</h4>
 
-<li>⚪ Crear queries para CRUD de equipos</li>
-<li>⚪ Implementar relación equipos ↔ usuarios</li>
-<li>⚪ Crear query para obtener miembros de un equipo</li>
+<li>✅ Crear EquipoService con CRUD completo <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Implementar relación equipos ↔ usuarios <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear query para obtener miembros de un equipo <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Gestión de usuarios sin equipo asignado <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
 
 <h4>4.3 Frontend - Gestión de Equipos</h4>
 
-<li>⚪ Crear componente de gestión de equipos</li>
-<li>⚪ Listar equipos con miembros</li>
-<li>⚪ Asignar/remover usuarios de equipos</li>
-<li>⚪ Mostrar responsable de equipo</li>
+<li>✅ Crear EquipoListComponent con filtros y paginación <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear EquipoFormComponent (crear/editar) <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Crear EquipoDetailComponent con gestión de miembros <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Asignar/remover usuarios de equipos <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Configurar rutas con roleGuard <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
+<li>✅ Agregar menú de navegación <a href="#version-1-15-0" style="font-size: 11px; color: #4CAF50;">[v1.15.0]</a></li>
 
 <h3>5. Horarios y Turnos</h3>
 
@@ -650,14 +653,24 @@ END;
 $ LANGUAGE plpgsql;</div>
 
 
+<li>✅ Modelo de datos Horario actualizado <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
 <li>⚪ Implementar función de cálculo de horarios hábiles</li>
 <li>⚪ Crear tabla de días festivos</li>
 
-<h4>5.3 Frontend - Horarios</h4>
+<h4>5.3 Backend - HorarioService</h4>
 
-<li>⚪ Crear interfaz de configuración de turnos</li>
-<li>⚪ Mostrar turno actual del usuario</li>
-<li>⚪ Asignar turnos a usuarios</li>
+<li>✅ Crear HorarioService con CRUD completo <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Obtener usuarios por horario <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Asignar/remover horario a usuarios <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Helper isWithinSchedule para verificar si está en horario <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+
+<h4>5.4 Frontend - Horarios</h4>
+
+<li>✅ Crear HorarioListComponent con filtros y paginación <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Crear HorarioFormComponent con selector de días <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Crear HorarioDetailComponent con usuarios asignados <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Configurar rutas con roleGuard <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
+<li>✅ Agregar menú de navegación <a href="#version-1-16-0" style="font-size: 11px; color: #4CAF50;">[v1.16.0]</a></li>
 
 <h3>6. Auditoría de Usuarios</h3>
 
@@ -698,6 +711,9 @@ CREATE TRIGGER profiles_audit_trigger
   AFTER INSERT OR UPDATE OR DELETE ON profiles
   FOR EACH ROW EXECUTE FUNCTION audit_trigger_function();</div>
 
+<li>✅ Tabla audit_log creada <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Función audit_trigger_function() con SECURITY DEFINER <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Triggers aplicados a profiles, roles, equipos, horarios <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
 
 <h4>6.2 Historial de Sesiones</h4>
 <div class="code-block">CREATE TABLE public.sesiones_log (
@@ -710,25 +726,40 @@ CREATE TRIGGER profiles_audit_trigger
 );</div>
 
 
-<li>⚪ Registrar logins exitosos</li>
-<li>⚪ Registrar intentos fallidos</li>
-<li>⚪ Implementar consulta de historial</li>
+<li>✅ Tabla sesiones_log creada <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar logins exitosos <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar intentos fallidos <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Registrar logouts <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Implementar consulta de historial <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+
+<h4>6.3 Frontend - Auditoría</h4>
+<li>✅ AuditService con métodos de consulta <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ AuditLogComponent con tabs, filtros y paginación <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Vista de cambios en datos (INSERT/UPDATE/DELETE) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Vista de eventos de sesión (login/logout/failed) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Modal de detalle con comparación de cambios <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Tarjetas de estadísticas <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Menú "Auditoría" en navegación (solo Admin) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
 
 <h3>7. Panel de Administración - Usuarios</h3>
 
 <h4>7.1 Panel Admin</h4>
 
-<li>⚪ Crear sección "Administración" en menú</li>
-<li>⚪ Crear submenu: Usuarios, Roles, Equipos, Horarios</li>
-<li>⚪ Implementar dashboard de usuarios:</li>
-  - ⚪ Total de usuarios activos/inactivos
-  - ⚪ Usuarios por rol
-  - ⚪ Usuarios por equipo
-  - ⚪ Gráfica con ApexCharts
-<li>⚪ Implementar filtros avanzados</li>
-<li>⚪ Crear exportación a CSV/Excel</li>
-<li>⚪ Crear vista de actividad de usuarios</li>
-<li>⚪ Mostrar historial de auditoría</li>
+<li>✅ Crear sección "Administración" en menú <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear submenu: Usuarios, Equipos, Horarios, Auditoría <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Implementar dashboard de usuarios: <a href="#version-1-18-0" style="font-size: 11px; color: #4CAF50;">[v1.18.0]</a></li>
+  - ✅ Total de usuarios activos/inactivos
+  - ✅ Usuarios por rol (gráfica donut)
+  - ✅ Usuarios por equipo (gráfica barras)
+  - ✅ Gráficas con ApexCharts
+  - ✅ Disponibilidad actual (gráfica pie)
+  - ✅ Barra de progreso activos/inactivos
+  - ✅ Tabla resumen por rol
+  - ✅ Accesos rápidos a módulos
+<li>✅ Implementar filtros avanzados (en lista de usuarios) <a href="#version-1-13-0" style="font-size: 11px; color: #4CAF50;">[v1.13.0]</a></li>
+<li>✅ Crear exportación a CSV <a href="#version-1-18-0" style="font-size: 11px; color: #4CAF50;">[v1.18.0]</a></li>
+<li>✅ Crear vista de actividad de usuarios (en auditoría) <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
+<li>✅ Mostrar historial de auditoría <a href="#version-1-17-0" style="font-size: 11px; color: #4CAF50;">[v1.17.0]</a></li>
 
 <h3>8. Mejoras de UX</h3>
 
@@ -791,7 +822,150 @@ CREATE TRIGGER profiles_audit_trigger
 <h2>Historial de Versiones - Fase 1</h2>
 
 <div class="info-box" style="background: #f8f9fa; border-left: 4px solid #F9B000; padding: 20px; margin: 20px 0;">
-    <p id="version-1-13-0"><strong>v1.13.0</strong> - 18 de enero de 2026</p>
+    <p id="version-1-18-0"><strong>v1.18.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Panel de Administración - Usuarios - Punto 7 completado</li>
+        <li>📁 Dashboard actualizado <code>src/app/demo/dashboard/</code>:</li>
+        <li>  • Estadísticas de usuarios en tiempo real</li>
+        <li>  • Tarjetas: Total, Activos, Inactivos, Roles</li>
+        <li>  • Gráfica donut: Distribución por Rol (ApexCharts)</li>
+        <li>  • Gráfica barras: Usuarios por Equipo (ApexCharts)</li>
+        <li>  • Gráfica pie: Disponibilidad Actual</li>
+        <li>  • Barra de progreso: % Usuarios Activos</li>
+        <li>  • Tabla resumen de usuarios por rol</li>
+        <li>  • Panel de accesos rápidos a módulos</li>
+        <li>  • Mensaje de bienvenida personalizado</li>
+        <li>📁 UserService actualizado <code>src/app/core/services/user.service.ts</code>:</li>
+        <li>  • getUserStats() - estadísticas para dashboard</li>
+        <li>  • getAllUsersForExport() - obtener usuarios para CSV</li>
+        <li>📁 Exportación CSV en <code>src/app/features/users/pages/user-list/</code>:</li>
+        <li>  • Botón de exportación en barra de herramientas</li>
+        <li>  • Exporta: nombre, email, teléfono, rol, equipo, horario, estatus, disponibilidad, fecha</li>
+        <li>  • Encoding UTF-8 con BOM para Excel</li>
+        <li>  • Nombre de archivo con fecha: usuarios_YYYY-MM-DD.csv</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-17-0"><strong>v1.17.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Sistema de Auditoría - Punto 6 completado</li>
+        <li>📁 Migración <code>database/migrations/13_audit_system.sql</code>:</li>
+        <li>  • Tabla audit_log para registrar cambios en datos</li>
+        <li>  • Tabla sesiones_log para registrar eventos de sesión</li>
+        <li>  • Función audit_trigger_function() con SECURITY DEFINER</li>
+        <li>  • Función log_session_event() para registrar sesiones</li>
+        <li>  • Triggers en profiles, roles, equipos, horarios</li>
+        <li>  • Vistas v_audit_log_detail y v_sesiones_log_detail</li>
+        <li>  • Políticas RLS para seguridad</li>
+        <li>📁 Modelos en <code>src/app/core/models/audit.model.ts</code>:</li>
+        <li>  • AuditLog, AuditLogDetail, SessionLog, SessionLogDetail</li>
+        <li>  • AuditFilters, SessionFilters</li>
+        <li>  • Constantes para nombres y colores de acciones</li>
+        <li>📁 AuditService en <code>src/app/core/services/audit.service.ts</code>:</li>
+        <li>  • getAuditLogs() - logs con filtros y paginación</li>
+        <li>  • getSessionLogs() - sesiones con filtros y paginación</li>
+        <li>  • logSessionEvent() - registrar evento de sesión</li>
+        <li>  • getAuditStats() / getSessionStats() - estadísticas</li>
+        <li>  • getRecordHistory() / getUserSessionHistory()</li>
+        <li>📁 Componente en <code>src/app/features/auditoria/</code>:</li>
+        <li>  • AuditLogComponent - vista de auditoría para admins</li>
+        <li>  • Tabs: Cambios en Datos / Eventos de Sesión</li>
+        <li>  • Filtros por tabla, acción, fechas, usuario</li>
+        <li>  • Modal de detalle con comparación de cambios</li>
+        <li>  • Tarjetas de estadísticas</li>
+        <li>✅ Integración con login/logout:</li>
+        <li>  • auth-signin.component.ts actualizado para registrar login/login_failed</li>
+        <li>  • nav-right.component.ts actualizado para registrar logout</li>
+        <li>✅ Menú "Auditoría" en Administración (solo Admin)</li>
+        <li>✅ Ruta /auditoria con roleGuard</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-16-0"><strong>v1.16.0</strong> - 20 de enero de 2026</p>
+    <ul>
+        <li>✅ Gestión de Horarios/Turnos - Punto 5 completado</li>
+        <li>📁 Modelo horario.model.ts actualizado:</li>
+        <li>  • Horario, HorarioWithCount, DTOs y Filters</li>
+        <li>  • Helpers DIAS_SEMANA_NOMBRES y DIAS_SEMANA_ABREV</li>
+        <li>📁 HorarioService creado en <code>src/app/core/services/horario.service.ts</code>:</li>
+        <li>  • getHorarios() - listado con filtros y paginación</li>
+        <li>  • getHorarioById() - obtener horario con conteo</li>
+        <li>  • getUsuariosByHorario() - usuarios asignados a un horario</li>
+        <li>  • createHorario() / updateHorario() - CRUD completo</li>
+        <li>  • deactivateHorario() / activateHorario() - soft delete</li>
+        <li>  • assignHorarioToUser() / removeHorarioFromUser() - asignación</li>
+        <li>  • isWithinSchedule() - verifica si está en horario</li>
+        <li>📁 Componentes creados en <code>src/app/features/horarios/</code>:</li>
+        <li>  • HorarioListComponent - Lista con tabla, filtros, paginación</li>
+        <li>  • HorarioFormComponent - Formulario con selector de días interactivo</li>
+        <li>  • HorarioDetailComponent - Vista detallada con usuarios asignados</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por estatus y horario hábil</li>
+        <li>  • Selector visual de días de la semana</li>
+        <li>  • Conteo de usuarios por horario</li>
+        <li>  • Vista semanal en detalle</li>
+        <li>  • Indicador "En horario" si aplica</li>
+        <li>✅ Rutas configuradas en <code>/horarios</code>:</li>
+        <li>  • /horarios - Lista de horarios (Admin, Supervisor)</li>
+        <li>  • /horarios/nuevo - Crear horario (Admin)</li>
+        <li>  • /horarios/editar/:id - Editar horario (Admin)</li>
+        <li>  • /horarios/:id - Detalle de horario (Admin, Supervisor)</li>
+        <li>✅ Menú de navegación actualizado con sección "Horarios"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-15-0"><strong>v1.15.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Gestión de Equipos/Áreas - Punto 4 completado</li>
+        <li>📁 EquipoService creado en <code>src/app/core/services/equipo.service.ts</code>:</li>
+        <li>  • getEquipos() - listado con filtros y paginación</li>
+        <li>  • getEquipoById() - obtener equipo con relaciones</li>
+        <li>  • getEquipoMembers() - obtener miembros de un equipo</li>
+        <li>  • createEquipo() / updateEquipo() - CRUD completo</li>
+        <li>  • deactivateEquipo() / activateEquipo() - soft delete</li>
+        <li>  • assignMember() / removeMember() - gestión de miembros</li>
+        <li>  • getUnassignedUsers() - usuarios disponibles para asignar</li>
+        <li>📁 Componentes creados en <code>src/app/features/equipos/</code>:</li>
+        <li>  • EquipoListComponent - Lista con tabla, filtros, búsqueda, paginación</li>
+        <li>  • EquipoFormComponent - Formulario crear/editar equipos</li>
+        <li>  • EquipoDetailComponent - Vista detallada con gestión de miembros</li>
+        <li>✅ Funcionalidades implementadas:</li>
+        <li>  • Filtros por supervisor y estatus</li>
+        <li>  • Búsqueda por nombre/descripción</li>
+        <li>  • Contador de miembros por equipo</li>
+        <li>  • Asignar/remover usuarios de equipos</li>
+        <li>  • Modal para seleccionar usuarios sin equipo</li>
+        <li>✅ Rutas configuradas en <code>/equipos</code>:</li>
+        <li>  • /equipos - Lista de equipos (Admin, Supervisor)</li>
+        <li>  • /equipos/nuevo - Crear equipo (Admin)</li>
+        <li>  • /equipos/editar/:id - Editar equipo (Admin)</li>
+        <li>  • /equipos/:id - Detalle de equipo (Admin, Supervisor)</li>
+        <li>✅ Menú de navegación actualizado con sección "Equipos"</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-14-0"><strong>v1.14.0</strong> - 18 de enero de 2026</p>
+    <ul>
+        <li>✅ Sistema de Roles y Permisos - Punto 3 completado</li>
+        <li>📁 Guards creados en <code>src/app/core/guards/auth.guard.ts</code>:</li>
+        <li>  • roleGuard - Protege rutas basadas en roles del usuario</li>
+        <li>  • adminGuard - Atajo para rutas solo de administradores</li>
+        <li>📁 Directivas creadas en <code>src/app/core/directives/</code>:</li>
+        <li>  • HasRoleDirective - *hasRole="'Administrador'" o *hasRole="['Admin', 'Supervisor']"</li>
+        <li>  • IsAdminDirective - *isAdmin para mostrar elementos solo a admins</li>
+        <li>✅ Guards aplicados en rutas de usuarios:</li>
+        <li>  • /usuarios - Solo Administrador y Supervisor</li>
+        <li>  • /usuarios/nuevo - Solo Administrador</li>
+        <li>  • /usuarios/editar/:id - Solo Administrador</li>
+        <li>  • /usuarios/:id - Solo Administrador y Supervisor</li>
+        <li>  • /usuarios/perfil - Todos los usuarios autenticados</li>
+        <li>✅ Correcciones de UI:</li>
+        <li>  • Título "Card Title" cambiado por títulos correctos en componentes</li>
+        <li>  • Mensaje de error "Email not confirmed" mapeado correctamente</li>
+        <li>  • Creación de usuarios sin trigger (creación directa de profile)</li>
+        <li>✅ Políticas RLS actualizadas:</li>
+        <li>  • Admins can insert profiles - Para crear nuevos usuarios</li>
+        <li>  • Admins can update all profiles - Para editar usuarios</li>
+        <li>  • get_all_users() RPC function - Para listar todos los usuarios</li>
+    </ul>
+
+    <p style="margin-top: 15px;" id="version-1-13-0"><strong>v1.13.0</strong> - 18 de enero de 2026</p>
     <ul>
         <li>✅ Crear módulo de usuarios completo en <code>src/app/features/users/</code></li>
         <li>📁 Componentes creados:</li>
@@ -1022,8 +1196,8 @@ CREATE TRIGGER profiles_audit_trigger
         <p><strong>iGAS Control Volumétrico</strong></p>
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
-            Última actualización: 17 de enero de 2026<br>
-            Fase 1: v1.11.0 - 15 tareas completadas
+            Última actualización: 18 de enero de 2026<br>
+            Fase 1: v1.14.0 - Sistema de Roles y Guards implementado
         </p>
     </div>
 </body>

@@ -10,7 +10,7 @@
   <div class="row">
     <!-- Columna izquierda - Avatar e información básica -->
     <div class="col-md-4 mb-4">
-      <app-card [options]="false">
+      <app-card [hidHeader]="true">
         <div class="text-center">
           <!-- Avatar -->
           <div class="position-relative d-inline-block mb-3">
@@ -97,7 +97,7 @@
 
     <!-- Columna derecha - Tabs de edición -->
     <div class="col-md-8">
-      <app-card [options]="false">
+      <app-card [hidHeader]="true">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs mb-4">
           <li [ngbNavItem]="1">
             <button ngbNavLink>
@@ -174,15 +174,25 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="current_password" class="form-label">Contraseña actual</label>
-                    <input
-                      type="password"
-                      id="current_password"
-                      class="form-control"
-                      formControlName="current_password"
-                      [class.is-invalid]="isFieldInvalid(passwordForm, 'current_password')"
-                    />
+                    <div class="input-group">
+                      <input
+                        [type]="showCurrentPassword() ? 'text' : 'password'"
+                        id="current_password"
+                        class="form-control"
+                        formControlName="current_password"
+                        [class.is-invalid]="isFieldInvalid(passwordForm, 'current_password')"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="toggleCurrentPassword()"
+                        tabindex="-1"
+                      >
+                        <i class="feather" [class.icon-eye]="!showCurrentPassword()" [class.icon-eye-off]="showCurrentPassword()"></i>
+                      </button>
+                    </div>
                     @if (isFieldInvalid(passwordForm, 'current_password')) {
-                      <div class="invalid-feedback">{{ getFieldError(passwordForm, 'current_password') }}</div>
+                      <div class="invalid-feedback d-block">{{ getFieldError(passwordForm, 'current_password') }}</div>
                     }
                   </div>
                 </div>
@@ -190,15 +200,25 @@
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="new_password" class="form-label">Nueva contraseña</label>
-                    <input
-                      type="password"
-                      id="new_password"
-                      class="form-control"
-                      formControlName="new_password"
-                      [class.is-invalid]="isFieldInvalid(passwordForm, 'new_password')"
-                    />
+                    <div class="input-group">
+                      <input
+                        [type]="showNewPassword() ? 'text' : 'password'"
+                        id="new_password"
+                        class="form-control"
+                        formControlName="new_password"
+                        [class.is-invalid]="isFieldInvalid(passwordForm, 'new_password')"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="toggleNewPassword()"
+                        tabindex="-1"
+                      >
+                        <i class="feather" [class.icon-eye]="!showNewPassword()" [class.icon-eye-off]="showNewPassword()"></i>
+                      </button>
+                    </div>
                     @if (isFieldInvalid(passwordForm, 'new_password')) {
-                      <div class="invalid-feedback">{{ getFieldError(passwordForm, 'new_password') }}</div>
+                      <div class="invalid-feedback d-block">{{ getFieldError(passwordForm, 'new_password') }}</div>
                     }
                     <!-- Indicador de fortaleza -->
                     @if (passwordStrength() > 0) {
@@ -221,13 +241,23 @@
 
                   <div class="col-md-6 mb-3">
                     <label for="confirm_password" class="form-label">Confirmar nueva contraseña</label>
-                    <input
-                      type="password"
-                      id="confirm_password"
-                      class="form-control"
-                      formControlName="confirm_password"
-                      [class.is-invalid]="isFieldInvalid(passwordForm, 'confirm_password') || hasPasswordMismatch()"
-                    />
+                    <div class="input-group">
+                      <input
+                        [type]="showConfirmPassword() ? 'text' : 'password'"
+                        id="confirm_password"
+                        class="form-control"
+                        formControlName="confirm_password"
+                        [class.is-invalid]="isFieldInvalid(passwordForm, 'confirm_password') || hasPasswordMismatch()"
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        (click)="toggleConfirmPassword()"
+                        tabindex="-1"
+                      >
+                        <i class="feather" [class.icon-eye]="!showConfirmPassword()" [class.icon-eye-off]="showConfirmPassword()"></i>
+                      </button>
+                    </div>
                     @if (hasPasswordMismatch()) {
                       <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
                     }

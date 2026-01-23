@@ -12,6 +12,7 @@ import { NgbModalModule, NgbModal, NgbTooltipModule, NgbDropdownModule } from '@
 
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { TicketService } from 'src/app/core/services/ticket.service';
+import { CasoService } from 'src/app/core/services/caso.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import {
@@ -19,7 +20,11 @@ import {
   TicketBitacora,
   TicketAdjunto,
   EstatusTicket,
-  ProfileBasic
+  ProfileBasic,
+  AreaDestino,
+  MotivoEscalamiento,
+  AREAS_DESTINO,
+  MOTIVOS_ESCALAMIENTO
 } from 'src/app/core/models';
 import {
   SemaforoBadgeComponent,
@@ -50,6 +55,7 @@ export class TicketDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private ticketService = inject(TicketService);
+  private casoService = inject(CasoService);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
   private modalService = inject(NgbModal);
@@ -76,6 +82,14 @@ export class TicketDetailComponent implements OnInit {
   nuevoResponsableId = signal<string | null>(null);
   motivoAsignacion = signal('');
   savingAction = signal(false);
+
+  // Escalamiento
+  escalarAreaDestino = signal<AreaDestino | null>(null);
+  escalarMotivo = signal<MotivoEscalamiento | null>(null);
+  escalarDescripcion = signal('');
+  escalarFechaCompromiso = signal('');
+  areasDestino = AREAS_DESTINO;
+  motivosEscalamiento = MOTIVOS_ESCALAMIENTO;
 
   // Computed
   ticketId = computed(() => this.route.snapshot.paramMap.get('id') || '');
@@ -272,6 +286,58 @@ export class TicketDetailComponent implements OnInit {
       },
       error: () => {
         this.notificationService.error('Error al agregar nota');
+        this.savingAction.set(false);
+      }
+    });
+  }
+
+  // ============================================================================
+  // Escalamiento
+  // ============================================================================
+
+  openEscalarModal(content: any): void {
+    this.escalarAreaDestino.set(null);
+    this.escalarMotivo.set(null);
+    this.escalarDescripcion.set(this.ticket()?.descripcion || '');
+    this.escalarFechaCompromiso.set('');
+    this.modalService.open(content, { centered: true, size: 'lg' });
+  }
+
+  confirmEscalar(): void {
+    const areaDestino = this.escalarAreaDestino();
+    const motivo = this.escalarMotivo();
+
+    if (!areaDestino || !motivo) {
+      this.notificationService.warning('Selecciona área destino y motivo');
+      return;
+    }
+
+    this.savingAction.set(true);
+
+    this.casoService.escalarTicket({
+      ticket_id: this.ticketId(),
+      area_destino: areaDestino,
+      motivo: motivo,
+      descripcion: this.escalarDescripcion() || undefined,
+      fecha_compromiso: this.escalarFechaCompromiso() || undefined
+    }).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.notificationService.success('Ticket escalado correctamente. Se ha creado el caso.');
+          this.loadTicket();
+          this.modalService.dismissAll();
+
+          // Navegar al caso creado
+          if (response.data?.id) {
+            this.router.navigate(['/casos', response.data.id]);
+          }
+        } else {
+          this.notificationService.error(response.error || 'Error al escalar ticket');
+        }
+        this.savingAction.set(false);
+      },
+      error: () => {
+        this.notificationService.error('Error al escalar ticket');
         this.savingAction.set(false);
       }
     });

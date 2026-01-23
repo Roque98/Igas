@@ -21,6 +21,7 @@ import {
   calculatePasswordStrength,
   getPasswordStrengthMessage
 } from 'src/app/core/validators';
+import { getErrorMessage } from 'src/app/core/helpers/error-messages';
 
 @Component({
   selector: 'app-user-profile',
@@ -60,6 +61,11 @@ export class UserProfileComponent implements OnInit {
   // Password strength
   passwordStrength = signal(0);
   passwordStrengthInfo = computed(() => getPasswordStrengthMessage(this.passwordStrength()));
+
+  // Password visibility toggles
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   // Formularios
   profileForm!: FormGroup;
@@ -181,7 +187,7 @@ export class UserProfileComponent implements OnInit {
 
     this.supabaseService.updatePassword(formData.new_password).then(({ error }) => {
       if (error) {
-        this.notificationService.error(error.message || 'Error al cambiar contraseña');
+        this.notificationService.error(getErrorMessage(error));
       } else {
         this.notificationService.success('Contraseña actualizada correctamente');
         this.passwordForm.reset();
@@ -314,5 +320,17 @@ export class UserProfileComponent implements OnInit {
   hasPasswordMismatch(): boolean {
     return this.passwordForm.hasError('passwordMatch') &&
            this.passwordForm.get('confirm_password')?.touched === true;
+  }
+
+  toggleCurrentPassword(): void {
+    this.showCurrentPassword.update(v => !v);
+  }
+
+  toggleNewPassword(): void {
+    this.showNewPassword.update(v => !v);
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword.update(v => !v);
   }
 }

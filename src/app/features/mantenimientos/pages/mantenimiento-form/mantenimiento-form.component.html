@@ -1,0 +1,193 @@
+<!-- ============================================================================
+  Mantenimiento Form Component - Template
+============================================================================= -->
+
+<div class="row">
+  <div class="col-12 col-lg-8">
+    <app-card [hidHeader]="true">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="mb-1">{{ isEditMode() ? 'Editar Mantenimiento' : 'Nuevo Mantenimiento' }}</h4>
+          <p class="text-muted mb-0">
+            {{ isEditMode() ? 'Modifica los datos del mantenimiento' : 'Programa un nuevo mantenimiento' }}
+          </p>
+        </div>
+        <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+          <i class="feather icon-x me-1"></i>Cancelar
+        </button>
+      </div>
+
+      <!-- Loading -->
+      @if (loadingMantenimiento()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      } @else {
+        <!-- Formulario -->
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Cliente y Sucursal -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Cliente <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="cliente_id"
+                      [class.is-invalid]="isFieldInvalid('cliente_id')">
+                <option value="">Seleccionar cliente...</option>
+                @for (cliente of clientes(); track cliente.id) {
+                  <option [value]="cliente.id">{{ cliente.razon_social }}</option>
+                }
+              </select>
+              @if (isFieldInvalid('cliente_id')) {
+                <div class="invalid-feedback">{{ getFieldError('cliente_id') }}</div>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Sucursal</label>
+              <select class="form-select" formControlName="sucursal_id"
+                      [disabled]="sucursales().length === 0">
+                <option value="">Seleccionar sucursal...</option>
+                @for (suc of sucursales(); track suc.id) {
+                  <option [value]="suc.id">
+                    {{ suc.nombre }}
+                    @if (suc.es_matriz) { (Matriz) }
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Tipo y Template -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Tipo de Mantenimiento <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="tipo_mantenimiento_id"
+                      [class.is-invalid]="isFieldInvalid('tipo_mantenimiento_id')">
+                <option value="">Seleccionar tipo...</option>
+                @for (tipo of tipos(); track tipo.id) {
+                  <option [value]="tipo.id">{{ tipo.nombre }}</option>
+                }
+              </select>
+              @if (isFieldInvalid('tipo_mantenimiento_id')) {
+                <div class="invalid-feedback">{{ getFieldError('tipo_mantenimiento_id') }}</div>
+              }
+              @if (getSelectedTipo()) {
+                <small class="text-muted">{{ getSelectedTipo()?.descripcion }}</small>
+              }
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Template de Checklist</label>
+              <select class="form-select" formControlName="template_checklist_id"
+                      [disabled]="templates().length === 0">
+                <option value="">Sin checklist</option>
+                @for (tpl of templates(); track tpl.id) {
+                  <option [value]="tpl.id">
+                    {{ tpl.nombre }}
+                    @if (tpl.items) { ({{ tpl.items.length }} items) }
+                  </option>
+                }
+              </select>
+              <small class="text-muted">El checklist se copiará al crear el mantenimiento</small>
+            </div>
+          </div>
+
+          <!-- Fecha y Hora -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <label class="form-label">Fecha Programada <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" formControlName="fecha_programada"
+                     [class.is-invalid]="isFieldInvalid('fecha_programada')">
+              @if (isFieldInvalid('fecha_programada')) {
+                <div class="invalid-feedback">{{ getFieldError('fecha_programada') }}</div>
+              }
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Hora</label>
+              <input type="time" class="form-control" formControlName="hora_programada">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Técnico Asignado</label>
+              <select class="form-select" formControlName="tecnico_id">
+                <option value="">Sin asignar</option>
+                @for (tec of tecnicos(); track tec.id) {
+                  <option [value]="tec.id">{{ tec.nombre_completo }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Contacto del cliente -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Contacto en sitio</label>
+              <input type="text" class="form-control" formControlName="contacto_cliente"
+                     placeholder="Nombre del contacto">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Teléfono de contacto</label>
+              <input type="tel" class="form-control" formControlName="telefono_contacto"
+                     placeholder="Teléfono">
+            </div>
+          </div>
+
+          <!-- Notas internas -->
+          <div class="mb-4">
+            <label class="form-label">Notas internas</label>
+            <textarea class="form-control" formControlName="notas_internas" rows="3"
+                      placeholder="Notas o instrucciones especiales para el técnico..."></textarea>
+          </div>
+
+          <!-- Botones -->
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="loading()">
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              {{ isEditMode() ? 'Guardar Cambios' : 'Crear Mantenimiento' }}
+            </button>
+          </div>
+        </form>
+      }
+    </app-card>
+  </div>
+
+  <!-- Panel lateral de ayuda -->
+  <div class="col-12 col-lg-4">
+    <app-card cardTitle="Información" [options]="false">
+      <div class="help-content">
+        <h6><i class="feather icon-info text-primary me-2"></i>Tipos de Mantenimiento</h6>
+        <ul class="list-unstyled small text-muted">
+          <li class="mb-2">
+            <strong>Preventivo:</strong> Revisión programada para evitar fallas.
+          </li>
+          <li class="mb-2">
+            <strong>Correctivo:</strong> Reparación de una falla existente.
+          </li>
+          <li class="mb-2">
+            <strong>Actualización:</strong> Instalación de nuevas versiones.
+          </li>
+        </ul>
+
+        <hr>
+
+        <h6><i class="feather icon-check-square text-success me-2"></i>Checklist</h6>
+        <p class="small text-muted">
+          Al seleccionar un template, los items se copiarán automáticamente
+          y podrás ejecutarlos durante el mantenimiento.
+        </p>
+
+        <hr>
+
+        <h6><i class="feather icon-calendar text-warning me-2"></i>Programación</h6>
+        <p class="small text-muted">
+          Selecciona la fecha y hora en que se realizará el mantenimiento.
+          El técnico asignado recibirá una notificación.
+        </p>
+      </div>
+    </app-card>
+  </div>
+</div>

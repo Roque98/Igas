@@ -54,6 +54,9 @@
         <button class="btn btn-outline-success" (click)="openAgregarNotaModal(agregarNotaModal)">
           <i class="feather icon-message-square me-1"></i> Agregar Nota
         </button>
+        <button class="btn btn-outline-danger" (click)="openEscalarModal(escalarModal)" ngbTooltip="Escalar a otra área">
+          <i class="feather icon-trending-up me-1"></i> Escalar
+        </button>
         <div class="btn-group">
           <button class="btn btn-outline-secondary" (click)="fileInput.click()">
             <i class="feather icon-paperclip me-1"></i> Adjuntar
@@ -394,6 +397,82 @@
         <span class="spinner-border spinner-border-sm me-1"></span>
       }
       Agregar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Escalar Ticket -->
+<ng-template #escalarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="feather icon-trending-up me-2"></i>
+      Escalar Ticket a Caso
+    </h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-info py-2 mb-3">
+      <i class="feather icon-info me-1"></i>
+      Se creará un caso para seguimiento por el área especializada.
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Área destino *</label>
+      <select
+        class="form-select"
+        [ngModel]="escalarAreaDestino()"
+        (ngModelChange)="escalarAreaDestino.set($event)"
+      >
+        <option [ngValue]="null">Selecciona un área...</option>
+        @for (area of areasDestino; track area.value) {
+          <option [ngValue]="area.value">{{ area.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo *</label>
+      <select
+        class="form-select"
+        [ngModel]="escalarMotivo()"
+        (ngModelChange)="escalarMotivo.set($event)"
+      >
+        <option [ngValue]="null">Selecciona un motivo...</option>
+        @for (motivo of motivosEscalamiento; track motivo.value) {
+          <option [ngValue]="motivo.value">{{ motivo.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Descripción del problema (opcional)</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        placeholder="Describe el problema a resolver..."
+        [ngModel]="escalarDescripcion()"
+        (ngModelChange)="escalarDescripcion.set($event)"
+      ></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Fecha de compromiso (opcional)</label>
+      <input
+        type="datetime-local"
+        class="form-control"
+        [ngModel]="escalarFechaCompromiso()"
+        (ngModelChange)="escalarFechaCompromiso.set($event)"
+      />
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirmEscalar()"
+      [disabled]="savingAction() || !escalarAreaDestino() || !escalarMotivo()"
+    >
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Escalar Ticket
     </button>
   </div>
 </ng-template>

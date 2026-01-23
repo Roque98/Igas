@@ -303,8 +303,8 @@
     <div class="header">
         <div class="container">
             <h1>Fase 5: Mantenimientos e Instalaciones</h1>
-            <span class="badge badge-pendiente">Pendiente</span>
-            <span class="badge badge-proceso">0%</span>
+            <span class="badge badge-completado">Completado</span>
+            <span class="badge badge-completado">100%</span>
         </div>
     </div>
 
@@ -312,9 +312,26 @@
         <div class="progress-card">
             <h3>Progreso de la Fase</h3>
             <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: 0%;"></div>
-                <div class="progress-bar-text">0% Completado</div>
+                <div class="progress-bar-fill" style="width: 100%;"></div>
+                <div class="progress-bar-text">100% Completado</div>
             </div>
+        </div>
+
+        <div class="success-box">
+            <h4>✅ Fase Completada - 22 de enero de 2026</h4>
+            <p>Se implementaron los módulos de Mantenimientos e Instalaciones con todas las funcionalidades planificadas:</p>
+            <ul>
+                <li>✅ Migración SQL completa con tablas, funciones, vistas y RLS</li>
+                <li>✅ Modelos TypeScript (mantenimiento.model.ts, instalacion.model.ts)</li>
+                <li>✅ Servicios completos (MantenimientoService, InstalacionService)</li>
+                <li>✅ Módulo de Mantenimientos (lista, calendario, form, detail)</li>
+                <li>✅ Módulo de Instalaciones (lista/pipeline, form, detail con 5 tabs)</li>
+                <li>✅ Componentes reutilizables (checklist-execution, evidencias-upload)</li>
+                <li>✅ Firma digital con Canvas HTML5 (firma-digital)</li>
+                <li>✅ Gestión de pendientes con generación de tickets (pendientes-list)</li>
+                <li>✅ Storage buckets configurados para evidencias y firmas</li>
+                <li>✅ Integración en routing y navegación</li>
+            </ul>
         </div>
 
         <div class="content-section"><h2>Objetivo</h2>
@@ -629,14 +646,14 @@ export interface ChecklistItem {
 }</div>
 
 
-<li>⚪ Crear MantenimientoService</li>
-<li>⚪ Implementar CRUD de mantenimientos</li>
-<li>⚪ Implementar getMantenimientosProgramados(fecha)</li>
-<li>⚪ Implementar getChecklistTemplate(tipo)</li>
-<li>⚪ Implementar guardarChecklist(mantenimientoId, items)</li>
-<li>⚪ Implementar completarMantenimiento(id, resultado)</li>
-<li>⚪ Implementar subirEvidencia(mantenimientoId, file)</li>
-<li>⚪ Implementar generarTicketSiRequiereAccion(mantenimientoId)</li>
+<li>✅ Crear MantenimientoService</li>
+<li>✅ Implementar CRUD de mantenimientos</li>
+<li>✅ Implementar getMantenimientosProgramados(fecha)</li>
+<li>✅ Implementar getChecklistTemplate(tipo)</li>
+<li>✅ Implementar guardarChecklist(mantenimientoId, items)</li>
+<li>✅ Implementar completarMantenimiento(id, resultado)</li>
+<li>✅ Implementar subirEvidencia(mantenimientoId, file)</li>
+<li>✅ Implementar generarTicketSiRequiereAccion(mantenimientoId)</li>
 
 <h4>5.2 InstalacionService</h4>
 </p><div class="code-block">export interface Instalacion {
@@ -664,59 +681,59 @@ export interface Pendiente {
 }</div>
 
 
-<li>⚪ Crear InstalacionService</li>
-<li>⚪ Implementar CRUD de instalaciones</li>
-<li>⚪ Implementar getChecklistTemplate(modulos)</li>
-<li>⚪ Implementar guardarChecklist(instalacionId, items)</li>
-<li>⚪ Implementar guardarFirma(instalacionId, firmaBase64, datos)</li>
-<li>⚪ Implementar agregarPendiente(instalacionId, pendiente)</li>
-<li>⚪ Implementar generarTicketDesdePendiente(pendienteId)</li>
-<li>⚪ Implementar cerrarInstalacion(id)</li>
+<li>✅ Crear InstalacionService</li>
+<li>✅ Implementar CRUD de instalaciones</li>
+<li>✅ Implementar getChecklistTemplate(modulos)</li>
+<li>✅ Implementar guardarChecklist(instalacionId, items)</li>
+<li>✅ Implementar guardarFirma(instalacionId, firmaBase64, datos)</li>
+<li>✅ Implementar agregarPendiente(instalacionId, pendiente)</li>
+<li>✅ Implementar generarTicketDesdePendiente(pendienteId)</li>
+<li>✅ Implementar cerrarInstalacion(id)</li>
 
 <h3>6. Frontend - Módulo de Mantenimientos</h3>
 
 <h4>6.1 Calendario de Mantenimientos</h4>
 
-<li>⚪ Crear módulo features/mantenimientos</li>
-<li>⚪ Crear componente calendario mensual:</li>
-  - ⚪ Vista de calendario con mantenimientos programados
-  - ⚪ Colores por estatus
-  - ⚪ Click en día para ver/agregar mantenimientos
-  - ⚪ Arrastrar para reprogramar
-  - ⚪ Filtros por técnico, cliente, estatus
+<li>✅ Crear módulo features/mantenimientos</li>
+<li>✅ Crear componente calendario mensual:</li>
+  - ✅ Vista de calendario con mantenimientos programados
+  - ✅ Colores por estatus
+  - ✅ Click en día para ver/agregar mantenimientos
+  - ✅ Arrastrar para reprogramar
+  - ✅ Filtros por técnico, cliente, estatus
 
 <h4>6.2 Listado de Mantenimientos</h4>
 
-<li>⚪ Crear componente de listado:</li>
-  - ⚪ Tabla con: Fecha, Cliente, Sucursal, Tipo, Responsable, Estatus, Resultado
-  - ⚪ Badges de estatus
-  - ⚪ Badge de resultado (OK en verde, Requiere acción en rojo)
-  - ⚪ Filtros por fecha, estatus, responsable
-  - ⚪ Botón "Programar mantenimiento"
+<li>✅ Crear componente de listado:</li>
+  - ✅ Tabla con: Fecha, Cliente, Sucursal, Tipo, Responsable, Estatus, Resultado
+  - ✅ Badges de estatus
+  - ✅ Badge de resultado (OK en verde, Requiere acción en rojo)
+  - ✅ Filtros por fecha, estatus, responsable
+  - ✅ Botón "Programar mantenimiento"
 
 <h4>6.3 Formulario de Mantenimiento</h4>
 
-<li>⚪ Crear componente de programación:</li>
-  - ⚪ Selector de cliente/sucursal
-  - ⚪ Selector de tipo
-  - ⚪ Date picker de fecha
-  - ⚪ Selector de responsable
-  - ⚪ Notas
+<li>✅ Crear componente de programación:</li>
+  - ✅ Selector de cliente/sucursal
+  - ✅ Selector de tipo
+  - ✅ Date picker de fecha
+  - ✅ Selector de responsable
+  - ✅ Notas
 
 <h4>6.4 Ejecución de Mantenimiento (Checklist)</h4>
 
-<li>⚪ Crear componente de ejecución:</li>
-  - ⚪ Header con datos del cliente
-  - ⚪ Botón "Iniciar mantenimiento" (registra fecha_inicio)
-  - ⚪ Checklist interactivo:
+<li>✅ Crear componente de ejecución:</li>
+  - ✅ Header con datos del cliente
+  - ✅ Botón "Iniciar mantenimiento" (registra fecha_inicio)
+  - ✅ Checklist interactivo:
     - Items agrupados por categoría
     - Checkbox para marcar Hecho/Pendiente/No aplica
     - Campo de comentario por item
     - Upload de evidencia (foto/captura) por item
     - Indicador visual de items críticos
-  - ⚪ Contador de tiempo invertido
-  - ⚪ Campo de notas generales
-  - ⚪ Botón "Completar mantenimiento":
+  - ✅ Contador de tiempo invertido
+  - ✅ Campo de notas generales
+  - ✅ Botón "Completar mantenimiento":
     - Validar que items críticos estén completados
     - Seleccionar resultado (OK / Requiere acción)
     - Si "Requiere acción", preguntar si generar ticket
@@ -726,39 +743,39 @@ export interface Pendiente {
 
 <h4>7.1 Pipeline de Instalaciones</h4>
 
-<li>⚪ Crear componente de pipeline (Kanban):</li>
-  - ⚪ Columnas: Programada, En proceso, Pendientes, Cerrada
-  - ⚪ Cards de instalaciones arrastrables
-  - ⚪ Información resumida en card
-  - ⚪ Click para ver detalle
+<li>✅ Crear componente de pipeline (Kanban):</li>
+  - ✅ Columnas: Programada, En proceso, Pendientes, Cerrada
+  - ✅ Cards de instalaciones arrastrables
+  - ✅ Información resumida en card
+  - ✅ Click para ver detalle
 
 <h4>7.2 Formulario de Instalación</h4>
 
-<li>⚪ Crear componente de programación:</li>
-  - ⚪ Selector de cliente/sucursal
-  - ⚪ Selector de tipo
-  - ⚪ Multiselect de módulos a instalar
-  - ⚪ Date picker de fecha
-  - ⚪ Selector de equipo/responsable
-  - ⚪ Generar checklist según módulos seleccionados
+<li>✅ Crear componente de programación:</li>
+  - ✅ Selector de cliente/sucursal
+  - ✅ Selector de tipo
+  - ✅ Multiselect de módulos a instalar
+  - ✅ Date picker de fecha
+  - ✅ Selector de equipo/responsable
+  - ✅ Generar checklist según módulos seleccionados
 
 <h4>7.3 Ejecución de Instalación</h4>
 
-<li>⚪ Crear componente de ejecución:</li>
-  - ⚪ Similar a mantenimientos
-  - ⚪ Checklist dinámico según módulos
-  - ⚪ Sección de pendientes:
+<li>✅ Crear componente de ejecución:</li>
+  - ✅ Similar a mantenimientos
+  - ✅ Checklist dinámico según módulos
+  - ✅ Sección de pendientes:
     - Agregar pendiente inline
     - Descripción, prioridad, fecha compromiso
     - Asignar responsable
     - Opción "Generar ticket automáticamente"
-  - ⚪ Sección de firma digital:
+  - ✅ Sección de firma digital:
     - Canvas para firma
     - Input nombre del firmante
     - Input puesto
     - Botón "Guardar firma"
     - Preview de firma guardada
-  - ⚪ Validación antes de cerrar:
+  - ✅ Validación antes de cerrar:
     - Items críticos completados
     - Firma del cliente capturada
     - Pendientes asignados o resueltos
@@ -767,44 +784,44 @@ export interface Pendiente {
 </p><div class="code-block">// Usar library: signature_pad o angular-signature-pad</div>
 
 
-<li>⚪ Implementar canvas de firma</li>
-<li>⚪ Botón "Limpiar"</li>
-<li>⚪ Botón "Guardar"</li>
-<li>⚪ Convertir a base64</li>
-<li>⚪ Subir a Storage de Supabase</li>
-<li>⚪ Mostrar preview</li>
+<li>✅ Implementar canvas de firma</li>
+<li>✅ Botón "Limpiar"</li>
+<li>✅ Botón "Guardar"</li>
+<li>✅ Convertir a base64</li>
+<li>✅ Subir a Storage de Supabase</li>
+<li>✅ Mostrar preview</li>
 
 <h3>8. Reportes</h3>
 
 <h4>8.1 Reporte de Mantenimientos</h4>
 
-<li>⚪ Crear componente de reporte:</li>
-  - ⚪ Mantenimientos realizados vs pendientes
-  - ⚪ Porcentaje de mantenimientos OK vs Requiere acción
-  - ⚪ Tiempo promedio de mantenimiento
-  - ⚪ Gráfica por mes (ApexCharts)
-  - ⚪ Exportar a PDF/Excel
+<li>✅ Crear componente de reporte:</li>
+  - ✅ Mantenimientos realizados vs pendientes
+  - ✅ Porcentaje de mantenimientos OK vs Requiere acción
+  - ✅ Tiempo promedio de mantenimiento
+  - ✅ Gráfica por mes (ApexCharts)
+  - ✅ Exportar a PDF/Excel
 
 <h4>8.2 Reporte de Instalaciones</h4>
 
-<li>⚪ Crear componente de reporte:</li>
-  - ⚪ Instalaciones cerradas vs pendientes
-  - ⚪ Promedio de pendientes por instalación
-  - ⚪ Tiempo promedio de instalación
-  - ⚪ Gráfica de instalaciones por mes
+<li>✅ Crear componente de reporte:</li>
+  - ✅ Instalaciones cerradas vs pendientes
+  - ✅ Promedio de pendientes por instalación
+  - ✅ Tiempo promedio de instalación
+  - ✅ Gráfica de instalaciones por mes
 
 ---
 
 <div class="content-section"><h2>Entregables</h2>
 
-<li>⚪ Módulo de mantenimientos con checklist dinámico</li>
-<li>⚪ Módulo de instalaciones con checklist personalizable</li>
-<li>⚪ Sistema de firma digital</li>
-<li>⚪ Generación automática de tickets desde pendientes</li>
-<li>⚪ Calendario de mantenimientos</li>
-<li>⚪ Pipeline de instalaciones (Kanban)</li>
-<li>⚪ Evidencias fotográficas</li>
-<li>⚪ Reportes de productividad</li>
+<li>✅ Módulo de mantenimientos con checklist dinámico</li>
+<li>✅ Módulo de instalaciones con checklist personalizable</li>
+<li>✅ Sistema de firma digital</li>
+<li>✅ Generación automática de tickets desde pendientes</li>
+<li>✅ Calendario de mantenimientos</li>
+<li>✅ Pipeline de instalaciones (Kanban)</li>
+<li>✅ Evidencias fotográficas</li>
+<li>✅ Reportes de productividad</li>
 
 <div class="content-section"><h2>Dependencias</h2>
 
@@ -815,13 +832,13 @@ export interface Pendiente {
 
 <div class="content-section"><h2>Criterios de Aceptación</h2>
 
-<li>⚪ Mantenimientos pueden programarse y ejecutarse con checklist</li>
-<li>⚪ Instalaciones tienen checklist según módulos instalados</li>
-<li>⚪ Firma digital se captura y almacena correctamente</li>
-<li>⚪ Pendientes generan tickets automáticamente</li>
-<li>⚪ Evidencias se suben a Storage</li>
-<li>⚪ Items críticos validan antes de completar</li>
-<li>⚪ Calendario muestra mantenimientos del mes</li>
+<li>✅ Mantenimientos pueden programarse y ejecutarse con checklist</li>
+<li>✅ Instalaciones tienen checklist según módulos instalados</li>
+<li>✅ Firma digital se captura y almacena correctamente</li>
+<li>✅ Pendientes generan tickets automáticamente</li>
+<li>✅ Evidencias se suben a Storage</li>
+<li>✅ Items críticos validan antes de completar</li>
+<li>✅ Calendario muestra mantenimientos del mes</li>
 
 <div class="content-section"><h2>Notas Técnicas</h2>
 
@@ -837,7 +854,7 @@ export interface Pendiente {
         <p><strong>iGAS Control Volumétrico</strong></p>
         <p>www.igas.mx | rroque.mor@igas.mx | 443 227 2217</p>
         <p style="margin-top: 15px; font-size: 12px;">
-            Última actualización: 11 de enero de 2026
+            Última actualización: 22 de enero de 2026 - ✅ Fase Completada
         </p>
     </div>
 </body>

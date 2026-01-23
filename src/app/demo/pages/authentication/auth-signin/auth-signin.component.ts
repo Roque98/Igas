@@ -8,6 +8,7 @@ import { email, Field, form, minLength, required } from '@angular/forms/signals'
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { AuditService } from 'src/app/core/services/audit.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 import { emailFormat as validateEmailFormat, noWhitespace as validateNoWhitespace } from 'src/app/core/validators/custom-validators';
 
@@ -22,6 +23,7 @@ export class AuthSigninComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private notificationService = inject(NotificationService);
+  private auditService = inject(AuditService);
 
   private readonly REMEMBER_EMAIL_KEY = 'igas_remember_email';
 
@@ -113,29 +115,51 @@ export class AuthSigninComponent implements OnInit {
       const { data, error } = await this.supabase.signIn(credentials.email, credentials.password);
 
       if (error) {
-        // Record failed attempt
-        await this.supabase.recordFailedAttempt(
-          credentials.email,
-          error.code || 'unknown',
-          error.message || 'Login failed'
-        );
+        const errorMessage = error.message?.toLowerCase() || '';
 
-        // Get remaining attempts to show warning
-        const remainingAttempts = await this.supabase.getRemainingAttempts(credentials.email);
+        // Errores que NO deben contar como intentos fallidos
+        const isNonCredentialError =
+          errorMessage.includes('email not confirmed') ||
+          errorMessage.includes('email_not_confirmed');
 
-        if (remainingAttempts <= 0) {
-          // User just got blocked
-          this.error.set(ErrorMessages.userBlocked(15));
-        } else if (remainingAttempts <= 3) {
-          // Show warning with remaining attempts
-          this.error.set(ErrorMessages.remainingAttempts(remainingAttempts));
-        } else {
-          // Normal error message
+        if (isNonCredentialError) {
+          // Mostrar mensaje específico sin registrar intento fallido
           this.error.set(getErrorMessage(error));
+          console.error('Login error:', error);
+        } else {
+          // Record failed attempt solo para errores de credenciales
+          await this.supabase.recordFailedAttempt(
+            credentials.email,
+            error.code || 'unknown',
+            error.message || 'Login failed'
+          );
+
+          // Log failed login to session log
+          this.auditService.logSessionEvent('login_failed', undefined, credentials.email, {
+            error_code: error.code,
+            error_message: error.message
+          }).subscribe();
+
+          // Get remaining attempts to show warning
+          const remainingAttempts = await this.supabase.getRemainingAttempts(credentials.email);
+
+          if (remainingAttempts <= 0) {
+            // User just got blocked
+            this.error.set(ErrorMessages.userBlocked(15));
+          } else if (remainingAttempts <= 3) {
+            // Show warning with remaining attempts
+            this.error.set(ErrorMessages.remainingAttempts(remainingAttempts));
+          } else {
+            // Normal error message
+            this.error.set(getErrorMessage(error));
+          }
+          console.error('Login error:', error);
         }
-        console.error('Login error:', error);
       } else if (data.user) {
         console.log('User logged in successfully:', data.user);
+
+        // Log successful login to session log
+        this.auditService.logSessionEvent('login', data.user.id, credentials.email).subscribe();
 
         // Handle remember me
         if (this.rememberMe()) {

@@ -1,0 +1,438 @@
+<!-- Indicador de carga -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-2 text-muted">Cargando caso...</p>
+  </div>
+}
+
+<!-- Mensaje de error -->
+@if (error()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="feather icon-alert-circle me-2"></i>
+    {{ error() }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadCaso()">
+      <i class="feather icon-refresh-cw me-1"></i> Reintentar
+    </button>
+    <button class="btn btn-sm btn-outline-secondary ms-2" (click)="goBack()">
+      <i class="feather icon-arrow-left me-1"></i> Volver
+    </button>
+  </div>
+}
+
+<!-- Contenido del caso -->
+@if (!loading() && !error() && caso()) {
+  <div class="row">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+      <!-- Encabezado -->
+      <app-card [options]="false">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <button class="btn btn-link text-muted p-0 mb-2" (click)="goBack()">
+              <i class="feather icon-arrow-left me-1"></i> Volver al listado
+            </button>
+            <h4 class="mb-1">
+              <span class="badge me-2" [style.background-color]="getAreaColor(caso()!.area_destino)">
+                {{ caso()!.area_destino }}
+              </span>
+              {{ caso()!.folio }}
+            </h4>
+            <p class="text-muted mb-0">
+              <i [class]="'feather icon-' + getMotivoInfo(caso()!.motivo).icon + ' me-1'"></i>
+              {{ getMotivoInfo(caso()!.motivo).label }}
+            </p>
+          </div>
+          <div class="d-flex gap-2">
+            <app-prioridad-badge [prioridad]="caso()!.prioridad" size="medium"></app-prioridad-badge>
+            @if (caso()!.estatus_nombre) {
+              <span class="badge" [style.background-color]="caso()!.estatus_color || '#6c757d'">
+                {{ caso()!.estatus_nombre }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- SLA -->
+        <div class="mb-4">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <app-semaforo-badge
+              [semaforo]="caso()!.semaforo"
+              [porcentaje]="caso()!.porcentaje_sla"
+              size="medium"
+            ></app-semaforo-badge>
+            <app-progress-bar-sla
+              [porcentaje]="caso()!.porcentaje_sla || 0"
+              [semaforo]="caso()!.semaforo"
+              [showPercentage]="true"
+              class="flex-grow-1"
+            ></app-progress-bar-sla>
+          </div>
+          @if (caso()!.compromiso_vencido) {
+            <div class="alert alert-danger py-2 mb-0">
+              <i class="feather icon-alert-triangle me-2"></i>
+              Fecha de compromiso vencida
+            </div>
+          }
+        </div>
+
+        <!-- Descripción del problema -->
+        @if (caso()!.problema_descripcion) {
+          <div class="mb-4">
+            <h6 class="text-muted mb-2">Descripción del problema</h6>
+            <p class="mb-0">{{ caso()!.problema_descripcion }}</p>
+          </div>
+        }
+
+        <!-- Ticket origen -->
+        @if (caso()!.ticket_id) {
+          <div class="mb-4">
+            <h6 class="text-muted mb-2">Ticket origen</h6>
+            <div class="d-flex align-items-center gap-2">
+              <a [routerLink]="['/tickets', caso()!.ticket_id]" class="text-primary text-decoration-none">
+                <i class="feather icon-file-text me-1"></i>
+                {{ caso()!.ticket_folio || 'Ver ticket' }}
+              </a>
+              @if (caso()!.cliente_nombre) {
+                <span class="badge bg-light text-dark">
+                  {{ caso()!.cliente_nombre_comercial || caso()!.cliente_nombre }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Número de caso externo -->
+        @if (caso()!.numero_caso_externo) {
+          <div class="mb-4">
+            <h6 class="text-muted mb-2">Número de caso externo</h6>
+            <p class="mb-0 fw-medium">
+              <i class="feather icon-hash me-1"></i>
+              {{ caso()!.numero_caso_externo }}
+            </p>
+          </div>
+        }
+
+        <!-- Acciones -->
+        <div class="d-flex flex-wrap gap-2">
+          <button class="btn btn-outline-primary btn-sm" (click)="openAgregarNotaModal(notaModal)">
+            <i class="feather icon-message-square me-1"></i> Agregar nota
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" (click)="openCambiarEstatusModal(estatusModal)">
+            <i class="feather icon-refresh-cw me-1"></i> Cambiar estatus
+          </button>
+          <button class="btn btn-outline-info btn-sm" (click)="openAsignarModal(asignarModal)">
+            <i class="feather icon-user-check me-1"></i> Asignar
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" (click)="openNumeroCasoModal(numeroCasoModal)">
+            <i class="feather icon-hash me-1"></i> Número externo
+          </button>
+          @if (canMarkAsReady()) {
+            <button class="btn btn-success btn-sm" (click)="openMarcarListoModal(listoModal)">
+              <i class="feather icon-check-circle me-1"></i> Listo para validar
+            </button>
+          }
+          @if (canReturnToSupport()) {
+            <button class="btn btn-warning btn-sm" (click)="openRegresarSoporteModal(regresarModal)">
+              <i class="feather icon-corner-up-left me-1"></i> Regresar a soporte
+            </button>
+          }
+          @if (canClose()) {
+            <button class="btn btn-danger btn-sm" (click)="cerrarCaso()">
+              <i class="feather icon-x-circle me-1"></i> Cerrar caso
+            </button>
+          }
+        </div>
+      </app-card>
+
+      <!-- Bitácora -->
+      <app-card cardTitle="Bitácora" [options]="false">
+        @if (loadingBitacora()) {
+          <div class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          </div>
+        } @else if (bitacora().length === 0) {
+          <p class="text-muted text-center py-3 mb-0">Sin actividad registrada</p>
+        } @else {
+          <div class="timeline">
+            @for (entry of bitacora(); track entry.id) {
+              <div class="timeline-item">
+                <div class="timeline-icon" [style.background-color]="getBitacoraColor(entry.tipo)">
+                  <i [class]="'feather icon-' + getBitacoraIcon(entry.tipo)"></i>
+                </div>
+                <div class="timeline-content">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      @if (entry.usuario) {
+                        <span class="fw-medium">{{ entry.usuario.nombre_completo }}</span>
+                      }
+                      <span class="badge bg-light text-dark ms-2">{{ bitacoraTipos[entry.tipo]?.label || entry.tipo }}</span>
+                    </div>
+                    <small class="text-muted">{{ formatRelativeTime(entry.created_at) }}</small>
+                  </div>
+                  @if (entry.mensaje) {
+                    <p class="mb-0 mt-1">{{ entry.mensaje }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </app-card>
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+      <!-- Información -->
+      <app-card cardTitle="Información" [options]="false">
+        <dl class="row mb-0">
+          <dt class="col-5 text-muted">Creado</dt>
+          <dd class="col-7">{{ formatDate(caso()!.fecha_creacion) }}</dd>
+
+          <dt class="col-5 text-muted">Compromiso</dt>
+          <dd class="col-7" [class.text-danger]="caso()!.compromiso_vencido">
+            {{ caso()!.fecha_compromiso ? formatDate(caso()!.fecha_compromiso) : '-' }}
+          </dd>
+
+          <dt class="col-5 text-muted">SLA objetivo</dt>
+          <dd class="col-7">{{ caso()!.sla_objetivo_minutos }} min</dd>
+
+          @if (caso()!.fecha_primera_respuesta) {
+            <dt class="col-5 text-muted">Primera resp.</dt>
+            <dd class="col-7">{{ formatDate(caso()!.fecha_primera_respuesta) }}</dd>
+          }
+
+          @if (caso()!.fecha_resolucion) {
+            <dt class="col-5 text-muted">Resolución</dt>
+            <dd class="col-7">{{ formatDate(caso()!.fecha_resolucion) }}</dd>
+          }
+
+          <dt class="col-5 text-muted">Creador</dt>
+          <dd class="col-7">{{ caso()!.creador_nombre || '-' }}</dd>
+        </dl>
+      </app-card>
+
+      <!-- Responsable -->
+      <app-card cardTitle="Responsable" [options]="false">
+        @if (caso()!.responsable_nombre) {
+          <div class="d-flex align-items-center">
+            <img
+              [src]="caso()!.responsable_avatar || 'assets/images/user/avatar-1.jpg'"
+              class="rounded-circle me-3"
+              width="48"
+              height="48"
+              [alt]="caso()!.responsable_nombre"
+              style="object-fit: cover;"
+            />
+            <div>
+              <p class="mb-0 fw-medium">{{ caso()!.responsable_nombre }}</p>
+              <small class="text-muted">Responsable del caso</small>
+            </div>
+          </div>
+        } @else {
+          <div class="text-center py-3">
+            <i class="feather icon-user-x text-muted" style="font-size: 24px;"></i>
+            <p class="text-muted mb-2 mt-2">Sin asignar</p>
+            <button class="btn btn-sm btn-outline-primary" (click)="openAsignarModal(asignarModal)">
+              Asignar responsable
+            </button>
+          </div>
+        }
+      </app-card>
+
+      <!-- Adjuntos -->
+      <app-card cardTitle="Adjuntos" [options]="false">
+        <div class="mb-3">
+          <label class="btn btn-sm btn-outline-primary w-100">
+            <i class="feather icon-upload me-1"></i> Subir archivo
+            <input type="file" class="d-none" (change)="onFileSelected($event)" />
+          </label>
+        </div>
+
+        @if (adjuntos().length === 0) {
+          <p class="text-muted text-center mb-0 small">Sin adjuntos</p>
+        } @else {
+          <ul class="list-unstyled mb-0">
+            @for (adj of adjuntos(); track adj.id) {
+              <li class="d-flex align-items-center py-2 border-bottom">
+                <i [class]="'feather icon-' + getFileIcon(adj.tipo_archivo) + ' me-2 text-muted'"></i>
+                <div class="flex-grow-1 min-width-0">
+                  <p class="mb-0 text-truncate small">{{ adj.nombre_archivo }}</p>
+                  <small class="text-muted">{{ formatFileSize(adj.tamanio_bytes) }}</small>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </app-card>
+    </div>
+  </div>
+}
+
+<!-- Modal: Agregar Nota -->
+<ng-template #notaModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Agregar nota</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Nota</label>
+      <textarea
+        class="form-control"
+        rows="4"
+        placeholder="Escribe una nota..."
+        [ngModel]="nuevaNota()"
+        (ngModelChange)="nuevaNota.set($event)"
+      ></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="confirmAgregarNota()" [disabled]="savingAction() || !nuevaNota().trim()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Agregar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal: Cambiar Estatus -->
+<ng-template #estatusModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Cambiar estatus</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Nuevo estatus</label>
+      <select class="form-select" [ngModel]="nuevoEstatusId()" (ngModelChange)="nuevoEstatusId.set($event)">
+        @for (est of estatus(); track est.id) {
+          <option [ngValue]="est.id">{{ est.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nota (opcional)</label>
+      <textarea class="form-control" rows="3" [ngModel]="notaCambioEstatus()" (ngModelChange)="notaCambioEstatus.set($event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="confirmCambiarEstatus()" [disabled]="savingAction()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Cambiar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal: Asignar -->
+<ng-template #asignarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Asignar caso</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Responsable</label>
+      <select class="form-select" [ngModel]="nuevoResponsableId()" (ngModelChange)="nuevoResponsableId.set($event)">
+        <option [ngValue]="null">Selecciona un usuario</option>
+        @for (user of usuarios(); track user.id) {
+          <option [ngValue]="user.id">{{ user.nombre_completo }}</option>
+        }
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo (opcional)</label>
+      <textarea class="form-control" rows="2" [ngModel]="motivoAsignacion()" (ngModelChange)="motivoAsignacion.set($event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="confirmAsignar()" [disabled]="savingAction() || !nuevoResponsableId()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Asignar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal: Número de Caso Externo -->
+<ng-template #numeroCasoModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Número de caso externo</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Número de caso del proveedor/externo</label>
+      <input type="text" class="form-control" placeholder="Ej: PROV-12345" [ngModel]="numeroCasoExterno()" (ngModelChange)="numeroCasoExterno.set($event)" />
+      <small class="text-muted">Número de referencia del caso en el sistema externo</small>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary" (click)="confirmNumeroCaso()" [disabled]="savingAction() || !numeroCasoExterno().trim()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Guardar
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal: Marcar Listo para Validar -->
+<ng-template #listoModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Marcar como listo para validar</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Notas de resolución *</label>
+      <textarea class="form-control" rows="4" placeholder="Describe la solución aplicada..." [ngModel]="notasResolucion()" (ngModelChange)="notasResolucion.set($event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-success" (click)="confirmMarcarListo()" [disabled]="savingAction() || !notasResolucion().trim()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Marcar listo
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal: Regresar a Soporte -->
+<ng-template #regresarModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Regresar a soporte</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="alert alert-warning py-2">
+      <i class="feather icon-alert-triangle me-1"></i>
+      El caso será devuelto al equipo de soporte para seguimiento.
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Motivo del regreso *</label>
+      <textarea class="form-control" rows="3" placeholder="Explica por qué el caso regresa a soporte..." [ngModel]="motivoRegreso()" (ngModelChange)="motivoRegreso.set($event)"></textarea>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-warning" (click)="confirmRegresarSoporte()" [disabled]="savingAction() || !motivoRegreso().trim()">
+      @if (savingAction()) {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+      }
+      Regresar
+    </button>
+  </div>
+</ng-template>

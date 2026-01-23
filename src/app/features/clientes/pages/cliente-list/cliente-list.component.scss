@@ -1,0 +1,45 @@
+// ============================================================================
+// Cliente List Component Styles
+// ============================================================================
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  i {
+    font-size: 12px;
+    margin-left: 4px;
+    opacity: 0.5;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.04);
+  }
+}
+
+.badge-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.table {
+  th, td {
+    vertical-align: middle;
+  }
+}
+
+.btn-group-sm {
+  .btn {
+    padding: 0.25rem 0.5rem;
+  }
+}

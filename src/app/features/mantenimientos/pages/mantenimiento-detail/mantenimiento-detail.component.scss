@@ -1,0 +1,29 @@
+.badge-lg {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.table-borderless td {
+  padding: 0.5rem 0;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+
+  .nav-link {
+    border: none;
+    color: #6c757d;
+    padding: 0.75rem 1rem;
+
+    &.active {
+      color: #04a9f5;
+      border-bottom: 2px solid #04a9f5;
+      margin-bottom: -2px;
+    }
+
+    &:hover:not(.active) {
+      border-bottom: 2px solid #dee2e6;
+      margin-bottom: -2px;
+    }
+  }
+}

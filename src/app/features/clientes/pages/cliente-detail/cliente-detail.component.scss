@@ -1,0 +1,71 @@
+// ============================================================================
+// Cliente Detail Component Styles
+// ============================================================================
+
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.bg-light-primary {
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  color: var(--bs-primary);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+    color: var(--bs-primary);
+  }
+}
+
+.card {
+  &.border-primary {
+    border-width: 2px;
+  }
+
+  &.border-success,
+  &.border-warning,
+  &.border-danger {
+    border-width: 2px;
+  }
+}
+
+dl {
+  dt {
+    font-weight: 500;
+    color: #6c757d;
+  }
+
+  dd {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.nav-tabs {
+  .nav-link {
+    color: #6c757d;
+
+    &.active {
+      color: var(--bs-primary);
+      font-weight: 500;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+    }
+  }
+}
+
+.table {
+  th, td {
+    vertical-align: middle;
+  }
+}
+
+.progress {
+  border-radius: 4px;
+}

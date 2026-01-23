@@ -4,6 +4,67 @@
 -- Descripción: Habilita y configura políticas de seguridad a nivel de fila
 -- ============================================================================
 
+-- ============================================================================
+-- FUNCIONES HELPER CON SECURITY DEFINER
+-- ============================================================================
+-- Estas funciones evitan recursión infinita al verificar roles dentro de policies
+
+-- Función para verificar si el usuario actual es Administrador
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles p
+    INNER JOIN public.roles r ON p.rol_id = r.id
+    WHERE p.id = auth.uid()
+    AND r.nombre = 'Administrador'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- Función para verificar si el usuario actual es Supervisor
+CREATE OR REPLACE FUNCTION public.is_supervisor()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles p
+    INNER JOIN public.roles r ON p.rol_id = r.id
+    WHERE p.id = auth.uid()
+    AND r.nombre = 'Supervisor'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- Función para verificar si el usuario es Admin o Supervisor
+CREATE OR REPLACE FUNCTION public.is_admin_or_supervisor()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles p
+    INNER JOIN public.roles r ON p.rol_id = r.id
+    WHERE p.id = auth.uid()
+    AND r.nombre IN ('Administrador', 'Supervisor')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- Función para verificar si el usuario tiene un rol específico
+CREATE OR REPLACE FUNCTION public.has_role(role_name TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles p
+    INNER JOIN public.roles r ON p.rol_id = r.id
+    WHERE p.id = auth.uid()
+    AND r.nombre = role_name
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- ============================================================================
+-- HABILITAR RLS EN TABLAS
+-- ============================================================================
+
 -- Habilitar RLS en tablas de catálogo
 ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.equipos ENABLE ROW LEVEL SECURITY;
@@ -23,7 +84,10 @@ ALTER TABLE public.ticket_adjuntos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_bitacora ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_historial_asignaciones ENABLE ROW LEVEL SECURITY;
 
--- Policies para profiles
+-- ============================================================================
+-- POLICIES PARA PROFILES
+-- ============================================================================
+
 CREATE POLICY "Users can view own profile"
   ON public.profiles FOR SELECT
   USING (auth.uid() = id);
@@ -36,15 +100,12 @@ CREATE POLICY "Users can update own profile"
 -- Admins pueden ver y gestionar todos los perfiles
 CREATE POLICY "Admins can view all profiles"
   ON public.profiles FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
--- Policies para tickets (básicas, se refinan en siguiente fase)
+-- ============================================================================
+-- POLICIES PARA TICKETS
+-- ============================================================================
+
 CREATE POLICY "Users can view tickets assigned to them"
   ON public.tickets FOR SELECT
   USING (
@@ -59,16 +120,10 @@ CREATE POLICY "Users can view tickets assigned to them"
 -- Admins pueden ver todos los tickets
 CREATE POLICY "Admins can view all tickets"
   ON public.tickets FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- ============================================================================
--- Policies para CATÁLOGOS (solo lectura para todos, admins pueden todo)
+-- POLICIES PARA CATÁLOGOS (solo lectura para todos, admins pueden todo)
 -- ============================================================================
 
 -- Roles
@@ -78,13 +133,7 @@ CREATE POLICY "Authenticated users can view roles"
 
 CREATE POLICY "Admins can manage roles"
   ON public.roles FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- Equipos
 CREATE POLICY "Authenticated users can view equipos"
@@ -93,13 +142,7 @@ CREATE POLICY "Authenticated users can view equipos"
 
 CREATE POLICY "Admins can manage equipos"
   ON public.equipos FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- Horarios
 CREATE POLICY "Authenticated users can view horarios"
@@ -108,13 +151,7 @@ CREATE POLICY "Authenticated users can view horarios"
 
 CREATE POLICY "Admins can manage horarios"
   ON public.horarios FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- Categorías de Servicio
 CREATE POLICY "Authenticated users can view categorias_servicio"
@@ -123,13 +160,7 @@ CREATE POLICY "Authenticated users can view categorias_servicio"
 
 CREATE POLICY "Admins can manage categorias_servicio"
   ON public.categorias_servicio FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- Estatus de Tickets
 CREATE POLICY "Authenticated users can view estatus_tickets"
@@ -138,16 +169,10 @@ CREATE POLICY "Authenticated users can view estatus_tickets"
 
 CREATE POLICY "Admins can manage estatus_tickets"
   ON public.estatus_tickets FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
-  );
+  USING (public.is_admin());
 
 -- ============================================================================
--- Policies para CLIENTES Y SUCURSALES
+-- POLICIES PARA CLIENTES Y SUCURSALES
 -- ============================================================================
 
 -- Clientes - Todos los usuarios autenticados pueden ver
@@ -158,16 +183,7 @@ CREATE POLICY "Authenticated users can view clientes"
 -- Solo admins y supervisores pueden modificar clientes
 CREATE POLICY "Admins and supervisors can manage clientes"
   ON public.clientes FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (
-        SELECT id FROM public.roles
-        WHERE nombre IN ('Administrador', 'Supervisor')
-      )
-    )
-  );
+  USING (public.is_admin_or_supervisor());
 
 -- Sucursales - Todos los usuarios autenticados pueden ver
 CREATE POLICY "Authenticated users can view sucursales"
@@ -177,19 +193,10 @@ CREATE POLICY "Authenticated users can view sucursales"
 -- Solo admins y supervisores pueden modificar sucursales
 CREATE POLICY "Admins and supervisors can manage sucursales"
   ON public.sucursales FOR ALL
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (
-        SELECT id FROM public.roles
-        WHERE nombre IN ('Administrador', 'Supervisor')
-      )
-    )
-  );
+  USING (public.is_admin_or_supervisor());
 
 -- ============================================================================
--- Policies para TABLAS RELACIONADAS CON TICKETS
+-- POLICIES PARA TABLAS RELACIONADAS CON TICKETS
 -- ============================================================================
 
 -- Ticket Participantes
@@ -202,11 +209,7 @@ CREATE POLICY "Users can view ticket_participantes for their tickets"
       WHERE t.id = ticket_participantes.ticket_id
       AND (t.responsable_id = auth.uid() OR t.creado_por = auth.uid())
     )
-    OR EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
+    OR public.is_admin()
   );
 
 -- Ticket Adjuntos
@@ -223,11 +226,7 @@ CREATE POLICY "Users can view ticket_adjuntos for their tickets"
       SELECT 1 FROM public.ticket_participantes
       WHERE ticket_id = ticket_adjuntos.ticket_id AND usuario_id = auth.uid()
     )
-    OR EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
+    OR public.is_admin()
   );
 
 CREATE POLICY "Users can upload ticket_adjuntos for their tickets"
@@ -258,11 +257,7 @@ CREATE POLICY "Users can view ticket_bitacora for their tickets"
       SELECT 1 FROM public.ticket_participantes
       WHERE ticket_id = ticket_bitacora.ticket_id AND usuario_id = auth.uid()
     )
-    OR EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre = 'Administrador')
-    )
+    OR public.is_admin()
   );
 
 CREATE POLICY "Users can add ticket_bitacora entries for their tickets"
@@ -290,14 +285,12 @@ CREATE POLICY "Users can view ticket_historial_asignaciones for their tickets"
       WHERE t.id = ticket_historial_asignaciones.ticket_id
       AND (t.responsable_id = auth.uid() OR t.creado_por = auth.uid())
     )
-    OR EXISTS (
-      SELECT 1 FROM public.profiles
-      WHERE id = auth.uid()
-      AND rol_id IN (SELECT id FROM public.roles WHERE nombre IN ('Administrador', 'Supervisor'))
-    )
+    OR public.is_admin_or_supervisor()
   );
 
--- Verificación
+-- ============================================================================
+-- VERIFICACIÓN
+-- ============================================================================
 SELECT
   schemaname,
   tablename,
