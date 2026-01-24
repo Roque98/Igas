@@ -21,3 +21,6 @@ export * from './reporte.service';
 export * from './export.service';
 export * from './theme.service';
 export * from './logger.service';
+export * from './ticket.service';
+export * from './ticket-files.service';
+export * from './ticket-meta.service';

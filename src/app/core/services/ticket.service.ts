@@ -1,13 +1,19 @@
 // ============================================================================
 // Ticket Service
 // ============================================================================
-// Servicio para gestión de tickets de soporte con SLA
+// Servicio principal para gestión de tickets con SLA
+// Responsabilidad: CRUD y acciones sobre tickets
+//
+// Servicios relacionados:
+// - TicketFilesService: Bitácora y adjuntos
+// - TicketMetaService: Estadísticas, alertas y catálogos
 // ============================================================================
 
 import { Injectable, inject } from '@angular/core';
-import { Observable, from, map } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { SupabaseService } from './supabase.service';
-import { compressImage, IMAGE_PRESETS } from '../helpers/image.utils';
+import { TicketFilesService } from './ticket-files.service';
+import { TicketMetaService } from './ticket-meta.service';
 import {
   Ticket,
   TicketConSLA,
@@ -29,13 +35,15 @@ import {
   ServiceResponse
 } from '../models';
 import { environment } from '../../../environments/environment';
-import { TABLES, VIEWS, STORAGE_BUCKETS } from '../constants/tables';
+import { TABLES, VIEWS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService {
   private supabase = inject(SupabaseService);
+  private filesService = inject(TicketFilesService);
+  private metaService = inject(TicketMetaService);
 
   // ============================================================================
   // CRUD Operations
@@ -69,56 +77,7 @@ export class TicketService {
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
-    if (filters) {
-      if (filters.search) {
-        query = query.or(`folio.ilike.%${filters.search}%,titulo.ilike.%${filters.search}%,descripcion.ilike.%${filters.search}%`);
-      }
-      if (filters.folio) {
-        query = query.eq('folio', filters.folio);
-      }
-      if (filters.cliente_id) {
-        query = query.eq('cliente_id', filters.cliente_id);
-      }
-      if (filters.categoria_id) {
-        query = query.eq('categoria_id', filters.categoria_id);
-      }
-      if (filters.prioridad) {
-        query = query.eq('prioridad', filters.prioridad);
-      }
-      if (filters.estatus_id) {
-        query = query.eq('estatus_id', filters.estatus_id);
-      }
-      if (filters.estatus_ids && filters.estatus_ids.length > 0) {
-        query = query.in('estatus_id', filters.estatus_ids);
-      }
-      if (filters.responsable_id) {
-        query = query.eq('responsable_id', filters.responsable_id);
-      }
-      if (filters.equipo_id) {
-        query = query.eq('equipo_id', filters.equipo_id);
-      }
-      if (filters.semaforo) {
-        query = query.eq('semaforo', filters.semaforo);
-      }
-      if (filters.canal) {
-        query = query.eq('canal', filters.canal);
-      }
-      if (filters.fecha_desde) {
-        query = query.gte('fecha_creacion', filters.fecha_desde);
-      }
-      if (filters.fecha_hasta) {
-        query = query.lte('fecha_creacion', filters.fecha_hasta);
-      }
-      if (filters.solo_mis_tickets) {
-        const userId = this.supabase.user?.id;
-        if (userId) {
-          query = query.or(`responsable_id.eq.${userId},creado_por.eq.${userId}`);
-        }
-      }
-      if (filters.solo_sin_asignar) {
-        query = query.is('responsable_id', null);
-      }
-    }
+    query = this.applyFilters(query, filters);
 
     // Ordenamiento y paginación
     query = query
@@ -129,13 +88,7 @@ export class TicketService {
 
     if (error) {
       if (!environment.production) { console.error('Error fetching tickets:', error); }
-      return {
-        data: [],
-        total: 0,
-        page,
-        pageSize,
-        totalPages: 0
-      };
+      return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
 
     const total = count ?? 0;
@@ -146,6 +99,65 @@ export class TicketService {
       pageSize,
       totalPages: Math.ceil(total / pageSize)
     };
+  }
+
+  /**
+   * Aplica filtros a la query de tickets
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyFilters(query: any, filters?: TicketFilters): any {
+    if (!filters) return query;
+
+    if (filters.search) {
+      query = query.or(`folio.ilike.%${filters.search}%,titulo.ilike.%${filters.search}%,descripcion.ilike.%${filters.search}%`);
+    }
+    if (filters.folio) {
+      query = query.eq('folio', filters.folio);
+    }
+    if (filters.cliente_id) {
+      query = query.eq('cliente_id', filters.cliente_id);
+    }
+    if (filters.categoria_id) {
+      query = query.eq('categoria_id', filters.categoria_id);
+    }
+    if (filters.prioridad) {
+      query = query.eq('prioridad', filters.prioridad);
+    }
+    if (filters.estatus_id) {
+      query = query.eq('estatus_id', filters.estatus_id);
+    }
+    if (filters.estatus_ids && filters.estatus_ids.length > 0) {
+      query = query.in('estatus_id', filters.estatus_ids);
+    }
+    if (filters.responsable_id) {
+      query = query.eq('responsable_id', filters.responsable_id);
+    }
+    if (filters.equipo_id) {
+      query = query.eq('equipo_id', filters.equipo_id);
+    }
+    if (filters.semaforo) {
+      query = query.eq('semaforo', filters.semaforo);
+    }
+    if (filters.canal) {
+      query = query.eq('canal', filters.canal);
+    }
+    if (filters.fecha_desde) {
+      query = query.gte('fecha_creacion', filters.fecha_desde);
+    }
+    if (filters.fecha_hasta) {
+      query = query.lte('fecha_creacion', filters.fecha_hasta);
+    }
+    if (filters.solo_mis_tickets) {
+      const userId = this.supabase.user?.id;
+      if (userId) {
+        query = query.or(`responsable_id.eq.${userId},creado_por.eq.${userId}`);
+      }
+    }
+    if (filters.solo_sin_asignar) {
+      query = query.is('responsable_id', null);
+    }
+
+    return query;
   }
 
   /**
@@ -244,15 +256,12 @@ export class TicketService {
     }
 
     // Registrar en bitácora
-    await this.supabase.client
-      .from(TABLES.TICKET_BITACORA)
-      .insert({
-        ticket_id: data.id,
-        usuario_id: userId,
-        tipo: 'nota',
-        mensaje: 'Ticket creado',
-        datos_adicionales: { accion: 'creacion' }
-      });
+    await this.filesService.registrarEnBitacora(
+      data.id,
+      'nota',
+      'Ticket creado',
+      { accion: 'creacion' }
+    );
 
     return { data: data as Ticket, error: null, success: true };
   }
@@ -295,8 +304,6 @@ export class TicketService {
   }
 
   private async cambiarEstatusAsync(ticketId: string, dto: CambiarEstatusDTO): Promise<ServiceResponse<Ticket>> {
-    const userId = this.supabase.user?.id;
-
     // Actualizar ticket
     const { data, error } = await this.supabase.client
       .from(TABLES.TICKETS)
@@ -315,14 +322,7 @@ export class TicketService {
 
     // Si hay nota, agregarla
     if (dto.nota) {
-      await this.supabase.client
-        .from(TABLES.TICKET_BITACORA)
-        .insert({
-          ticket_id: ticketId,
-          usuario_id: userId,
-          tipo: 'nota',
-          mensaje: dto.nota
-        });
+      await this.filesService.registrarEnBitacora(ticketId, 'cambio_estatus', dto.nota);
     }
 
     return { data: data as Ticket, error: null, success: true };
@@ -336,8 +336,6 @@ export class TicketService {
   }
 
   private async asignarTicketAsync(ticketId: string, dto: AsignarTicketDTO): Promise<ServiceResponse<Ticket>> {
-    const userId = this.supabase.user?.id;
-
     // Obtener ticket actual para historial
     const { data: ticketActual } = await this.supabase.client
       .from(TABLES.TICKETS)
@@ -372,368 +370,96 @@ export class TicketService {
       });
 
     // Registrar en bitácora
-    await this.supabase.client
-      .from(TABLES.TICKET_BITACORA)
-      .insert({
-        ticket_id: ticketId,
-        usuario_id: userId,
-        tipo: 'asignacion',
-        mensaje: dto.motivo || 'Ticket asignado',
-        datos_adicionales: {
-          de_usuario_id: ticketActual?.responsable_id,
-          a_usuario_id: dto.usuario_id
-        }
-      });
+    await this.filesService.registrarEnBitacora(
+      ticketId,
+      'asignacion',
+      dto.motivo || 'Ticket asignado',
+      {
+        de_usuario_id: ticketActual?.responsable_id,
+        a_usuario_id: dto.usuario_id
+      }
+    );
 
     return { data: data as Ticket, error: null, success: true };
   }
 
+  // ============================================================================
+  // Delegación a TicketFilesService (compatibilidad hacia atrás)
+  // ============================================================================
+
   /**
    * Agrega una nota al ticket
+   * @deprecated Usar TicketFilesService.agregarNota
    */
   agregarNota(ticketId: string, dto: AgregarNotaDTO): Observable<ServiceResponse<TicketBitacora>> {
-    return from(this.agregarNotaAsync(ticketId, dto));
+    return this.filesService.agregarNota(ticketId, dto);
   }
-
-  private async agregarNotaAsync(ticketId: string, dto: AgregarNotaDTO): Promise<ServiceResponse<TicketBitacora>> {
-    const userId = this.supabase.user?.id;
-
-    const { data, error } = await this.supabase.client
-      .from(TABLES.TICKET_BITACORA)
-      .insert({
-        ticket_id: ticketId,
-        usuario_id: userId,
-        tipo: 'nota',
-        mensaje: dto.mensaje,
-        es_publico: dto.es_publico ?? true
-      })
-      .select()
-      .single();
-
-    if (error) {
-      if (!environment.production) { console.error('Error adding note:', error); }
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as TicketBitacora, error: null, success: true };
-  }
-
-  // ============================================================================
-  // Bitácora y Adjuntos
-  // ============================================================================
 
   /**
    * Obtiene la bitácora de un ticket
+   * @deprecated Usar TicketFilesService.getBitacora
    */
   getTicketBitacora(ticketId: string): Observable<ServiceResponse<TicketBitacora[]>> {
-    return from(this.fetchTicketBitacora(ticketId));
-  }
-
-  private async fetchTicketBitacora(ticketId: string): Promise<ServiceResponse<TicketBitacora[]>> {
-    const { data, error } = await this.supabase.client
-      .from(TABLES.TICKET_BITACORA)
-      .select(`
-        *,
-        usuario:profiles(nombre_completo, avatar_url)
-      `)
-      .eq('ticket_id', ticketId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      if (!environment.production) { console.error('Error fetching ticket timeline:', error); }
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as TicketBitacora[], error: null, success: true };
+    return this.filesService.getBitacora(ticketId);
   }
 
   /**
    * Obtiene los adjuntos de un ticket
+   * @deprecated Usar TicketFilesService.getAdjuntos
    */
   getTicketAdjuntos(ticketId: string): Observable<ServiceResponse<TicketAdjunto[]>> {
-    return from(this.fetchTicketAdjuntos(ticketId));
-  }
-
-  private async fetchTicketAdjuntos(ticketId: string): Promise<ServiceResponse<TicketAdjunto[]>> {
-    const { data, error } = await this.supabase.client
-      .from(TABLES.TICKET_ADJUNTOS)
-      .select(`
-        *,
-        usuario:profiles(nombre_completo)
-      `)
-      .eq('ticket_id', ticketId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      if (!environment.production) { console.error('Error fetching attachments:', error); }
-      return { data: null, error: error.message, success: false };
-    }
-
-    // Generar URLs firmadas para cada adjunto
-    const adjuntosConUrl = await Promise.all(
-      (data as TicketAdjunto[]).map(async (adj) => {
-        const { data: urlData } = await this.supabase.client.storage
-          .from(STORAGE_BUCKETS.TICKET_ATTACHMENTS)
-          .createSignedUrl(adj.ruta_storage, 3600);
-        return { ...adj, url: urlData?.signedUrl };
-      })
-    );
-
-    return { data: adjuntosConUrl, error: null, success: true };
+    return this.filesService.getAdjuntos(ticketId);
   }
 
   /**
    * Sube un adjunto a un ticket
+   * @deprecated Usar TicketFilesService.subirAdjunto
    */
   subirAdjunto(ticketId: string, file: File): Observable<ServiceResponse<TicketAdjunto>> {
-    return from(this.subirAdjuntoAsync(ticketId, file));
-  }
-
-  private async subirAdjuntoAsync(ticketId: string, file: File): Promise<ServiceResponse<TicketAdjunto>> {
-    const userId = this.supabase.user?.id;
-    if (!userId) {
-      return { data: null, error: 'Usuario no autenticado', success: false };
-    }
-
-    // Comprimir imagen si es una imagen
-    let processedFile = file;
-    if (file.type.startsWith('image/')) {
-      try {
-        processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
-        if (!environment.production) { console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`); }
-      } catch (err) {
-        if (!environment.production) { console.warn('No se pudo comprimir la imagen:', err); }
-      }
-    }
-
-    // Generar ruta única
-    const fileName = `${ticketId}/${Date.now()}_${processedFile.name}`;
-
-    // Subir archivo a storage
-    const { error: uploadError } = await this.supabase.client.storage
-      .from(STORAGE_BUCKETS.TICKET_ATTACHMENTS)
-      .upload(fileName, processedFile);
-
-    if (uploadError) {
-      if (!environment.production) { console.error('Error uploading file:', uploadError); }
-      return { data: null, error: 'Error al subir archivo', success: false };
-    }
-
-    // Registrar en base de datos
-    const { data, error } = await this.supabase.client
-      .from(TABLES.TICKET_ADJUNTOS)
-      .insert({
-        ticket_id: ticketId,
-        nombre_archivo: processedFile.name,
-        ruta_storage: fileName,
-        tipo_archivo: processedFile.type,
-        tamanio_bytes: processedFile.size,
-        subido_por: userId
-      })
-      .select()
-      .single();
-
-    if (error) {
-      if (!environment.production) { console.error('Error registering attachment:', error); }
-      return { data: null, error: error.message, success: false };
-    }
-
-    // Registrar en bitácora
-    await this.supabase.client
-      .from(TABLES.TICKET_BITACORA)
-      .insert({
-        ticket_id: ticketId,
-        usuario_id: userId,
-        tipo: 'adjunto',
-        mensaje: `Archivo adjuntado: ${file.name}`,
-        datos_adicionales: { adjunto_id: data.id, nombre: file.name }
-      });
-
-    return { data: data as TicketAdjunto, error: null, success: true };
+    return this.filesService.subirAdjunto(ticketId, file);
   }
 
   // ============================================================================
-  // Estadísticas y Alertas
+  // Delegación a TicketMetaService (compatibilidad hacia atrás)
   // ============================================================================
 
   /**
    * Obtiene estadísticas de tickets
+   * @deprecated Usar TicketMetaService.getStats
    */
   async getTicketStats(): Promise<TicketStats> {
-    try {
-      const userId = this.supabase.user?.id;
-
-      // Obtener tickets de la vista
-      const { data: tickets } = await this.supabase.client
-        .from(VIEWS.V_TICKETS_CON_SLA)
-        .select('*');
-
-      if (!tickets || tickets.length === 0) {
-        return this.emptyStats();
-      }
-
-      const total = tickets.length;
-      const abiertos = tickets.filter(t => !t.estatus_es_final && t.estatus_nombre !== 'En Progreso').length;
-      const en_progreso = tickets.filter(t => t.estatus_nombre === 'En Progreso').length;
-      const resueltos = tickets.filter(t => t.estatus_nombre === 'Resuelto').length;
-      const cerrados = tickets.filter(t => t.estatus_es_final).length;
-      const sin_asignar = tickets.filter(t => !t.responsable_id && !t.estatus_es_final).length;
-      const mis_tickets = tickets.filter(t => t.responsable_id === userId).length;
-
-      const ticketsActivos = tickets.filter(t => !t.estatus_es_final);
-      const por_semaforo = {
-        verde: ticketsActivos.filter(t => t.semaforo === 'verde').length,
-        amarillo: ticketsActivos.filter(t => t.semaforo === 'amarillo').length,
-        rojo: ticketsActivos.filter(t => t.semaforo === 'rojo').length
-      };
-
-      const por_prioridad = {
-        critica: ticketsActivos.filter(t => t.prioridad === 'Crítica').length,
-        alta: ticketsActivos.filter(t => t.prioridad === 'Alta').length,
-        media: ticketsActivos.filter(t => t.prioridad === 'Media').length,
-        baja: ticketsActivos.filter(t => t.prioridad === 'Baja').length
-      };
-
-      // Agrupar por categoría
-      const categoriasMap = new Map<string, { nombre: string; cantidad: number; color: string }>();
-      ticketsActivos.forEach(t => {
-        const key = t.categoria_id;
-        const existing = categoriasMap.get(key);
-        if (existing) {
-          existing.cantidad++;
-        } else {
-          categoriasMap.set(key, {
-            nombre: t.categoria_nombre || 'Sin categoría',
-            cantidad: 1,
-            color: t.categoria_color || '#6c757d'
-          });
-        }
-      });
-      const por_categoria = Array.from(categoriasMap.values());
-
-      // Calcular cumplimiento SLA (tickets cerrados a tiempo / total cerrados)
-      const ticketsCerrados = tickets.filter(t => t.estatus_es_final);
-      const enTiempo = ticketsCerrados.filter(t => (t.porcentaje_sla || 0) <= 100).length;
-      const cumplimiento_sla = ticketsCerrados.length > 0
-        ? Math.round((enTiempo / ticketsCerrados.length) * 100)
-        : 100;
-
-      return {
-        total,
-        abiertos,
-        en_progreso,
-        resueltos,
-        cerrados,
-        sin_asignar,
-        mis_tickets,
-        por_semaforo,
-        por_prioridad,
-        por_categoria,
-        cumplimiento_sla
-      };
-    } catch (error) {
-      if (!environment.production) { console.error('Error getting ticket stats:', error); }
-      return this.emptyStats();
-    }
-  }
-
-  private emptyStats(): TicketStats {
-    return {
-      total: 0,
-      abiertos: 0,
-      en_progreso: 0,
-      resueltos: 0,
-      cerrados: 0,
-      sin_asignar: 0,
-      mis_tickets: 0,
-      por_semaforo: { verde: 0, amarillo: 0, rojo: 0 },
-      por_prioridad: { critica: 0, alta: 0, media: 0, baja: 0 },
-      por_categoria: [],
-      cumplimiento_sla: 100
-    };
+    return this.metaService.getStats().toPromise() as Promise<TicketStats>;
   }
 
   /**
-   * Obtiene tickets en alerta (amarillos y rojos)
+   * Obtiene tickets en alerta
+   * @deprecated Usar TicketMetaService.getAlertas
    */
   getTicketsAlertas(limite: number = 10): Observable<ServiceResponse<TicketAlerta[]>> {
-    return from(this.fetchTicketsAlertas(limite));
+    return this.metaService.getAlertas(limite);
   }
-
-  private async fetchTicketsAlertas(limite: number): Promise<ServiceResponse<TicketAlerta[]>> {
-    const { data, error } = await this.supabase.client
-      .rpc('get_tickets_alertas', { p_limite: limite });
-
-    if (error) {
-      if (!environment.production) { console.error('Error fetching ticket alerts:', error); }
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as TicketAlerta[], error: null, success: true };
-  }
-
-  // ============================================================================
-  // Catálogos
-  // ============================================================================
 
   /**
-   * Obtiene todas las categorías de servicio
+   * Obtiene categorías de servicio
+   * @deprecated Usar TicketMetaService.getCategorias
    */
   getCategorias(): Observable<ServiceResponse<CategoriaServicio[]>> {
-    return from(this.fetchCategorias());
-  }
-
-  private async fetchCategorias(): Promise<ServiceResponse<CategoriaServicio[]>> {
-    const { data, error } = await this.supabase.client
-      .from(TABLES.CATEGORIAS_SERVICIO)
-      .select('*')
-      .eq('estatus', 'Activo')
-      .order('orden');
-
-    if (error) {
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as CategoriaServicio[], error: null, success: true };
+    return this.metaService.getCategorias();
   }
 
   /**
-   * Obtiene todos los estatus de tickets
+   * Obtiene estatus de tickets
+   * @deprecated Usar TicketMetaService.getEstatus
    */
   getEstatus(): Observable<ServiceResponse<EstatusTicket[]>> {
-    return from(this.fetchEstatus());
-  }
-
-  private async fetchEstatus(): Promise<ServiceResponse<EstatusTicket[]>> {
-    const { data, error } = await this.supabase.client
-      .from(TABLES.ESTATUS_TICKETS)
-      .select('*')
-      .order('orden');
-
-    if (error) {
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as EstatusTicket[], error: null, success: true };
+    return this.metaService.getEstatus();
   }
 
   /**
-   * Obtiene todos los canales de contacto
+   * Obtiene canales de contacto
+   * @deprecated Usar TicketMetaService.getCanales
    */
   getCanales(): Observable<ServiceResponse<CanalContacto[]>> {
-    return from(this.fetchCanales());
-  }
-
-  private async fetchCanales(): Promise<ServiceResponse<CanalContacto[]>> {
-    const { data, error } = await this.supabase.client
-      .from(TABLES.CANALES_CONTACTO)
-      .select('*')
-      .eq('activo', true);
-
-    if (error) {
-      return { data: null, error: error.message, success: false };
-    }
-
-    return { data: data as CanalContacto[], error: null, success: true };
+    return this.metaService.getCanales();
   }
 }

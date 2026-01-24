@@ -510,7 +510,7 @@
                     <div class="label">Problemas Medios (P2)</div>
                 </div>
                 <div class="stat-card success">
-                    <div class="number">12</div>
+                    <div class="number">13</div>
                     <div class="label">Problemas Resueltos</div>
                 </div>
             </div>
@@ -1080,22 +1080,23 @@ npm install --save-dev @cypress/schematic cypress
                     Mejoras de Arquitectura
                 </div>
                 <div class="card-body">
-                    <div class="issue-item">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
                         <h4>
-                            <span class="priority-badge priority-p2">P2</span>
-                            Servicios con demasiada responsabilidad
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Servicios refactorizados
                         </h4>
-                        <p>Algunos servicios tienen mas de 700 lineas de codigo y manejan multiples responsabilidades.</p>
-                        <p><span class="location">Ejemplo: ticket.service.ts</span></p>
+                        <p><s>Algunos servicios tienen mas de 700 lineas de codigo y manejan multiples responsabilidades.</s></p>
+                        <p>ticket.service.ts dividido en 3 servicios especializados con compatibilidad hacia atras.</p>
+                        <p><span class="location">739 lineas → 3 servicios (~200-250 lineas c/u)</span></p>
 
                         <div class="solution">
-                            <strong>Solucion:</strong> Dividir servicios grandes en:
+                            <strong>Implementacion:</strong>
                             <ul>
-                                <li>TicketCrudService - Operaciones CRUD basicas</li>
-                                <li>TicketQueryService - Consultas y filtros complejos</li>
-                                <li>TicketSlaService - Logica de SLA</li>
-                                <li>TicketNotificationService - Notificaciones relacionadas</li>
+                                <li><code>TicketService</code> - CRUD + Acciones (crear, editar, asignar, cambiar estatus)</li>
+                                <li><code>TicketFilesService</code> - Bitacora + Adjuntos (notas, archivos, historial)</li>
+                                <li><code>TicketMetaService</code> - Stats + Catalogos + Alertas (dashboard, reportes)</li>
                             </ul>
+                            <p class="mt-2"><strong>Compatibilidad:</strong> Los metodos delegados en TicketService mantienen la API existente con @deprecated para migracion gradual.</p>
                         </div>
                     </div>
 
@@ -1276,7 +1277,7 @@ npm install --save-dev @cypress/schematic cypress
                     <ul class="checklist">
                         <li class="done">Mejorar accesibilidad (labels, aria-*, autocomplete)</li>
                         <li class="done">Implementar lazy loading selectivo (SelectivePreloadingStrategy)</li>
-                        <li>Refactorizar servicios grandes</li>
+                        <li class="done">Refactorizar servicios grandes (ticket.service.ts → 3 servicios)</li>
                         <li class="done">Crear BaseService para operaciones CRUD</li>
                         <li class="done">Centralizar constantes de tablas (TABLES, VIEWS, STORAGE_BUCKETS)</li>
                         <li class="done">Habilitar strictTemplates (19 errores corregidos)</li>
@@ -1383,10 +1384,10 @@ npm install --save-dev @cypress/schematic cypress
                         <td>Medio</td>
                         <td>Medio</td>
                     </tr>
-                    <tr>
-                        <td><span class="priority-badge priority-p2">P2</span></td>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
                         <td>Mantenibilidad</td>
-                        <td>Servicios muy grandes</td>
+                        <td><s>Servicios muy grandes</s> - ticket.service.ts dividido en 3 servicios especializados</td>
                         <td>Bajo</td>
                         <td>Alto</td>
                     </tr>
@@ -1433,8 +1434,8 @@ npm install --save-dev @cypress/schematic cypress
         <section class="section" style="text-align: center; padding: 40px 0; border-top: 2px solid #eee;">
             <p style="color: #666;">
                 <strong>Documento generado automaticamente</strong><br>
-                APP Mesa de Ayuda iGAS - Plan de Mejoras v2.0<br>
-                Ultima actualizacion: 24 Enero 2026 - BaseService abstracto implementado
+                APP Mesa de Ayuda iGAS - Plan de Mejoras v2.1<br>
+                Ultima actualizacion: 24 Enero 2026 - Seccion 6 Mantenibilidad completada
             </p>
         </section>
     </div>
