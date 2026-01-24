@@ -215,6 +215,7 @@ export class CasoListComponent implements OnInit {
     this.soloMisCasos.set(false);
     this.soloSinAsignar.set(false);
     this.soloCompromisoVencido.set(false);
+    this.soloAbiertos.set(false);
     this.currentPage.set(1);
     this.loadCasos();
   }
@@ -313,7 +314,8 @@ export class CasoListComponent implements OnInit {
       this.selectedSemaforo() ||
       this.soloMisCasos() ||
       this.soloSinAsignar() ||
-      this.soloCompromisoVencido()
+      this.soloCompromisoVencido() ||
+      this.soloAbiertos()
     );
   }
 }

@@ -66,6 +66,17 @@
           <input
             type="checkbox"
             class="btn-check"
+            id="btnAbiertos"
+            [checked]="soloAbiertos()"
+            (change)="soloAbiertos.set(!soloAbiertos()); onFilterChange()"
+          />
+          <label class="btn btn-outline-success btn-sm" for="btnAbiertos">
+            <i class="feather icon-inbox me-1"></i> Abiertos
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
             id="btnMisCasos"
             [checked]="soloMisCasos()"
             (change)="soloMisCasos.set(!soloMisCasos()); onFilterChange()"

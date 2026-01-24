@@ -225,6 +225,8 @@ export class TicketListComponent implements OnInit {
     this.selectedResponsableId.set(null);
     this.soloMisTickets.set(false);
     this.soloSinAsignar.set(false);
+    this.filterHoy.set(false);
+    this.filterAbiertos.set(false);
     this.currentPage.set(1);
     this.loadTickets();
   }
@@ -321,7 +323,9 @@ export class TicketListComponent implements OnInit {
       this.selectedPrioridad() ||
       this.selectedSemaforo() ||
       this.soloMisTickets() ||
-      this.soloSinAsignar()
+      this.soloSinAsignar() ||
+      this.filterHoy() ||
+      this.filterAbiertos()
     );
   }
 }

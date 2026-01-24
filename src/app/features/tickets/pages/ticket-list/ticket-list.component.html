@@ -81,6 +81,28 @@
           <input
             type="checkbox"
             class="btn-check"
+            id="btnHoy"
+            [checked]="filterHoy()"
+            (change)="filterHoy.set(!filterHoy()); onFilterChange()"
+          />
+          <label class="btn btn-outline-info btn-sm" for="btnHoy">
+            <i class="feather icon-calendar me-1" aria-hidden="true"></i> Hoy
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
+            id="btnAbiertos"
+            [checked]="filterAbiertos()"
+            (change)="filterAbiertos.set(!filterAbiertos()); onFilterChange()"
+          />
+          <label class="btn btn-outline-success btn-sm" for="btnAbiertos">
+            <i class="feather icon-inbox me-1" aria-hidden="true"></i> Abiertos
+          </label>
+
+          <input
+            type="checkbox"
+            class="btn-check"
             id="btnMisTickets"
             [checked]="soloMisTickets()"
             (change)="soloMisTickets.set(!soloMisTickets()); onFilterChange()"
