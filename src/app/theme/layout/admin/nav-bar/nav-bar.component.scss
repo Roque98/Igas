@@ -1,0 +1,28 @@
+// ============================================================================
+// Nav Bar Component Styles
+// ============================================================================
+
+// Mobile header brand styling
+.m-header {
+  .b-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: white;
+    border-radius: 6px;
+    text-decoration: none;
+
+    .logo-igas-mobile {
+      height: 28px;
+      width: auto;
+    }
+
+    .b-title {
+      color: #1a1a2e;
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+  }
+}
