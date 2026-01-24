@@ -4,7 +4,8 @@
 // Formulario para crear/editar mantenimientos
 // ============================================================================
 
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -41,6 +42,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class MantenimientoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private mantenimientoService = inject(MantenimientoService);
@@ -119,7 +121,7 @@ export class MantenimientoFormComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Tipos de mantenimiento
-    this.mantenimientoService.getTiposMantenimiento().subscribe({
+    this.mantenimientoService.getTiposMantenimiento().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.tipos.set(response.data);
@@ -128,14 +130,14 @@ export class MantenimientoFormComponent implements OnInit {
     });
 
     // Clientes
-    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).subscribe({
+    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.clientes.set(response.data);
       }
     });
 
     // Técnicos
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.tecnicos.set(response.data);
       }
@@ -143,7 +145,7 @@ export class MantenimientoFormComponent implements OnInit {
   }
 
   private loadSucursales(clienteId: string): void {
-    this.clienteService.getSucursales(clienteId).subscribe({
+    this.clienteService.getSucursales(clienteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.sucursales.set(response.data);
@@ -153,7 +155,7 @@ export class MantenimientoFormComponent implements OnInit {
   }
 
   private loadTemplates(tipoId: string): void {
-    this.mantenimientoService.getChecklistTemplates(tipoId).subscribe({
+    this.mantenimientoService.getChecklistTemplates(tipoId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.templates.set(response.data);
@@ -169,7 +171,7 @@ export class MantenimientoFormComponent implements OnInit {
   private loadMantenimiento(id: string): void {
     this.loadingMantenimiento.set(true);
 
-    this.mantenimientoService.getMantenimientoById(id).subscribe({
+    this.mantenimientoService.getMantenimientoById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.mantenimiento.set(response.data);
@@ -230,7 +232,7 @@ export class MantenimientoFormComponent implements OnInit {
   }
 
   private createMantenimiento(data: any): void {
-    this.mantenimientoService.createMantenimiento(data).subscribe({
+    this.mantenimientoService.createMantenimiento(data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.notificationService.success('Mantenimiento creado exitosamente');
@@ -252,7 +254,7 @@ export class MantenimientoFormComponent implements OnInit {
     const id = this.mantenimientoId();
     if (!id) return;
 
-    this.mantenimientoService.updateMantenimiento(id, data).subscribe({
+    this.mantenimientoService.updateMantenimiento(id, data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Mantenimiento actualizado exitosamente');

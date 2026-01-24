@@ -4,7 +4,8 @@
 // Página de reporte de tickets con filtros, gráficas y tabla
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -63,6 +64,7 @@ import {
 })
 export class ReporteTicketsComponent implements OnInit {
   private reporteService = inject(ReporteService);
+  private destroyRef = inject(DestroyRef);
   private exportService = inject(ExportService);
   private clienteService = inject(ClienteService);
   private userService = inject(UserService);
@@ -133,17 +135,17 @@ export class ReporteTicketsComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Clientes
-    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).subscribe({
+    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => this.clientes.set(response.data)
     });
 
     // Usuarios
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 200 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 200 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => this.usuarios.set(response.data)
     });
 
     // Categorías
-    this.ticketService.getCategorias().subscribe({
+    this.ticketService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.categorias.set(response.data);
@@ -165,7 +167,7 @@ export class ReporteTicketsComponent implements OnInit {
 
   private loadResumen(): void {
     this.loadingResumen.set(true);
-    this.reporteService.getTicketsResumen(this.filters()).subscribe({
+    this.reporteService.getTicketsResumen(this.filters()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.resumen.set(response.data);
@@ -183,7 +185,7 @@ export class ReporteTicketsComponent implements OnInit {
 
   private loadTendencia(): void {
     this.loadingTendencia.set(true);
-    this.reporteService.getTicketsTendenciaMensual(12, this.filters().cliente_id).subscribe({
+    this.reporteService.getTicketsTendenciaMensual(12, this.filters().cliente_id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.tendencia.set(response.data);
@@ -201,7 +203,7 @@ export class ReporteTicketsComponent implements OnInit {
 
   private loadDetalle(): void {
     this.loadingDetalle.set(true);
-    this.reporteService.getTicketsDetalle(this.filters(), this.pagination()).subscribe({
+    this.reporteService.getTicketsDetalle(this.filters(), this.pagination()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.detalle.set(response.data);
         this.totalItems.set(response.total);
@@ -354,7 +356,7 @@ export class ReporteTicketsComponent implements OnInit {
     ];
 
     // Cargar todos los datos para exportar
-    this.reporteService.getTicketsDetalle(this.filters(), { page: 1, pageSize: 10000 }).subscribe({
+    this.reporteService.getTicketsDetalle(this.filters(), { page: 1, pageSize: 10000 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.exportService.exportToExcel(response.data, columns, 'reporte_tickets', config);
       }
@@ -378,7 +380,7 @@ export class ReporteTicketsComponent implements OnInit {
       { header: 'Semáforo', key: 'semaforo' as const }
     ];
 
-    this.reporteService.getTicketsDetalle(this.filters(), { page: 1, pageSize: 500 }).subscribe({
+    this.reporteService.getTicketsDetalle(this.filters(), { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.exportService.exportToPDF(response.data, columns, 'reporte_tickets', config);
       }

@@ -4,7 +4,8 @@
 // Vista detallada de una instalación con tabs
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -48,6 +49,7 @@ import { FirmaDigitalComponent, FirmaData } from '../../components/firma-digital
 })
 export class InstalacionDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private instalacionService = inject(InstalacionService);
   private notificationService = inject(NotificationService);
@@ -87,7 +89,7 @@ export class InstalacionDetailComponent implements OnInit {
   private loadInstalacion(id: string): void {
     this.loading.set(true);
 
-    this.instalacionService.getInstalacionById(id).subscribe({
+    this.instalacionService.getInstalacionById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.instalacion.set(response.data);
@@ -114,7 +116,7 @@ export class InstalacionDetailComponent implements OnInit {
   }
 
   private loadModulos(id: string): void {
-    this.instalacionService.getModulos(id).subscribe({
+    this.instalacionService.getModulos(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.modulos.set(response.data);
@@ -125,7 +127,7 @@ export class InstalacionDetailComponent implements OnInit {
 
   private loadChecklist(id: string): void {
     this.loadingChecklist.set(true);
-    this.instalacionService.getChecklist(id).subscribe({
+    this.instalacionService.getChecklist(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.checklistItems.set(response.data);
@@ -140,7 +142,7 @@ export class InstalacionDetailComponent implements OnInit {
 
   private loadPendientes(id: string): void {
     this.loadingPendientes.set(true);
-    this.instalacionService.getPendientes(id).subscribe({
+    this.instalacionService.getPendientes(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.pendientes.set(response.data);
@@ -155,7 +157,7 @@ export class InstalacionDetailComponent implements OnInit {
 
   private loadEvidencias(id: string): void {
     this.loadingEvidencias.set(true);
-    this.instalacionService.getEvidencias(id).subscribe({
+    this.instalacionService.getEvidencias(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.evidencias.set(response.data);
@@ -200,7 +202,7 @@ export class InstalacionDetailComponent implements OnInit {
     if (!id) return;
 
     this.actionLoading.set(true);
-    this.instalacionService.cambiarEstatus(id, 'En proceso').subscribe({
+    this.instalacionService.cambiarEstatus(id, 'En proceso').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Instalación iniciada');
@@ -222,7 +224,7 @@ export class InstalacionDetailComponent implements OnInit {
     if (!id) return;
 
     this.actionLoading.set(true);
-    this.instalacionService.cambiarEstatus(id, 'Pendientes').subscribe({
+    this.instalacionService.cambiarEstatus(id, 'Pendientes').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Instalación marcada con pendientes');
@@ -244,7 +246,7 @@ export class InstalacionDetailComponent implements OnInit {
     if (!id) return;
 
     this.actionLoading.set(true);
-    this.instalacionService.cambiarEstatus(id, 'En proceso').subscribe({
+    this.instalacionService.cambiarEstatus(id, 'En proceso').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Instalación reanudada');
@@ -270,7 +272,7 @@ export class InstalacionDetailComponent implements OnInit {
     }
 
     this.actionLoading.set(true);
-    this.instalacionService.cerrarInstalacion(id).subscribe({
+    this.instalacionService.cerrarInstalacion(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Instalación cerrada exitosamente');
@@ -295,7 +297,7 @@ export class InstalacionDetailComponent implements OnInit {
     this.instalacionService.ejecutarChecklistItem(event.itemId, {
       completado: event.completado,
       notas: event.notas
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.loadChecklist(id);
@@ -320,7 +322,7 @@ export class InstalacionDetailComponent implements OnInit {
       prioridad: event.prioridad,
       responsable: event.responsable,
       fecha_compromiso: event.fecha_compromiso
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Pendiente agregado');
@@ -340,7 +342,7 @@ export class InstalacionDetailComponent implements OnInit {
     const id = this.instalacion()?.id;
     if (!id) return;
 
-    this.instalacionService.resolverPendiente(event.pendienteId, { notas_resolucion: event.notas_resolucion }).subscribe({
+    this.instalacionService.resolverPendiente(event.pendienteId, { notas_resolucion: event.notas_resolucion }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Pendiente resuelto');
@@ -360,7 +362,7 @@ export class InstalacionDetailComponent implements OnInit {
     const id = this.instalacion()?.id;
     if (!id) return;
 
-    this.instalacionService.generarTicketDesdePendiente(pendienteId).subscribe({
+    this.instalacionService.generarTicketDesdePendiente(pendienteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.notificationService.success('Ticket generado exitosamente');
@@ -382,7 +384,7 @@ export class InstalacionDetailComponent implements OnInit {
     const id = this.instalacion()?.id;
     if (!id) return;
 
-    this.instalacionService.subirEvidencia(id, event.file, event.tipo, event.descripcion).subscribe({
+    this.instalacionService.subirEvidencia(id, event.file, event.tipo, event.descripcion).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Evidencia subida exitosamente');
@@ -401,7 +403,7 @@ export class InstalacionDetailComponent implements OnInit {
     const id = this.instalacion()?.id;
     if (!id) return;
 
-    this.instalacionService.eliminarEvidencia(evidenciaId).subscribe({
+    this.instalacionService.eliminarEvidencia(evidenciaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Evidencia eliminada');
@@ -426,7 +428,7 @@ export class InstalacionDetailComponent implements OnInit {
       firma_base64: firma.firma_base64,
       nombre_firmante: firma.nombre_firmante,
       puesto_firmante: firma.puesto_firmante
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Firma guardada exitosamente');

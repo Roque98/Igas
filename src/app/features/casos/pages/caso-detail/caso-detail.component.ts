@@ -4,7 +4,8 @@
 // Componente para mostrar el detalle de un caso con bitácora y acciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -52,6 +53,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class CasoDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private casoService = inject(CasoService);
   private userService = inject(UserService);
@@ -107,7 +109,7 @@ export class CasoDetailComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Cargar estatus
-    this.casoService.getEstatus().subscribe({
+    this.casoService.getEstatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.estatus.set(response.data);
@@ -116,7 +118,7 @@ export class CasoDetailComponent implements OnInit {
     });
 
     // Cargar usuarios para asignación
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.usuarios.set(response.data.map(u => ({
           id: u.id,
@@ -139,7 +141,7 @@ export class CasoDetailComponent implements OnInit {
       return;
     }
 
-    this.casoService.getCasoById(id).subscribe({
+    this.casoService.getCasoById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.caso.set(response.data);
@@ -162,7 +164,7 @@ export class CasoDetailComponent implements OnInit {
     this.loadingBitacora.set(true);
     const id = this.casoId();
 
-    this.casoService.getCasoBitacora(id).subscribe({
+    this.casoService.getCasoBitacora(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.bitacora.set(response.data);
@@ -178,7 +180,7 @@ export class CasoDetailComponent implements OnInit {
   loadAdjuntos(): void {
     const id = this.casoId();
 
-    this.casoService.getCasoAdjuntos(id).subscribe({
+    this.casoService.getCasoAdjuntos(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.adjuntos.set(response.data);
@@ -206,7 +208,7 @@ export class CasoDetailComponent implements OnInit {
     this.casoService.cambiarEstatus(this.casoId(), {
       estatus_id: estatusId,
       nota: this.notaCambioEstatus() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Estatus actualizado correctamente');
@@ -240,7 +242,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.asignarCaso(this.casoId(), responsableId, this.motivoAsignacion() || undefined).subscribe({
+    this.casoService.asignarCaso(this.casoId(), responsableId, this.motivoAsignacion() || undefined).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Caso asignado correctamente');
@@ -273,7 +275,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.agregarNota(this.casoId(), nota).subscribe({
+    this.casoService.agregarNota(this.casoId(), nota).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Nota agregada correctamente');
@@ -306,7 +308,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.registrarNumeroCasoExterno(this.casoId(), numero).subscribe({
+    this.casoService.registrarNumeroCasoExterno(this.casoId(), numero).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Número de caso externo registrado');
@@ -343,7 +345,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.marcarListoParaValidar(this.casoId(), { notas_resolucion: notas }).subscribe({
+    this.casoService.marcarListoParaValidar(this.casoId(), { notas_resolucion: notas }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Caso marcado como listo para validar');
@@ -379,7 +381,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.regresarASoporte(this.casoId(), { motivo }).subscribe({
+    this.casoService.regresarASoporte(this.casoId(), { motivo }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Caso regresado a soporte');
@@ -406,7 +408,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.cerrarCaso(this.casoId(), { resultado: 'Cerrado' }).subscribe({
+    this.casoService.cerrarCaso(this.casoId(), { resultado: 'Cerrado' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Caso cerrado correctamente');
@@ -441,7 +443,7 @@ export class CasoDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.casoService.subirAdjunto(this.casoId(), file).subscribe({
+    this.casoService.subirAdjunto(this.casoId(), file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Archivo adjuntado correctamente');

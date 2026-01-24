@@ -4,7 +4,8 @@
 // Componente para mostrar el detalle de un ticket con bitácora y acciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -55,6 +56,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class TicketDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private ticketService = inject(TicketService);
   private casoService = inject(CasoService);
@@ -111,7 +113,7 @@ export class TicketDetailComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Cargar estatus
-    this.ticketService.getEstatus().subscribe({
+    this.ticketService.getEstatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.estatus.set(response.data);
@@ -120,7 +122,7 @@ export class TicketDetailComponent implements OnInit {
     });
 
     // Cargar usuarios para asignación
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.usuarios.set(response.data.map(u => ({
           id: u.id,
@@ -143,7 +145,7 @@ export class TicketDetailComponent implements OnInit {
       return;
     }
 
-    this.ticketService.getTicketById(id).subscribe({
+    this.ticketService.getTicketById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.ticket.set(response.data);
@@ -166,7 +168,7 @@ export class TicketDetailComponent implements OnInit {
     this.loadingBitacora.set(true);
     const id = this.ticketId();
 
-    this.ticketService.getTicketBitacora(id).subscribe({
+    this.ticketService.getTicketBitacora(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.bitacora.set(response.data);
@@ -182,7 +184,7 @@ export class TicketDetailComponent implements OnInit {
   loadAdjuntos(): void {
     const id = this.ticketId();
 
-    this.ticketService.getTicketAdjuntos(id).subscribe({
+    this.ticketService.getTicketAdjuntos(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.adjuntos.set(response.data);
@@ -210,7 +212,7 @@ export class TicketDetailComponent implements OnInit {
     this.ticketService.cambiarEstatus(this.ticketId(), {
       estatus_id: estatusId,
       nota: this.notaCambioEstatus() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Estatus actualizado correctamente');
@@ -243,7 +245,7 @@ export class TicketDetailComponent implements OnInit {
     this.ticketService.asignarTicket(this.ticketId(), {
       usuario_id: responsableId,
       motivo: this.motivoAsignacion() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Ticket asignado correctamente');
@@ -275,7 +277,7 @@ export class TicketDetailComponent implements OnInit {
     this.ticketService.agregarNota(this.ticketId(), {
       mensaje: nota,
       es_publico: true
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Nota agregada correctamente');
@@ -322,7 +324,7 @@ export class TicketDetailComponent implements OnInit {
       motivo: motivo,
       descripcion: this.escalarDescripcion() || undefined,
       fecha_compromiso: this.escalarFechaCompromiso() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Ticket escalado correctamente. Se ha creado el caso.');
@@ -359,7 +361,7 @@ export class TicketDetailComponent implements OnInit {
 
     this.savingAction.set(true);
 
-    this.ticketService.subirAdjunto(this.ticketId(), file).subscribe({
+    this.ticketService.subirAdjunto(this.ticketId(), file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Archivo adjuntado correctamente');

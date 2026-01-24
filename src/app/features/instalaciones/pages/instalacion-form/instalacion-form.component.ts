@@ -4,7 +4,8 @@
 // Formulario para crear/editar instalaciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -39,6 +40,7 @@ import {
 })
 export class InstalacionFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private instalacionService = inject(InstalacionService);
@@ -102,7 +104,7 @@ export class InstalacionFormComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Módulos del sistema
-    this.instalacionService.getModulosSistema().subscribe({
+    this.instalacionService.getModulosSistema().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.modulos.set(response.data);
@@ -111,14 +113,14 @@ export class InstalacionFormComponent implements OnInit {
     });
 
     // Clientes
-    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).subscribe({
+    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.clientes.set(response.data);
       }
     });
 
     // Técnicos
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 100 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.tecnicos.set(response.data);
       }
@@ -126,7 +128,7 @@ export class InstalacionFormComponent implements OnInit {
   }
 
   private loadSucursales(clienteId: string): void {
-    this.clienteService.getSucursales(clienteId).subscribe({
+    this.clienteService.getSucursales(clienteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.sucursales.set(response.data);
@@ -138,7 +140,7 @@ export class InstalacionFormComponent implements OnInit {
   private loadInstalacion(id: string): void {
     this.loadingInstalacion.set(true);
 
-    this.instalacionService.getInstalacionById(id).subscribe({
+    this.instalacionService.getInstalacionById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.instalacion.set(response.data);
@@ -159,7 +161,7 @@ export class InstalacionFormComponent implements OnInit {
   }
 
   private loadInstalacionModulos(id: string): void {
-    this.instalacionService.getModulos(id).subscribe({
+    this.instalacionService.getModulos(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           const modulosIds = new Set(response.data.map(m => m.modulo_id));
@@ -228,7 +230,7 @@ export class InstalacionFormComponent implements OnInit {
   }
 
   private createInstalacion(data: any): void {
-    this.instalacionService.createInstalacion(data).subscribe({
+    this.instalacionService.createInstalacion(data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.notificationService.success('Instalación creada exitosamente');
@@ -252,7 +254,7 @@ export class InstalacionFormComponent implements OnInit {
     // Para actualización no se envían módulos (se gestionan por separado)
     delete data.modulos_ids;
 
-    this.instalacionService.updateInstalacion(id, data).subscribe({
+    this.instalacionService.updateInstalacion(id, data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Instalación actualizada exitosamente');

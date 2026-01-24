@@ -4,7 +4,8 @@
 // Componente para crear y editar tickets
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -39,6 +40,7 @@ import { PrioridadBadgeComponent } from '../../components';
 })
 export class TicketFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private ticketService = inject(TicketService);
@@ -108,7 +110,7 @@ export class TicketFormComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Cargar categorías
-    this.ticketService.getCategorias().subscribe({
+    this.ticketService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.categorias.set(response.data);
@@ -117,7 +119,7 @@ export class TicketFormComponent implements OnInit {
     });
 
     // Cargar canales
-    this.ticketService.getCanales().subscribe({
+    this.ticketService.getCanales().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.canales.set(response.data);
@@ -129,7 +131,7 @@ export class TicketFormComponent implements OnInit {
   private loadTicket(id: string): void {
     this.loading.set(true);
 
-    this.ticketService.getTicketById(id).subscribe({
+    this.ticketService.getTicketById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.ticket.set(response.data);
@@ -245,7 +247,7 @@ export class TicketFormComponent implements OnInit {
       ticketData.sucursal_id = formValue.sucursal_id;
     }
 
-    this.ticketService.createTicket(ticketData).subscribe({
+    this.ticketService.createTicket(ticketData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: async (response) => {
         if (response.success && response.data) {
           // Subir archivos adjuntos si hay
@@ -279,7 +281,7 @@ export class TicketFormComponent implements OnInit {
       categoria_id: formValue.categoria_id,
       prioridad: formValue.prioridad,
       canal: formValue.canal
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: async (response) => {
         if (response.success) {
           // Subir archivos adjuntos si hay nuevos

@@ -4,7 +4,8 @@
 // Detalle de mantenimiento con checklist y evidencias
 // ============================================================================
 
-import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -44,6 +45,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class MantenimientoDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private mantenimientoService = inject(MantenimientoService);
   private notificationService = inject(NotificationService);
@@ -92,7 +94,7 @@ export class MantenimientoDetailComponent implements OnInit {
 
   private loadMantenimiento(id: string): void {
     this.loading.set(true);
-    this.mantenimientoService.getMantenimientoById(id).subscribe({
+    this.mantenimientoService.getMantenimientoById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.mantenimiento.set(response.data);
@@ -114,7 +116,7 @@ export class MantenimientoDetailComponent implements OnInit {
 
   loadChecklist(id: string): void {
     this.loadingChecklist.set(true);
-    this.mantenimientoService.getChecklist(id).subscribe({
+    this.mantenimientoService.getChecklist(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.checklist.set(response.data);
@@ -127,7 +129,7 @@ export class MantenimientoDetailComponent implements OnInit {
 
   loadEvidencias(id: string): void {
     this.loadingEvidencias.set(true);
-    this.mantenimientoService.getEvidencias(id).subscribe({
+    this.mantenimientoService.getEvidencias(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.evidencias.set(response.data);
@@ -155,7 +157,7 @@ export class MantenimientoDetailComponent implements OnInit {
     const id = this.mantenimientoId();
     if (!id) return;
 
-    this.mantenimientoService.iniciarMantenimiento(id).subscribe({
+    this.mantenimientoService.iniciarMantenimiento(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Mantenimiento iniciado');
@@ -187,7 +189,7 @@ export class MantenimientoDetailComponent implements OnInit {
     this.mantenimientoService.ejecutarChecklistItem(event.itemId, {
       completado: event.completado,
       notas: event.notas
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           const id = this.mantenimientoId();
@@ -231,7 +233,7 @@ export class MantenimientoDetailComponent implements OnInit {
       event.tipo,
       event.checklistItemId || this.currentChecklistItemId() || undefined,
       event.descripcion
-    ).subscribe({
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Evidencia subida');
@@ -251,7 +253,7 @@ export class MantenimientoDetailComponent implements OnInit {
   }
 
   onDeleteEvidencia(evidenciaId: string): void {
-    this.mantenimientoService.eliminarEvidencia(evidenciaId).subscribe({
+    this.mantenimientoService.eliminarEvidencia(evidenciaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Evidencia eliminada');
@@ -281,7 +283,7 @@ export class MantenimientoDetailComponent implements OnInit {
       resultado: this.finalizarResultado(),
       observaciones: this.finalizarObservaciones() || undefined,
       recomendaciones: this.finalizarRecomendaciones() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Mantenimiento finalizado');
@@ -304,7 +306,7 @@ export class MantenimientoDetailComponent implements OnInit {
     const id = this.mantenimientoId();
     if (!id) return;
 
-    this.mantenimientoService.generarTicketPorResultado(id).subscribe({
+    this.mantenimientoService.generarTicketPorResultado(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.notificationService.success('Ticket generado');

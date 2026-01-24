@@ -4,7 +4,8 @@
 // Componente para ver y editar el perfil del usuario actual
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbNavModule, NgbModalModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -41,6 +42,7 @@ export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private userService = inject(UserService);
   private supabaseService = inject(SupabaseService);
   private notificationService = inject(NotificationService);
@@ -112,7 +114,7 @@ export class UserProfileComponent implements OnInit {
   private loadProfile(): void {
     this.loading.set(true);
 
-    this.userService.getCurrentUserProfile().subscribe({
+    this.userService.getCurrentUserProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.profile.set(response.data);
@@ -155,7 +157,7 @@ export class UserProfileComponent implements OnInit {
       nombre_completo: formData.nombre_completo,
       telefono: formData.telefono || undefined,
       disponibilidad: formData.disponibilidad
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Perfil actualizado correctamente');
@@ -230,7 +232,7 @@ export class UserProfileComponent implements OnInit {
   private uploadAvatar(file: File): void {
     this.uploadingAvatar.set(true);
 
-    this.userService.uploadAvatar(file).subscribe({
+    this.userService.uploadAvatar(file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Avatar actualizado correctamente');
@@ -252,7 +254,7 @@ export class UserProfileComponent implements OnInit {
   }
 
   confirmDeleteAvatar(): void {
-    this.userService.deleteAvatar().subscribe({
+    this.userService.deleteAvatar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Avatar eliminado correctamente');

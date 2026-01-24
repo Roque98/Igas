@@ -4,7 +4,8 @@
 // Componente para crear y editar usuarios
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,6 +38,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class UserFormComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private userService = inject(UserService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
@@ -100,7 +102,7 @@ export class UserFormComponent implements OnInit {
 
   private loadCatalogos(): void {
     // Cargar roles, equipos y horarios en paralelo
-    this.userService.getRoles().subscribe({
+    this.userService.getRoles().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.roles.set(response.data);
@@ -108,7 +110,7 @@ export class UserFormComponent implements OnInit {
       }
     });
 
-    this.userService.getEquipos().subscribe({
+    this.userService.getEquipos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.equipos.set(response.data);
@@ -116,7 +118,7 @@ export class UserFormComponent implements OnInit {
       }
     });
 
-    this.userService.getHorarios().subscribe({
+    this.userService.getHorarios().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.horarios.set(response.data);
@@ -142,7 +144,7 @@ export class UserFormComponent implements OnInit {
   private loadUserData(id: string): void {
     this.loadingData.set(true);
 
-    this.userService.getUserById(id).subscribe({
+    this.userService.getUserById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.currentUser.set(response.data);
@@ -203,7 +205,7 @@ export class UserFormComponent implements OnInit {
       area_equipo_id: formData.area_equipo_id || undefined,
       telefono: formData.telefono || undefined,
       turno_horario_id: formData.turno_horario_id || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Usuario creado correctamente');
@@ -233,7 +235,7 @@ export class UserFormComponent implements OnInit {
       area_equipo_id: formData.area_equipo_id || undefined,
       telefono: formData.telefono || undefined,
       turno_horario_id: formData.turno_horario_id || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Usuario actualizado correctamente');

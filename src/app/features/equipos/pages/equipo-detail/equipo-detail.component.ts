@@ -4,7 +4,8 @@
 // Componente para ver detalles de un equipo y gestionar sus miembros
 // ============================================================================
 
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModalModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -31,6 +32,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class EquipoDetailComponent implements OnInit {
   private equipoService = inject(EquipoService);
+  private destroyRef = inject(DestroyRef);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -78,7 +80,7 @@ export class EquipoDetailComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.equipoService.getEquipoById(id).subscribe({
+    this.equipoService.getEquipoById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.equipo.set(response.data);
@@ -102,7 +104,7 @@ export class EquipoDetailComponent implements OnInit {
 
     this.loadingMiembros.set(true);
 
-    this.equipoService.getEquipoMembers(equipoId).subscribe({
+    this.equipoService.getEquipoMembers(equipoId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.miembros.set(response.data);
@@ -118,7 +120,7 @@ export class EquipoDetailComponent implements OnInit {
   loadUnassignedUsers(): void {
     this.loadingUnassigned.set(true);
 
-    this.equipoService.getUnassignedUsers().subscribe({
+    this.equipoService.getUnassignedUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.unassignedUsers.set(response.data);
@@ -150,7 +152,7 @@ export class EquipoDetailComponent implements OnInit {
       return;
     }
 
-    this.equipoService.assignMember(userId, equipoId).subscribe({
+    this.equipoService.assignMember(userId, equipoId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Usuario asignado al equipo');
@@ -175,7 +177,7 @@ export class EquipoDetailComponent implements OnInit {
     const member = this.selectedMember();
     if (!member) return;
 
-    this.equipoService.removeMember(member.id).subscribe({
+    this.equipoService.removeMember(member.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success(`${member.nombre_completo} removido del equipo`);

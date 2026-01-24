@@ -4,7 +4,8 @@
 // Componente para mostrar el detalle de un cliente con pestañas
 // ============================================================================
 
-import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -115,6 +116,7 @@ export class ClienteDetailComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private notificationService = inject(NotificationService);
   private modalService = inject(NgbModal);
+  private destroyRef = inject(DestroyRef);
 
   // ============================================================================
   // Signals - Estado reactivo
@@ -213,7 +215,7 @@ export class ClienteDetailComponent implements OnInit {
 
   private loadCliente(id: string): void {
     this.loading.set(true);
-    this.clienteService.getClienteById(id).subscribe({
+    this.clienteService.getClienteById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.cliente.set(response.data);
@@ -238,7 +240,7 @@ export class ClienteDetailComponent implements OnInit {
 
   loadSucursales(clienteId: string): void {
     this.loadingSucursales.set(true);
-    this.clienteService.getSucursales(clienteId).subscribe({
+    this.clienteService.getSucursales(clienteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.sucursales.set(response.data);
@@ -481,7 +483,7 @@ export class ClienteDetailComponent implements OnInit {
       nueva_fecha_vencimiento: this.renovarNuevaFecha(),
       costo: this.renovarCosto() || undefined,
       notas: this.renovarNotas() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Licencia renovada exitosamente');
@@ -524,7 +526,7 @@ export class ClienteDetailComponent implements OnInit {
       nueva_fecha_vencimiento: this.renovarNuevaFecha(),
       costo: this.renovarCosto() || undefined,
       notas: this.renovarNotas() || undefined
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Póliza renovada exitosamente');
@@ -590,7 +592,7 @@ export class ClienteDetailComponent implements OnInit {
     const editing = this.editingSucursal();
 
     if (editing) {
-      this.clienteService.updateSucursal(editing.id, form).subscribe({
+      this.clienteService.updateSucursal(editing.id, form).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Sucursal actualizada');
@@ -607,7 +609,7 @@ export class ClienteDetailComponent implements OnInit {
         }
       });
     } else {
-      this.clienteService.createSucursal({ ...form, cliente_id: clienteId }).subscribe({
+      this.clienteService.createSucursal({ ...form, cliente_id: clienteId }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Sucursal creada');
@@ -637,7 +639,7 @@ export class ClienteDetailComponent implements OnInit {
     if (!sucursal || !clienteId) return;
 
     this.savingAction.set(true);
-    this.clienteService.deleteSucursal(sucursal.id).subscribe({
+    this.clienteService.deleteSucursal(sucursal.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Sucursal eliminada');
@@ -704,7 +706,7 @@ export class ClienteDetailComponent implements OnInit {
     };
 
     if (editing) {
-      this.clienteService.updateContacto(editing.id, dto).subscribe({
+      this.clienteService.updateContacto(editing.id, dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Contacto actualizado');
@@ -721,7 +723,7 @@ export class ClienteDetailComponent implements OnInit {
         }
       });
     } else {
-      this.clienteService.createContacto({ ...dto, cliente_id: clienteId }).subscribe({
+      this.clienteService.createContacto({ ...dto, cliente_id: clienteId }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Contacto creado');
@@ -751,7 +753,7 @@ export class ClienteDetailComponent implements OnInit {
     if (!contacto || !clienteId) return;
 
     this.savingAction.set(true);
-    this.clienteService.deleteContacto(contacto.id).subscribe({
+    this.clienteService.deleteContacto(contacto.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success('Contacto eliminado');
@@ -821,7 +823,7 @@ export class ClienteDetailComponent implements OnInit {
     };
 
     if (editing) {
-      this.clienteService.updateLicencia(editing.id, dto).subscribe({
+      this.clienteService.updateLicencia(editing.id, dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Licencia actualizada');
@@ -838,7 +840,7 @@ export class ClienteDetailComponent implements OnInit {
         }
       });
     } else {
-      this.clienteService.createLicencia({ ...dto, cliente_id: clienteId }).subscribe({
+      this.clienteService.createLicencia({ ...dto, cliente_id: clienteId }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Licencia creada');
@@ -863,7 +865,7 @@ export class ClienteDetailComponent implements OnInit {
     this.loadingHistorial.set(true);
     this.activeModal = this.modalService.open(content, { size: 'lg', centered: true });
 
-    this.clienteService.getRenovacionesLicencia(licencia.id).subscribe({
+    this.clienteService.getRenovacionesLicencia(licencia.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.historialRenovaciones.set(response.data);
@@ -926,7 +928,7 @@ export class ClienteDetailComponent implements OnInit {
     };
 
     if (editing) {
-      this.clienteService.updatePoliza(editing.id, dto).subscribe({
+      this.clienteService.updatePoliza(editing.id, dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Póliza actualizada');
@@ -943,7 +945,7 @@ export class ClienteDetailComponent implements OnInit {
         }
       });
     } else {
-      this.clienteService.createPoliza({ ...dto, cliente_id: clienteId }).subscribe({
+      this.clienteService.createPoliza({ ...dto, cliente_id: clienteId }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success) {
             this.notificationService.success('Póliza creada');

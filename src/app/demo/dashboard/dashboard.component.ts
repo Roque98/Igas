@@ -4,7 +4,8 @@
 // Dashboard principal con estadísticas de usuarios del sistema
 // ============================================================================
 
-import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -62,6 +63,7 @@ export type BarChartOptions = {
 })
 export class DashboardComponent implements OnInit {
   private userService = inject(UserService);
+  private destroyRef = inject(DestroyRef);
   private supabase = inject(SupabaseService);
   private clienteService = inject(ClienteService);
   private reporteService = inject(ReporteService);
@@ -122,7 +124,7 @@ export class DashboardComponent implements OnInit {
   private loadUserName(): void {
     const user = this.supabase.user;
     if (user) {
-      this.userService.getUserById(user.id).subscribe({
+      this.userService.getUserById(user.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.userName.set(response.data.nombre_completo || 'Usuario');
@@ -293,7 +295,7 @@ export class DashboardComponent implements OnInit {
 
   private loadAlertas(): void {
     this.loadingAlertas.set(true);
-    this.clienteService.getAlertas({ atendido: false }, 10).subscribe({
+    this.clienteService.getAlertas({ atendido: false }, 10).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.alertasVencimiento.set(response.data);
@@ -349,7 +351,7 @@ export class DashboardComponent implements OnInit {
   }
 
   marcarAlertaAtendida(alerta: AlertaVencimiento): void {
-    this.clienteService.marcarAlertaAtendida(alerta.id).subscribe({
+    this.clienteService.marcarAlertaAtendida(alerta.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.loadAlertas();

@@ -4,7 +4,8 @@
 // Página de reporte de casos con filtros, gráficas y tabla
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -47,6 +48,7 @@ import {
 })
 export class ReporteCasosComponent implements OnInit {
   private reporteService = inject(ReporteService);
+  private destroyRef = inject(DestroyRef);
   private exportService = inject(ExportService);
   private clienteService = inject(ClienteService);
   private userService = inject(UserService);
@@ -115,11 +117,11 @@ export class ReporteCasosComponent implements OnInit {
   // ============================================================================
 
   private loadCatalogos(): void {
-    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).subscribe({
+    this.clienteService.getClientes({ estatus_cliente: 'Activo' }, { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => this.clientes.set(response.data)
     });
 
-    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 200 }).subscribe({
+    this.userService.getUsers({ estatus: 'Activo' }, { page: 1, pageSize: 200 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => this.usuarios.set(response.data)
     });
   }
@@ -137,7 +139,7 @@ export class ReporteCasosComponent implements OnInit {
 
   private loadResumen(): void {
     this.loadingResumen.set(true);
-    this.reporteService.getCasosResumen(this.filters()).subscribe({
+    this.reporteService.getCasosResumen(this.filters()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.resumen.set(response.data);
@@ -155,7 +157,7 @@ export class ReporteCasosComponent implements OnInit {
 
   private loadTendencia(): void {
     this.loadingTendencia.set(true);
-    this.reporteService.getCasosTendenciaMensual(12, this.filters().cliente_id).subscribe({
+    this.reporteService.getCasosTendenciaMensual(12, this.filters().cliente_id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.tendencia.set(response.data);
@@ -173,7 +175,7 @@ export class ReporteCasosComponent implements OnInit {
 
   private loadDetalle(): void {
     this.loadingDetalle.set(true);
-    this.reporteService.getCasosDetalle(this.filters(), this.pagination()).subscribe({
+    this.reporteService.getCasosDetalle(this.filters(), this.pagination()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.detalle.set(response.data);
         this.totalItems.set(response.total);
@@ -325,7 +327,7 @@ export class ReporteCasosComponent implements OnInit {
       { header: 'Hrs Resolución', key: 'horas_resolucion' as const, format: (v: number) => this.exportService.formatNumber(v, 1) }
     ];
 
-    this.reporteService.getCasosDetalle(this.filters(), { page: 1, pageSize: 10000 }).subscribe({
+    this.reporteService.getCasosDetalle(this.filters(), { page: 1, pageSize: 10000 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.exportService.exportToExcel(response.data, columns, 'reporte_casos', config);
       }
@@ -349,7 +351,7 @@ export class ReporteCasosComponent implements OnInit {
       { header: 'Semáforo', key: 'semaforo' as const }
     ];
 
-    this.reporteService.getCasosDetalle(this.filters(), { page: 1, pageSize: 500 }).subscribe({
+    this.reporteService.getCasosDetalle(this.filters(), { page: 1, pageSize: 500 }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.exportService.exportToPDF(response.data, columns, 'reporte_casos', config);
       }

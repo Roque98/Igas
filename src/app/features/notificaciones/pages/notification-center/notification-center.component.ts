@@ -4,7 +4,8 @@
 // Centro de notificaciones con filtros, tabs y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -48,6 +49,7 @@ interface GroupedNotifications {
 export class NotificationCenterComponent implements OnInit {
   notificationPushService = inject(NotificationPushService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   // Estado
   loading = signal(false);
@@ -107,7 +109,7 @@ export class NotificationCenterComponent implements OnInit {
     this.notificationPushService.getNotifications(filters, {
       page: this.currentPage(),
       pageSize: this.pageSize
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         let data = response.data || [];
 
@@ -152,7 +154,7 @@ export class NotificationCenterComponent implements OnInit {
   markAsRead(notification: Notification): void {
     if (notification.leida) return;
 
-    this.notificationPushService.markAsRead(notification.id).subscribe({
+    this.notificationPushService.markAsRead(notification.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notifications.update(list =>
           list.map(n => n.id === notification.id ? { ...n, leida: true } : n)
@@ -168,7 +170,7 @@ export class NotificationCenterComponent implements OnInit {
   }
 
   deleteNotification(notification: Notification): void {
-    this.notificationPushService.deleteNotification(notification.id).subscribe({
+    this.notificationPushService.deleteNotification(notification.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notifications.update(list => list.filter(n => n.id !== notification.id));
@@ -215,7 +217,7 @@ export class NotificationCenterComponent implements OnInit {
     const ids = Array.from(this.selectedIds());
     if (ids.length === 0) return;
 
-    this.notificationPushService.markMultipleAsRead(ids).subscribe({
+    this.notificationPushService.markMultipleAsRead(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notifications.update(list =>
           list.map(n => ids.includes(n.id) ? { ...n, leida: true } : n)
@@ -230,7 +232,7 @@ export class NotificationCenterComponent implements OnInit {
   }
 
   markAllAsRead(): void {
-    this.notificationPushService.markAllAsRead().subscribe({
+    this.notificationPushService.markAllAsRead().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notifications.update(list => list.map(n => ({ ...n, leida: true })));
         this.toastService.success('Todas las notificaciones marcadas como leídas');

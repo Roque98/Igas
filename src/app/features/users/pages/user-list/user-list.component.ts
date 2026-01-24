@@ -4,7 +4,8 @@
 // Componente para listar usuarios con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -39,6 +40,7 @@ import { environment } from '../../../../../environments/environment';
 })
 export class UserListComponent implements OnInit {
   private userService = inject(UserService);
+  private destroyRef = inject(DestroyRef);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private modalService = inject(NgbModal);
@@ -84,7 +86,7 @@ export class UserListComponent implements OnInit {
   // ============================================================================
 
   private loadCatalogos(): void {
-    this.userService.getRoles().subscribe({
+    this.userService.getRoles().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.roles.set(response.data);
@@ -92,7 +94,7 @@ export class UserListComponent implements OnInit {
       }
     });
 
-    this.userService.getEquipos().subscribe({
+    this.userService.getEquipos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.equipos.set(response.data);
@@ -118,7 +120,7 @@ export class UserListComponent implements OnInit {
       sortOrder: 'asc'
     };
 
-    this.userService.getUsers(filters, pagination).subscribe({
+    this.userService.getUsers(filters, pagination).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         this.users.set(response.data);
         this.totalItems.set(response.total);
@@ -192,7 +194,7 @@ export class UserListComponent implements OnInit {
     const user = this.selectedUser();
     if (!user) return;
 
-    this.userService.deactivateUser(user.id).subscribe({
+    this.userService.deactivateUser(user.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success(`Usuario ${user.nombre_completo} desactivado correctamente`);
@@ -210,7 +212,7 @@ export class UserListComponent implements OnInit {
   }
 
   activateUser(user: ProfileWithRelations): void {
-    this.userService.activateUser(user.id).subscribe({
+    this.userService.activateUser(user.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
         if (response.success) {
           this.notificationService.success(`Usuario ${user.nombre_completo} activado correctamente`);
