@@ -46,6 +46,8 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -77,7 +79,7 @@ export class ClienteService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_clientes_resumen')
+      .from(VIEWS.V_CLIENTES_RESUMEN)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -110,7 +112,7 @@ export class ClienteService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching clientes:', error);
+      if (!environment.production) { console.error('Error fetching clientes:', error); }
       return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
 
@@ -130,7 +132,7 @@ export class ClienteService {
 
   private async fetchClienteById(id: string): Promise<ServiceResponse<ClienteResumen>> {
     const { data, error } = await this.supabase.client
-      .from('v_clientes_resumen')
+      .from(VIEWS.V_CLIENTES_RESUMEN)
       .select('*')
       .eq('id', id)
       .single();
@@ -148,7 +150,7 @@ export class ClienteService {
 
   private async insertCliente(dto: CreateClienteDTO): Promise<ServiceResponse<Cliente>> {
     const { data, error } = await this.supabase.client
-      .from('clientes')
+      .from(TABLES.CLIENTES)
       .insert({
         ...dto,
         tipo_cliente: dto.tipo_cliente || 'Cliente',
@@ -158,7 +160,7 @@ export class ClienteService {
       .single();
 
     if (error) {
-      console.error('Error creating cliente:', error);
+      if (!environment.production) { console.error('Error creating cliente:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -171,14 +173,14 @@ export class ClienteService {
 
   private async patchCliente(id: string, dto: UpdateClienteDTO): Promise<ServiceResponse<Cliente>> {
     const { data, error } = await this.supabase.client
-      .from('clientes')
+      .from(TABLES.CLIENTES)
       .update({ ...dto, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating cliente:', error);
+      if (!environment.production) { console.error('Error updating cliente:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -191,7 +193,7 @@ export class ClienteService {
 
   private async removeCliente(id: string): Promise<ServiceResponse<void>> {
     const { error } = await this.supabase.client
-      .from('clientes')
+      .from(TABLES.CLIENTES)
       .delete()
       .eq('id', id);
 
@@ -209,7 +211,7 @@ export class ClienteService {
 
   private async searchClientesAsync(term: string, limit: number): Promise<ServiceResponse<Cliente[]>> {
     const { data, error } = await this.supabase.client
-      .from('clientes')
+      .from(TABLES.CLIENTES)
       .select('id, nombre_comercial, razon_social, rfc, telefono, email, estatus_cliente')
       .or(`nombre_comercial.ilike.%${term}%,razon_social.ilike.%${term}%,rfc.ilike.%${term}%`)
       .limit(limit);
@@ -231,7 +233,7 @@ export class ClienteService {
 
   private async fetchSucursales(clienteId: string): Promise<ServiceResponse<Sucursal[]>> {
     const { data, error } = await this.supabase.client
-      .from('sucursales')
+      .from(TABLES.SUCURSALES)
       .select('*')
       .eq('cliente_id', clienteId)
       .order('es_matriz', { ascending: false })
@@ -252,13 +254,13 @@ export class ClienteService {
     // Si es matriz, desmarcar otras matrices del mismo cliente
     if (dto.es_matriz) {
       await this.supabase.client
-        .from('sucursales')
+        .from(TABLES.SUCURSALES)
         .update({ es_matriz: false })
         .eq('cliente_id', dto.cliente_id);
     }
 
     const { data, error } = await this.supabase.client
-      .from('sucursales')
+      .from(TABLES.SUCURSALES)
       .insert(dto)
       .select()
       .single();
@@ -278,14 +280,14 @@ export class ClienteService {
     // Si se marca como matriz, desmarcar otras
     if (dto.es_matriz) {
       const { data: sucursal } = await this.supabase.client
-        .from('sucursales')
+        .from(TABLES.SUCURSALES)
         .select('cliente_id')
         .eq('id', id)
         .single();
 
       if (sucursal) {
         await this.supabase.client
-          .from('sucursales')
+          .from(TABLES.SUCURSALES)
           .update({ es_matriz: false })
           .eq('cliente_id', sucursal.cliente_id)
           .neq('id', id);
@@ -293,7 +295,7 @@ export class ClienteService {
     }
 
     const { data, error } = await this.supabase.client
-      .from('sucursales')
+      .from(TABLES.SUCURSALES)
       .update({ ...dto, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
@@ -312,7 +314,7 @@ export class ClienteService {
 
   private async removeSucursal(id: string): Promise<ServiceResponse<void>> {
     const { error } = await this.supabase.client
-      .from('sucursales')
+      .from(TABLES.SUCURSALES)
       .delete()
       .eq('id', id);
 
@@ -333,7 +335,7 @@ export class ClienteService {
 
   private async fetchContactos(clienteId: string): Promise<ServiceResponse<ContactoCliente[]>> {
     const { data, error } = await this.supabase.client
-      .from('contactos_cliente')
+      .from(TABLES.CONTACTOS_CLIENTE)
       .select(`
         *,
         sucursal:sucursales(nombre)
@@ -363,13 +365,13 @@ export class ClienteService {
     // Si es principal, desmarcar otros
     if (dto.es_contacto_principal) {
       await this.supabase.client
-        .from('contactos_cliente')
+        .from(TABLES.CONTACTOS_CLIENTE)
         .update({ es_contacto_principal: false })
         .eq('cliente_id', dto.cliente_id);
     }
 
     const { data, error } = await this.supabase.client
-      .from('contactos_cliente')
+      .from(TABLES.CONTACTOS_CLIENTE)
       .insert(dto)
       .select()
       .single();
@@ -388,14 +390,14 @@ export class ClienteService {
   private async patchContacto(id: string, dto: UpdateContactoDTO): Promise<ServiceResponse<ContactoCliente>> {
     if (dto.es_contacto_principal) {
       const { data: contacto } = await this.supabase.client
-        .from('contactos_cliente')
+        .from(TABLES.CONTACTOS_CLIENTE)
         .select('cliente_id')
         .eq('id', id)
         .single();
 
       if (contacto) {
         await this.supabase.client
-          .from('contactos_cliente')
+          .from(TABLES.CONTACTOS_CLIENTE)
           .update({ es_contacto_principal: false })
           .eq('cliente_id', contacto.cliente_id)
           .neq('id', id);
@@ -403,7 +405,7 @@ export class ClienteService {
     }
 
     const { data, error } = await this.supabase.client
-      .from('contactos_cliente')
+      .from(TABLES.CONTACTOS_CLIENTE)
       .update({ ...dto, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
@@ -422,7 +424,7 @@ export class ClienteService {
 
   private async removeContacto(id: string): Promise<ServiceResponse<void>> {
     const { error } = await this.supabase.client
-      .from('contactos_cliente')
+      .from(TABLES.CONTACTOS_CLIENTE)
       .update({ estatus: 'Inactivo', updated_at: new Date().toISOString() })
       .eq('id', id);
 
@@ -443,7 +445,7 @@ export class ClienteService {
 
   private async fetchDatosFiscales(clienteId: string): Promise<ServiceResponse<DatosFiscales | null>> {
     const { data, error } = await this.supabase.client
-      .from('datos_fiscales')
+      .from(TABLES.DATOS_FISCALES)
       .select('*')
       .eq('cliente_id', clienteId)
       .maybeSingle();
@@ -461,7 +463,7 @@ export class ClienteService {
 
   private async upsertDatosFiscales(dto: CreateDatosFiscalesDTO): Promise<ServiceResponse<DatosFiscales>> {
     const { data, error } = await this.supabase.client
-      .from('datos_fiscales')
+      .from(TABLES.DATOS_FISCALES)
       .upsert(dto, { onConflict: 'cliente_id' })
       .select()
       .single();
@@ -488,7 +490,7 @@ export class ClienteService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_licencias_estado')
+      .from(VIEWS.V_LICENCIAS_ESTADO)
       .select('*', { count: 'exact' });
 
     if (filters) {
@@ -532,7 +534,7 @@ export class ClienteService {
 
   private async fetchLicenciasByCliente(clienteId: string): Promise<ServiceResponse<LicenciaConEstado[]>> {
     const { data, error } = await this.supabase.client
-      .from('v_licencias_estado')
+      .from(VIEWS.V_LICENCIAS_ESTADO)
       .select('*')
       .eq('cliente_id', clienteId)
       .order('fecha_vencimiento', { ascending: true, nullsFirst: false });
@@ -550,7 +552,7 @@ export class ClienteService {
 
   private async insertLicencia(dto: CreateLicenciaDTO): Promise<ServiceResponse<LicenciaHasp>> {
     const { data, error } = await this.supabase.client
-      .from('licencias_hasp')
+      .from(TABLES.LICENCIAS_HASP)
       .insert(dto)
       .select()
       .single();
@@ -568,7 +570,7 @@ export class ClienteService {
 
   private async patchLicencia(id: string, dto: UpdateLicenciaDTO): Promise<ServiceResponse<LicenciaHasp>> {
     const { data, error } = await this.supabase.client
-      .from('licencias_hasp')
+      .from(TABLES.LICENCIAS_HASP)
       .update({ ...dto, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
@@ -607,7 +609,7 @@ export class ClienteService {
 
   private async fetchRenovacionesLicencia(licenciaId: string): Promise<ServiceResponse<LicenciaRenovacion[]>> {
     const { data, error } = await this.supabase.client
-      .from('licencias_renovaciones')
+      .from(TABLES.LICENCIAS_RENOVACIONES)
       .select(`
         *,
         renovado_por_profile:profiles(nombre_completo)
@@ -642,7 +644,7 @@ export class ClienteService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_polizas_estado')
+      .from(VIEWS.V_POLIZAS_ESTADO)
       .select('*', { count: 'exact' });
 
     if (filters) {
@@ -683,7 +685,7 @@ export class ClienteService {
 
   private async fetchPolizasByCliente(clienteId: string): Promise<ServiceResponse<PolizaConEstado[]>> {
     const { data, error } = await this.supabase.client
-      .from('v_polizas_estado')
+      .from(VIEWS.V_POLIZAS_ESTADO)
       .select('*')
       .eq('cliente_id', clienteId)
       .order('fecha_vencimiento', { ascending: false });
@@ -701,7 +703,7 @@ export class ClienteService {
 
   private async insertPoliza(dto: CreatePolizaDTO): Promise<ServiceResponse<PolizaSoporte>> {
     const { data, error } = await this.supabase.client
-      .from('polizas_soporte')
+      .from(TABLES.POLIZAS_SOPORTE)
       .insert(dto)
       .select()
       .single();
@@ -719,7 +721,7 @@ export class ClienteService {
 
   private async patchPoliza(id: string, dto: UpdatePolizaDTO): Promise<ServiceResponse<PolizaSoporte>> {
     const { data, error } = await this.supabase.client
-      .from('polizas_soporte')
+      .from(TABLES.POLIZAS_SOPORTE)
       .update({ ...dto, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
@@ -762,7 +764,7 @@ export class ClienteService {
 
   private async fetchAlertas(filters?: AlertaFilters, limit: number = 20): Promise<ServiceResponse<AlertaVencimiento[]>> {
     let query = this.supabase.client
-      .from('alertas_vencimiento')
+      .from(TABLES.ALERTAS_VENCIMIENTO)
       .select(`
         *,
         cliente:clientes(nombre_comercial)
@@ -813,7 +815,7 @@ export class ClienteService {
     const userId = this.supabase.user?.id;
 
     const { error } = await this.supabase.client
-      .from('alertas_vencimiento')
+      .from(TABLES.ALERTAS_VENCIMIENTO)
       .update({
         atendido: true,
         atendido_por: userId,
@@ -838,7 +840,7 @@ export class ClienteService {
 
   private async fetchRegimenesFiscales(): Promise<ServiceResponse<RegimenFiscal[]>> {
     const { data, error } = await this.supabase.client
-      .from('cat_regimen_fiscal')
+      .from(TABLES.CAT_REGIMEN_FISCAL)
       .select('*')
       .eq('activo', true)
       .order('clave');
@@ -856,7 +858,7 @@ export class ClienteService {
 
   private async fetchUsosCFDI(): Promise<ServiceResponse<UsoCFDI[]>> {
     const { data, error } = await this.supabase.client
-      .from('cat_uso_cfdi')
+      .from(TABLES.CAT_USO_CFDI)
       .select('*')
       .eq('activo', true)
       .order('clave');
@@ -876,54 +878,54 @@ export class ClienteService {
     try {
       // Total clientes
       const { count: total } = await this.supabase.client
-        .from('clientes')
+        .from(TABLES.CLIENTES)
         .select('*', { count: 'exact', head: true });
 
       // Clientes activos
       const { count: activos } = await this.supabase.client
-        .from('clientes')
+        .from(TABLES.CLIENTES)
         .select('*', { count: 'exact', head: true })
         .eq('estatus_cliente', 'Activo');
 
       // Sin póliza
       const { count: sinPoliza } = await this.supabase.client
-        .from('clientes')
+        .from(TABLES.CLIENTES)
         .select('*', { count: 'exact', head: true })
         .eq('estatus_cliente', 'Sin póliza');
 
       // En cobranza
       const { count: enCobranza } = await this.supabase.client
-        .from('clientes')
+        .from(TABLES.CLIENTES)
         .select('*', { count: 'exact', head: true })
         .eq('estatus_cliente', 'En cobranza');
 
       // Licencias por vencer
       const { count: licPorVencer } = await this.supabase.client
-        .from('v_licencias_estado')
+        .from(VIEWS.V_LICENCIAS_ESTADO)
         .select('*', { count: 'exact', head: true })
         .eq('estado_calculado', 'Por vencer');
 
       // Licencias vencidas
       const { count: licVencidas } = await this.supabase.client
-        .from('v_licencias_estado')
+        .from(VIEWS.V_LICENCIAS_ESTADO)
         .select('*', { count: 'exact', head: true })
         .eq('estado_calculado', 'Vencida');
 
       // Pólizas por vencer
       const { count: polPorVencer } = await this.supabase.client
-        .from('v_polizas_estado')
+        .from(VIEWS.V_POLIZAS_ESTADO)
         .select('*', { count: 'exact', head: true })
         .eq('estado_calculado', 'Por vencer');
 
       // Pólizas vencidas
       const { count: polVencidas } = await this.supabase.client
-        .from('v_polizas_estado')
+        .from(VIEWS.V_POLIZAS_ESTADO)
         .select('*', { count: 'exact', head: true })
         .eq('estado_calculado', 'Vencida');
 
       // Alertas pendientes
       const { count: alertas } = await this.supabase.client
-        .from('alertas_vencimiento')
+        .from(TABLES.ALERTAS_VENCIMIENTO)
         .select('*', { count: 'exact', head: true })
         .eq('atendido', false);
 
@@ -939,7 +941,7 @@ export class ClienteService {
         alertas_pendientes: alertas || 0
       };
     } catch (error) {
-      console.error('Error getting cliente stats:', error);
+      if (!environment.production) { console.error('Error getting cliente stats:', error); }
       return {
         total_clientes: 0,
         clientes_activos: 0,

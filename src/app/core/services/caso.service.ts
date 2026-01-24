@@ -28,6 +28,8 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS, STORAGE_BUCKETS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +65,7 @@ export class CasoService {
 
     // Usar la vista con SLA calculado
     let query = this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -114,7 +116,7 @@ export class CasoService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching casos:', error);
+      if (!environment.production) { console.error('Error fetching casos:', error); }
       return {
         data: [],
         total: 0,
@@ -143,13 +145,13 @@ export class CasoService {
 
   private async fetchCasoById(id: string): Promise<ServiceResponse<CasoConSLA>> {
     const { data, error } = await this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error fetching caso:', error);
+      if (!environment.production) { console.error('Error fetching caso:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -165,13 +167,13 @@ export class CasoService {
 
   private async fetchCasoByFolio(folio: string): Promise<ServiceResponse<CasoConSLA>> {
     const { data, error } = await this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*')
       .eq('folio', folio)
       .single();
 
     if (error) {
-      console.error('Error fetching caso by folio:', error);
+      if (!environment.production) { console.error('Error fetching caso by folio:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -207,7 +209,7 @@ export class CasoService {
       });
 
     if (error) {
-      console.error('Error escalating ticket:', error);
+      if (!environment.production) { console.error('Error escalating ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -237,7 +239,7 @@ export class CasoService {
 
     // Obtener SLA default del área
     const { data: area } = await this.supabase.client
-      .from('areas_destino')
+      .from(TABLES.AREAS_DESTINO)
       .select('sla_default_horas')
       .eq('nombre', casoData.area_destino)
       .single();
@@ -246,7 +248,7 @@ export class CasoService {
 
     // Obtener estatus inicial "Nuevo"
     const { data: estatusNuevo } = await this.supabase.client
-      .from('estatus_casos')
+      .from(TABLES.ESTATUS_CASOS)
       .select('id')
       .eq('nombre', 'Nuevo')
       .single();
@@ -256,7 +258,7 @@ export class CasoService {
     }
 
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .insert({
         ...casoData,
         estatus_id: estatusNuevo.id,
@@ -268,13 +270,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error creating caso:', error);
+      if (!environment.production) { console.error('Error creating caso:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: data.id,
         usuario_id: userId,
@@ -295,7 +297,7 @@ export class CasoService {
 
   private async updateCasoAsync(id: string, casoData: UpdateCasoDTO): Promise<ServiceResponse<Caso>> {
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         ...casoData,
         updated_at: new Date().toISOString()
@@ -305,7 +307,7 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error updating caso:', error);
+      if (!environment.production) { console.error('Error updating caso:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -328,7 +330,7 @@ export class CasoService {
 
     // Actualizar caso
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         estatus_id: dto.estatus_id,
         updated_at: new Date().toISOString()
@@ -338,14 +340,14 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error changing caso status:', error);
+      if (!environment.production) { console.error('Error changing caso status:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Si hay nota, agregarla
     if (dto.nota) {
       await this.supabase.client
-        .from('caso_bitacora')
+        .from(TABLES.CASO_BITACORA)
         .insert({
           caso_id: casoId,
           usuario_id: userId,
@@ -369,14 +371,14 @@ export class CasoService {
 
     // Obtener caso actual para historial
     const { data: casoActual } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .select('responsable_id')
       .eq('id', casoId)
       .single();
 
     // Actualizar caso
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         responsable_id: usuarioId,
         updated_at: new Date().toISOString()
@@ -386,13 +388,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error assigning caso:', error);
+      if (!environment.production) { console.error('Error assigning caso:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en historial de asignaciones
     await this.supabase.client
-      .from('caso_historial_asignaciones')
+      .from(TABLES.CASO_HISTORIAL_ASIGNACIONES)
       .insert({
         caso_id: casoId,
         de_usuario_id: casoActual?.responsable_id || null,
@@ -402,7 +404,7 @@ export class CasoService {
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -429,7 +431,7 @@ export class CasoService {
 
     // Obtener estatus "Listo para validar"
     const { data: estatusListo } = await this.supabase.client
-      .from('estatus_casos')
+      .from(TABLES.ESTATUS_CASOS)
       .select('id')
       .eq('nombre', 'Listo para validar')
       .single();
@@ -440,7 +442,7 @@ export class CasoService {
 
     // Actualizar caso
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         estatus_id: estatusListo.id,
         resultado: 'Listo para validar',
@@ -452,13 +454,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error marking caso as ready:', error);
+      if (!environment.production) { console.error('Error marking caso as ready:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -482,7 +484,7 @@ export class CasoService {
 
     // Obtener estatus "Regresado a soporte"
     const { data: estatusRegresado } = await this.supabase.client
-      .from('estatus_casos')
+      .from(TABLES.ESTATUS_CASOS)
       .select('id')
       .eq('nombre', 'Regresado a soporte')
       .single();
@@ -493,7 +495,7 @@ export class CasoService {
 
     // Actualizar caso
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         estatus_id: estatusRegresado.id,
         resultado: 'Regresa a soporte',
@@ -504,13 +506,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error returning caso to support:', error);
+      if (!environment.production) { console.error('Error returning caso to support:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -534,7 +536,7 @@ export class CasoService {
 
     // Obtener estatus "Cerrado"
     const { data: estatusCerrado } = await this.supabase.client
-      .from('estatus_casos')
+      .from(TABLES.ESTATUS_CASOS)
       .select('id')
       .eq('nombre', 'Cerrado')
       .single();
@@ -545,7 +547,7 @@ export class CasoService {
 
     // Actualizar caso
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         estatus_id: estatusCerrado.id,
         resultado: dto.resultado,
@@ -558,13 +560,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error closing caso:', error);
+      if (!environment.production) { console.error('Error closing caso:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -587,7 +589,7 @@ export class CasoService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('casos')
+      .from(TABLES.CASOS)
       .update({
         numero_caso_externo: numeroCasoExterno,
         updated_at: new Date().toISOString()
@@ -597,13 +599,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error registering external case number:', error);
+      if (!environment.production) { console.error('Error registering external case number:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -628,7 +630,7 @@ export class CasoService {
 
   private async fetchCasoBitacora(casoId: string): Promise<ServiceResponse<CasoBitacora[]>> {
     const { data, error } = await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .select(`
         *,
         usuario:profiles(nombre_completo, avatar_url)
@@ -637,7 +639,7 @@ export class CasoService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching caso timeline:', error);
+      if (!environment.production) { console.error('Error fetching caso timeline:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -655,7 +657,7 @@ export class CasoService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -666,7 +668,7 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error adding note:', error);
+      if (!environment.production) { console.error('Error adding note:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -682,7 +684,7 @@ export class CasoService {
 
   private async fetchCasoAdjuntos(casoId: string): Promise<ServiceResponse<CasoAdjunto[]>> {
     const { data, error } = await this.supabase.client
-      .from('caso_adjuntos')
+      .from(TABLES.CASO_ADJUNTOS)
       .select(`
         *,
         usuario:profiles(nombre_completo)
@@ -691,7 +693,7 @@ export class CasoService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching attachments:', error);
+      if (!environment.production) { console.error('Error fetching attachments:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -699,7 +701,7 @@ export class CasoService {
     const adjuntosConUrl = await Promise.all(
       (data as CasoAdjunto[]).map(async (adj) => {
         const { data: urlData } = await this.supabase.client.storage
-          .from('caso-attachments')
+          .from(STORAGE_BUCKETS.CASO_ATTACHMENTS)
           .createSignedUrl(adj.ruta_storage, 3600);
         return { ...adj, url: urlData?.signedUrl };
       })
@@ -726,9 +728,9 @@ export class CasoService {
     if (file.type.startsWith('image/')) {
       try {
         processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
-        console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`);
+        if (!environment.production) { console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`); }
       } catch (err) {
-        console.warn('No se pudo comprimir la imagen:', err);
+        if (!environment.production) { console.warn('No se pudo comprimir la imagen:', err); }
       }
     }
 
@@ -737,17 +739,17 @@ export class CasoService {
 
     // Subir archivo a storage
     const { error: uploadError } = await this.supabase.client.storage
-      .from('caso-attachments')
+      .from(STORAGE_BUCKETS.CASO_ATTACHMENTS)
       .upload(fileName, processedFile);
 
     if (uploadError) {
-      console.error('Error uploading file:', uploadError);
+      if (!environment.production) { console.error('Error uploading file:', uploadError); }
       return { data: null, error: 'Error al subir archivo', success: false };
     }
 
     // Registrar en base de datos
     const { data, error } = await this.supabase.client
-      .from('caso_adjuntos')
+      .from(TABLES.CASO_ADJUNTOS)
       .insert({
         caso_id: casoId,
         nombre_archivo: processedFile.name,
@@ -760,13 +762,13 @@ export class CasoService {
       .single();
 
     if (error) {
-      console.error('Error registering attachment:', error);
+      if (!environment.production) { console.error('Error registering attachment:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('caso_bitacora')
+      .from(TABLES.CASO_BITACORA)
       .insert({
         caso_id: casoId,
         usuario_id: userId,
@@ -789,7 +791,7 @@ export class CasoService {
     try {
       // Obtener casos activos de la vista
       const { data: casos } = await this.supabase.client
-        .from('v_casos_con_sla')
+        .from(VIEWS.V_CASOS_CON_SLA)
         .select('*')
         .eq('estatus_es_final', false);
 
@@ -838,7 +840,7 @@ export class CasoService {
         casos_vencidos
       } as CasoStats;
     } catch (error) {
-      console.error('Error getting caso stats:', error);
+      if (!environment.production) { console.error('Error getting caso stats:', error); }
       return this.emptyStats();
     }
   }
@@ -874,7 +876,7 @@ export class CasoService {
   private async fetchCasosAlertas(limit: number): Promise<ServiceResponse<CasoConSLA[]>> {
     try {
       const { data, error } = await this.supabase.client
-        .from('v_casos_con_sla')
+        .from(VIEWS.V_CASOS_CON_SLA)
         .select('*')
         .eq('estatus_es_final', false)
         .or('semaforo.eq.amarillo,semaforo.eq.rojo,compromiso_vencido.eq.true')
@@ -887,7 +889,7 @@ export class CasoService {
 
       return { data: data as CasoConSLA[], error: null, success: true };
     } catch (error) {
-      console.error('Error fetching casos alertas:', error);
+      if (!environment.production) { console.error('Error fetching casos alertas:', error); }
       return { data: null, error: 'Error al obtener alertas', success: false };
     }
   }
@@ -902,7 +904,7 @@ export class CasoService {
   private async fetchCasosMasAntiguos(limit: number): Promise<ServiceResponse<CasoConSLA[]>> {
     try {
       const { data, error } = await this.supabase.client
-        .from('v_casos_con_sla')
+        .from(VIEWS.V_CASOS_CON_SLA)
         .select('*')
         .eq('estatus_es_final', false)
         .order('fecha_creacion', { ascending: true })
@@ -914,7 +916,7 @@ export class CasoService {
 
       return { data: data as CasoConSLA[], error: null, success: true };
     } catch (error) {
-      console.error('Error fetching casos antiguos:', error);
+      if (!environment.production) { console.error('Error fetching casos antiguos:', error); }
       return { data: null, error: 'Error al obtener casos antiguos', success: false };
     }
   }
@@ -932,7 +934,7 @@ export class CasoService {
 
   private async fetchEstatus(): Promise<ServiceResponse<EstatusCaso[]>> {
     const { data, error } = await this.supabase.client
-      .from('estatus_casos')
+      .from(TABLES.ESTATUS_CASOS)
       .select('*')
       .order('orden');
 
@@ -952,7 +954,7 @@ export class CasoService {
 
   private async fetchAreasDestino(): Promise<ServiceResponse<AreaDestinoConfig[]>> {
     const { data, error } = await this.supabase.client
-      .from('areas_destino')
+      .from(TABLES.AREAS_DESTINO)
       .select('*')
       .eq('estatus', 'Activo')
       .order('nombre');
@@ -973,13 +975,13 @@ export class CasoService {
 
   private async fetchCasosByTicket(ticketId: string): Promise<ServiceResponse<CasoConSLA[]>> {
     const { data, error } = await this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*')
       .eq('ticket_id', ticketId)
       .order('fecha_creacion', { ascending: false });
 
     if (error) {
-      console.error('Error fetching casos for ticket:', error);
+      if (!environment.production) { console.error('Error fetching casos for ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 

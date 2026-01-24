@@ -1,5 +1,5 @@
 // Angular import
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy} from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 
 // project import
@@ -12,7 +12,8 @@ import { SupabaseService } from './core/services/supabase.service';
   selector: 'app-root',
   imports: [SpinnerComponent, RouterModule, ToastContainerComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   private router = inject(Router);

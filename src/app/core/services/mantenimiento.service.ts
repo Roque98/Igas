@@ -29,6 +29,8 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS, STORAGE_BUCKETS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +65,7 @@ export class MantenimientoService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_mantenimientos_completo')
+      .from(VIEWS.V_MANTENIMIENTOS_COMPLETO)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -110,7 +112,7 @@ export class MantenimientoService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching mantenimientos:', error);
+      if (!environment.production) { console.error('Error fetching mantenimientos:', error); }
       return {
         data: [],
         total: 0,
@@ -139,13 +141,13 @@ export class MantenimientoService {
 
   private async fetchMantenimientoById(id: string): Promise<ServiceResponse<MantenimientoCompleto>> {
     const { data, error } = await this.supabase.client
-      .from('v_mantenimientos_completo')
+      .from(VIEWS.V_MANTENIMIENTOS_COMPLETO)
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error fetching mantenimiento:', error);
+      if (!environment.production) { console.error('Error fetching mantenimiento:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -166,7 +168,7 @@ export class MantenimientoService {
     }
 
     const { data, error } = await this.supabase.client
-      .from('mantenimientos')
+      .from(TABLES.MANTENIMIENTOS)
       .insert({
         ...dto,
         creado_por: userId
@@ -175,7 +177,7 @@ export class MantenimientoService {
       .single();
 
     if (error) {
-      console.error('Error creating mantenimiento:', error);
+      if (!environment.production) { console.error('Error creating mantenimiento:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -196,14 +198,14 @@ export class MantenimientoService {
 
   private async updateMantenimientoAsync(id: string, dto: UpdateMantenimientoDTO): Promise<ServiceResponse<Mantenimiento>> {
     const { data, error } = await this.supabase.client
-      .from('mantenimientos')
+      .from(TABLES.MANTENIMIENTOS)
       .update(dto)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating mantenimiento:', error);
+      if (!environment.production) { console.error('Error updating mantenimiento:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -226,7 +228,7 @@ export class MantenimientoService {
       .rpc('get_mantenimientos_por_mes', { p_mes: mes, p_anio: anio });
 
     if (error) {
-      console.error('Error fetching mantenimientos por mes:', error);
+      if (!environment.production) { console.error('Error fetching mantenimientos por mes:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -246,13 +248,13 @@ export class MantenimientoService {
 
   private async fetchChecklist(mantenimientoId: string): Promise<ServiceResponse<MantenimientoChecklist[]>> {
     const { data, error } = await this.supabase.client
-      .from('mantenimiento_checklist')
+      .from(TABLES.MANTENIMIENTO_CHECKLIST)
       .select('*')
       .eq('mantenimiento_id', mantenimientoId)
       .order('orden');
 
     if (error) {
-      console.error('Error fetching checklist:', error);
+      if (!environment.production) { console.error('Error fetching checklist:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -270,7 +272,7 @@ export class MantenimientoService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('mantenimiento_checklist')
+      .from(TABLES.MANTENIMIENTO_CHECKLIST)
       .update({
         completado: dto.completado,
         completado_por: dto.completado ? userId : null,
@@ -282,7 +284,7 @@ export class MantenimientoService {
       .single();
 
     if (error) {
-      console.error('Error ejecutando checklist item:', error);
+      if (!environment.production) { console.error('Error ejecutando checklist item:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -292,7 +294,7 @@ export class MantenimientoService {
   private async copiarChecklistFromTemplate(mantenimientoId: string, templateId: string): Promise<void> {
     // Obtener items del template
     const { data: items } = await this.supabase.client
-      .from('checklist_items_template')
+      .from(TABLES.CHECKLIST_ITEMS_TEMPLATE)
       .select('*')
       .eq('template_id', templateId)
       .order('orden');
@@ -308,7 +310,7 @@ export class MantenimientoService {
       }));
 
       await this.supabase.client
-        .from('mantenimiento_checklist')
+        .from(TABLES.MANTENIMIENTO_CHECKLIST)
         .insert(checklistItems);
     }
   }
@@ -326,13 +328,13 @@ export class MantenimientoService {
 
   private async fetchEvidencias(mantenimientoId: string): Promise<ServiceResponse<MantenimientoEvidencia[]>> {
     const { data, error } = await this.supabase.client
-      .from('mantenimiento_evidencias')
+      .from(TABLES.MANTENIMIENTO_EVIDENCIAS)
       .select('*')
       .eq('mantenimiento_id', mantenimientoId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching evidencias:', error);
+      if (!environment.production) { console.error('Error fetching evidencias:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -340,7 +342,7 @@ export class MantenimientoService {
     const evidenciasConUrl = await Promise.all(
       (data as MantenimientoEvidencia[]).map(async (ev) => {
         const { data: urlData } = await this.supabase.client.storage
-          .from('mantenimiento-evidencias')
+          .from(STORAGE_BUCKETS.MANTENIMIENTO_EVIDENCIAS)
           .createSignedUrl(ev.ruta_storage, 3600);
         return { ...ev, url: urlData?.signedUrl };
       })
@@ -379,25 +381,25 @@ export class MantenimientoService {
     if (file.type.startsWith('image/')) {
       try {
         processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
-        console.log(`Evidencia comprimida: ${file.size} -> ${processedFile.size} bytes`);
+        if (!environment.production) { console.log(`Evidencia comprimida: ${file.size} -> ${processedFile.size} bytes`); }
       } catch (err) {
-        console.warn('No se pudo comprimir la imagen:', err);
+        if (!environment.production) { console.warn('No se pudo comprimir la imagen:', err); }
       }
     }
 
     const fileName = `${mantenimientoId}/${Date.now()}_${processedFile.name}`;
 
     const { error: uploadError } = await this.supabase.client.storage
-      .from('mantenimiento-evidencias')
+      .from(STORAGE_BUCKETS.MANTENIMIENTO_EVIDENCIAS)
       .upload(fileName, processedFile);
 
     if (uploadError) {
-      console.error('Error uploading file:', uploadError);
+      if (!environment.production) { console.error('Error uploading file:', uploadError); }
       return { data: null, error: 'Error al subir archivo', success: false };
     }
 
     const { data, error } = await this.supabase.client
-      .from('mantenimiento_evidencias')
+      .from(TABLES.MANTENIMIENTO_EVIDENCIAS)
       .insert({
         mantenimiento_id: mantenimientoId,
         checklist_item_id: checklistItemId,
@@ -413,14 +415,14 @@ export class MantenimientoService {
       .single();
 
     if (error) {
-      console.error('Error registering evidencia:', error);
+      if (!environment.production) { console.error('Error registering evidencia:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Actualizar checklist item si aplica
     if (checklistItemId) {
       await this.supabase.client
-        .from('mantenimiento_checklist')
+        .from(TABLES.MANTENIMIENTO_CHECKLIST)
         .update({ tiene_evidencia: true })
         .eq('id', checklistItemId);
     }
@@ -438,24 +440,24 @@ export class MantenimientoService {
   private async eliminarEvidenciaAsync(evidenciaId: string): Promise<ServiceResponse<void>> {
     // Obtener la evidencia para borrar del storage
     const { data: evidencia } = await this.supabase.client
-      .from('mantenimiento_evidencias')
+      .from(TABLES.MANTENIMIENTO_EVIDENCIAS)
       .select('ruta_storage')
       .eq('id', evidenciaId)
       .single();
 
     if (evidencia) {
       await this.supabase.client.storage
-        .from('mantenimiento-evidencias')
+        .from(STORAGE_BUCKETS.MANTENIMIENTO_EVIDENCIAS)
         .remove([evidencia.ruta_storage]);
     }
 
     const { error } = await this.supabase.client
-      .from('mantenimiento_evidencias')
+      .from(TABLES.MANTENIMIENTO_EVIDENCIAS)
       .delete()
       .eq('id', evidenciaId);
 
     if (error) {
-      console.error('Error deleting evidencia:', error);
+      if (!environment.production) { console.error('Error deleting evidencia:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -476,13 +478,13 @@ export class MantenimientoService {
   private async finalizarMantenimientoAsync(id: string, dto: FinalizarMantenimientoDTO): Promise<ServiceResponse<Mantenimiento>> {
     // Obtener estatus "Completado"
     const { data: estatusCompletado } = await this.supabase.client
-      .from('estatus_mantenimientos')
+      .from(TABLES.ESTATUS_MANTENIMIENTOS)
       .select('id')
       .eq('nombre', 'Completado')
       .single();
 
     const { data, error } = await this.supabase.client
-      .from('mantenimientos')
+      .from(TABLES.MANTENIMIENTOS)
       .update({
         estatus_id: estatusCompletado?.id,
         resultado: dto.resultado,
@@ -495,7 +497,7 @@ export class MantenimientoService {
       .single();
 
     if (error) {
-      console.error('Error finalizando mantenimiento:', error);
+      if (!environment.production) { console.error('Error finalizando mantenimiento:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -514,7 +516,7 @@ export class MantenimientoService {
       .rpc('generar_ticket_desde_mantenimiento', { p_mantenimiento_id: mantenimientoId });
 
     if (error) {
-      console.error('Error generando ticket:', error);
+      if (!environment.production) { console.error('Error generando ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -530,13 +532,13 @@ export class MantenimientoService {
 
   private async iniciarMantenimientoAsync(id: string): Promise<ServiceResponse<Mantenimiento>> {
     const { data: estatusEnProceso } = await this.supabase.client
-      .from('estatus_mantenimientos')
+      .from(TABLES.ESTATUS_MANTENIMIENTOS)
       .select('id')
       .eq('nombre', 'En proceso')
       .single();
 
     const { data, error } = await this.supabase.client
-      .from('mantenimientos')
+      .from(TABLES.MANTENIMIENTOS)
       .update({
         estatus_id: estatusEnProceso?.id,
         fecha_inicio: new Date().toISOString()
@@ -546,7 +548,7 @@ export class MantenimientoService {
       .single();
 
     if (error) {
-      console.error('Error iniciando mantenimiento:', error);
+      if (!environment.production) { console.error('Error iniciando mantenimiento:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -566,7 +568,7 @@ export class MantenimientoService {
 
   private async fetchTiposMantenimiento(): Promise<ServiceResponse<TipoMantenimiento[]>> {
     const { data, error } = await this.supabase.client
-      .from('tipos_mantenimiento')
+      .from(TABLES.TIPOS_MANTENIMIENTO)
       .select('*')
       .eq('activo', true)
       .order('nombre');
@@ -587,7 +589,7 @@ export class MantenimientoService {
 
   private async fetchEstatus(): Promise<ServiceResponse<EstatusMantenimiento[]>> {
     const { data, error } = await this.supabase.client
-      .from('estatus_mantenimientos')
+      .from(TABLES.ESTATUS_MANTENIMIENTOS)
       .select('*')
       .order('orden');
 
@@ -607,7 +609,7 @@ export class MantenimientoService {
 
   private async fetchChecklistTemplates(tipoMantenimientoId?: string): Promise<ServiceResponse<ChecklistTemplate[]>> {
     let query = this.supabase.client
-      .from('checklist_templates')
+      .from(TABLES.CHECKLIST_TEMPLATES)
       .select(`
         *,
         items:checklist_items_template(*)
@@ -638,7 +640,7 @@ export class MantenimientoService {
   async getMantenimientoStats(): Promise<MantenimientoStats> {
     try {
       const { data: mantenimientos } = await this.supabase.client
-        .from('v_mantenimientos_completo')
+        .from(VIEWS.V_MANTENIMIENTOS_COMPLETO)
         .select('*');
 
       if (!mantenimientos || mantenimientos.length === 0) {
@@ -686,7 +688,7 @@ export class MantenimientoService {
         por_resultado
       };
     } catch (error) {
-      console.error('Error getting mantenimiento stats:', error);
+      if (!environment.production) { console.error('Error getting mantenimiento stats:', error); }
       return this.emptyStats();
     }
   }

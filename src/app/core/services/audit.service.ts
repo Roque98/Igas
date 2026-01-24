@@ -18,7 +18,8 @@ import {
   SESSION_ACCION_NOMBRES
 } from '../models';
 import { ServiceResponse, PaginatedResponse, PaginationOptions } from '../models';
-
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS } from '../constants/tables';
 @Injectable({
   providedIn: 'root'
 })
@@ -52,7 +53,7 @@ export class AuditService {
     const to_idx = from_idx + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_audit_log_detail')
+      .from(VIEWS.V_AUDIT_LOG_DETAIL)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -88,7 +89,7 @@ export class AuditService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching audit logs:', error);
+      if (!environment.production) { console.error('Error fetching audit logs:', error); }
       return {
         data: [],
         total: 0,
@@ -117,14 +118,14 @@ export class AuditService {
 
   private async fetchRecordHistory(tabla: string, registroId: string): Promise<ServiceResponse<AuditLogDetail[]>> {
     const { data, error } = await this.supabase.client
-      .from('v_audit_log_detail')
+      .from(VIEWS.V_AUDIT_LOG_DETAIL)
       .select('*')
       .eq('tabla', tabla)
       .eq('registro_id', registroId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching record history:', error);
+      if (!environment.production) { console.error('Error fetching record history:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -158,7 +159,7 @@ export class AuditService {
     const to_idx = from_idx + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_sesiones_log_detail')
+      .from(VIEWS.V_SESIONES_LOG_DETAIL)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -188,7 +189,7 @@ export class AuditService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching session logs:', error);
+      if (!environment.production) { console.error('Error fetching session logs:', error); }
       return {
         data: [],
         total: 0,
@@ -217,14 +218,14 @@ export class AuditService {
 
   private async fetchUserSessionHistory(userId: string): Promise<ServiceResponse<SessionLogDetail[]>> {
     const { data, error } = await this.supabase.client
-      .from('v_sesiones_log_detail')
+      .from(VIEWS.V_SESIONES_LOG_DETAIL)
       .select('*')
       .eq('usuario_id', userId)
       .order('created_at', { ascending: false })
       .limit(50);
 
     if (error) {
-      console.error('Error fetching user session history:', error);
+      if (!environment.production) { console.error('Error fetching user session history:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -259,7 +260,7 @@ export class AuditService {
     });
 
     if (error) {
-      console.error('Error logging session event:', error);
+      if (!environment.production) { console.error('Error logging session event:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -282,12 +283,12 @@ export class AuditService {
 
     // Total de cambios
     const { count: totalCambios } = await this.supabase.client
-      .from('audit_log')
+      .from(TABLES.AUDIT_LOG)
       .select('*', { count: 'exact', head: true });
 
     // Cambios hoy
     const { count: cambiosHoy } = await this.supabase.client
-      .from('audit_log')
+      .from(TABLES.AUDIT_LOG)
       .select('*', { count: 'exact', head: true })
       .gte('created_at', today);
 
@@ -296,7 +297,7 @@ export class AuditService {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const { data: porTablaData } = await this.supabase.client
-      .from('audit_log')
+      .from(TABLES.AUDIT_LOG)
       .select('tabla')
       .gte('created_at', thirtyDaysAgo.toISOString());
 
@@ -328,21 +329,21 @@ export class AuditService {
 
     // Logins hoy
     const { count: loginsHoy } = await this.supabase.client
-      .from('sesiones_log')
+      .from(TABLES.SESIONES_LOG)
       .select('*', { count: 'exact', head: true })
       .eq('accion', 'login')
       .gte('created_at', today);
 
     // Logins fallidos hoy
     const { count: loginsFallidosHoy } = await this.supabase.client
-      .from('sesiones_log')
+      .from(TABLES.SESIONES_LOG)
       .select('*', { count: 'exact', head: true })
       .eq('accion', 'login_failed')
       .gte('created_at', today);
 
     // Logouts hoy
     const { count: logoutsHoy } = await this.supabase.client
-      .from('sesiones_log')
+      .from(TABLES.SESIONES_LOG)
       .select('*', { count: 'exact', head: true })
       .eq('accion', 'logout')
       .gte('created_at', today);

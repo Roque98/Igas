@@ -4,7 +4,7 @@
 // Canvas HTML5 para captura de firma digital
 // ============================================================================
 
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';

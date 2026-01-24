@@ -1,5 +1,5 @@
 // angular import
-import { Component, viewChild } from '@angular/core';
+import { Component, viewChild, ChangeDetectionStrategy} from '@angular/core';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
@@ -11,7 +11,8 @@ import { ApexOptions, ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
   selector: 'app-apex-chart',
   imports: [SharedModule, NgApexchartsModule],
   templateUrl: './apex-chart.component.html',
-  styleUrls: ['./apex-chart.component.scss']
+  styleUrls: ['./apex-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ApexChartComponent {
   chart = viewChild<ChartComponent>('chart');

@@ -1,5 +1,5 @@
 // angular import
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -12,7 +12,8 @@ import { NavRightComponent } from './nav-right/nav-right.component';
   selector: 'app-nav-bar',
   imports: [SharedModule, NavLeftComponent, NavRightComponent, RouterModule, CommonModule],
   templateUrl: './nav-bar.component.html',
-  styleUrls: ['./nav-bar.component.scss']
+  styleUrls: ['./nav-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavBarComponent {
   // public props

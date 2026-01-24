@@ -4,7 +4,7 @@
 // Configuración de preferencias de notificaciones por usuario
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,13 +18,15 @@ import {
   PreferenciaNotificacionConTipo,
   NOTIFICATION_CATEGORY_ICONS
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-notification-preferences',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, SharedModule, NgbTooltipModule],
   templateUrl: './notification-preferences.component.html',
-  styleUrls: ['./notification-preferences.component.scss']
+  styleUrls: ['./notification-preferences.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationPreferencesComponent implements OnInit {
   private notificationPushService = inject(NotificationPushService);
@@ -55,7 +57,7 @@ export class NotificationPreferencesComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading preferences:', err);
+        if (!environment.production) { console.error('Error loading preferences:', err); }
         this.toastService.error('Error al cargar las preferencias');
         this.loading.set(false);
       }

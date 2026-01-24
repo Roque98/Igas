@@ -1,7 +1,7 @@
 import { ErrorHandler, Injectable, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NotificationService } from '../services/notification.service';
-
+import { environment } from '../../../environments/environment';
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
   private notificationService = inject(NotificationService);
@@ -18,16 +18,18 @@ export class GlobalErrorHandler implements ErrorHandler {
     } else {
       // Client-side or application errors
       errorMessage = error.message || 'Ha ocurrido un error inesperado';
-      console.error('Application Error:', error);
+      if (!environment.production) { console.error('Application Error:', error); }
     }
 
     // Log to console (in production, you might want to send to a logging service)
-    console.error('Global Error Handler:', {
-      message: errorMessage,
-      error: error,
-      stack: error instanceof Error ? error.stack : undefined,
-      timestamp: new Date().toISOString()
-    });
+    if (!environment.production) {
+      console.error('Global Error Handler:', {
+        message: errorMessage,
+        error: error,
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
+    }
 
     // Show user-friendly notification
     if (showToast) {

@@ -1,42 +1,55 @@
 <app-card [options]="false" cardTitle="Listado de Tickets">
 
   <!-- Barra de herramientas -->
-  <div class="row mb-4">
-    <!-- Búsqueda -->
+  <div class="row mb-4" role="search" aria-label="Filtros de tickets">
+    <!-- Busqueda -->
     <div class="col-md-4 mb-2">
+      <label for="search-tickets" class="visually-hidden">Buscar tickets</label>
       <div class="input-group">
         <input
-          type="text"
+          type="search"
+          id="search-tickets"
           class="form-control"
-          placeholder="Buscar por folio o descripción..."
+          placeholder="Buscar por folio o descripcion..."
           [ngModel]="searchTerm()"
           (ngModelChange)="searchTerm.set($event)"
           (keyup.enter)="onSearch()"
+          aria-describedby="search-btn"
         />
-        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
-          <i class="feather icon-search"></i>
+        <button
+          id="search-btn"
+          class="btn btn-outline-primary"
+          type="button"
+          (click)="onSearch()"
+          aria-label="Buscar tickets"
+        >
+          <i class="feather icon-search" aria-hidden="true"></i>
         </button>
       </div>
     </div>
 
-    <!-- Filtros rápidos -->
+    <!-- Filtros rapidos -->
     <div class="col-md-5 mb-2">
-      <div class="d-flex gap-2 flex-wrap">
-        <!-- Categoría -->
+      <div class="d-flex gap-2 flex-wrap" role="group" aria-label="Filtros rapidos">
+        <!-- Categoria -->
+        <label for="filter-categoria" class="visually-hidden">Filtrar por categoria</label>
         <select
+          id="filter-categoria"
           class="form-select form-select-sm"
           style="width: auto;"
           [ngModel]="selectedCategoriaId()"
           (ngModelChange)="selectedCategoriaId.set($event); onFilterChange()"
         >
-          <option [ngValue]="null">Categoría</option>
+          <option [ngValue]="null">Categoria</option>
           @for (cat of categorias(); track cat.id) {
             <option [ngValue]="cat.id">{{ cat.nombre }}</option>
           }
         </select>
 
         <!-- Prioridad -->
+        <label for="filter-prioridad" class="visually-hidden">Filtrar por prioridad</label>
         <select
+          id="filter-prioridad"
           class="form-select form-select-sm"
           style="width: auto;"
           [ngModel]="selectedPrioridad()"
@@ -48,8 +61,10 @@
           }
         </select>
 
-        <!-- Semáforo -->
+        <!-- Semaforo -->
+        <label for="filter-sla" class="visually-hidden">Filtrar por estado de SLA</label>
         <select
+          id="filter-sla"
           class="form-select form-select-sm"
           style="width: auto;"
           [ngModel]="selectedSemaforo()"
@@ -62,7 +77,7 @@
         </select>
 
         <!-- Filtros de checkbox -->
-        <div class="btn-group" role="group">
+        <div class="btn-group" role="group" aria-label="Filtros adicionales">
           <input
             type="checkbox"
             class="btn-check"
@@ -71,7 +86,7 @@
             (change)="soloMisTickets.set(!soloMisTickets()); onFilterChange()"
           />
           <label class="btn btn-outline-primary btn-sm" for="btnMisTickets">
-            <i class="feather icon-user me-1"></i> Mis tickets
+            <i class="feather icon-user me-1" aria-hidden="true"></i> Mis tickets
           </label>
 
           <input
@@ -82,7 +97,7 @@
             (change)="soloSinAsignar.set(!soloSinAsignar()); onFilterChange()"
           />
           <label class="btn btn-outline-warning btn-sm" for="btnSinAsignar">
-            <i class="feather icon-user-x me-1"></i> Sin asignar
+            <i class="feather icon-user-x me-1" aria-hidden="true"></i> Sin asignar
           </label>
         </div>
       </div>
@@ -91,12 +106,17 @@
     <!-- Acciones -->
     <div class="col-md-3 mb-2 text-end">
       @if (hasActiveFilters()) {
-        <button class="btn btn-outline-secondary btn-sm me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
-          <i class="feather icon-x"></i> Limpiar
+        <button
+          class="btn btn-outline-secondary btn-sm me-2"
+          (click)="clearFilters()"
+          ngbTooltip="Limpiar filtros"
+          aria-label="Limpiar todos los filtros aplicados"
+        >
+          <i class="feather icon-x" aria-hidden="true"></i> Limpiar
         </button>
       }
-      <a routerLink="/tickets/nuevo" class="btn btn-primary">
-        <i class="feather icon-plus me-1"></i> Nuevo Ticket
+      <a routerLink="/tickets/nuevo" class="btn btn-primary" aria-label="Crear nuevo ticket">
+        <i class="feather icon-plus me-1" aria-hidden="true"></i> Nuevo Ticket
       </a>
     </div>
   </div>
@@ -124,21 +144,23 @@
 
   <!-- Indicador de carga -->
   @if (loading()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
+    <div class="text-center py-5" role="status" aria-live="polite">
+      <div class="spinner-border text-primary" aria-hidden="true"></div>
       <p class="mt-2 text-muted">Cargando tickets...</p>
     </div>
   }
 
   <!-- Mensaje de error -->
   @if (error()) {
-    <div class="alert alert-danger" role="alert">
-      <i class="feather icon-alert-circle me-2"></i>
+    <div class="alert alert-danger" role="alert" aria-live="assertive">
+      <i class="feather icon-alert-circle me-2" aria-hidden="true"></i>
       {{ error() }}
-      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadTickets()">
-        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      <button
+        class="btn btn-sm btn-outline-danger ms-3"
+        (click)="loadTickets()"
+        aria-label="Reintentar carga de tickets"
+      >
+        <i class="feather icon-refresh-cw me-1" aria-hidden="true"></i> Reintentar
       </button>
     </div>
   }
@@ -146,41 +168,41 @@
   <!-- Tabla de tickets -->
   @if (!loading() && !error()) {
     @if (tickets().length === 0) {
-      <div class="text-center py-5">
-        <i class="feather icon-inbox" style="font-size: 48px; color: #ccc;"></i>
+      <div class="text-center py-5" role="status" aria-live="polite">
+        <i class="feather icon-inbox" style="font-size: 48px; color: #ccc;" aria-hidden="true"></i>
         <p class="mt-3 text-muted">No se encontraron tickets</p>
         @if (hasActiveFilters()) {
-          <button class="btn btn-outline-primary" (click)="clearFilters()">
+          <button class="btn btn-outline-primary" (click)="clearFilters()" aria-label="Limpiar filtros para ver todos los tickets">
             Limpiar filtros
           </button>
         }
       </div>
     } @else {
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle" aria-label="Lista de tickets">
           <thead class="table-light">
             <tr>
-              <th class="sortable" (click)="onSort('folio')">
+              <th scope="col" class="sortable" (click)="onSort('folio')" role="button" aria-sort="none" tabindex="0" (keydown.enter)="onSort('folio')">
                 Folio
-                <i [class]="getSortIcon('folio')"></i>
+                <i [class]="getSortIcon('folio')" aria-hidden="true"></i>
               </th>
-              <th>Descripción</th>
-              <th class="sortable" (click)="onSort('categoria_id')">
-                Categoría
-                <i [class]="getSortIcon('categoria_id')"></i>
+              <th scope="col">Descripcion</th>
+              <th scope="col" class="sortable" (click)="onSort('categoria_id')" role="button" tabindex="0" (keydown.enter)="onSort('categoria_id')">
+                Categoria
+                <i [class]="getSortIcon('categoria_id')" aria-hidden="true"></i>
               </th>
-              <th class="sortable text-center" (click)="onSort('prioridad')">
+              <th scope="col" class="sortable text-center" (click)="onSort('prioridad')" role="button" tabindex="0" (keydown.enter)="onSort('prioridad')">
                 Prioridad
-                <i [class]="getSortIcon('prioridad')"></i>
+                <i [class]="getSortIcon('prioridad')" aria-hidden="true"></i>
               </th>
-              <th>Responsable</th>
-              <th class="text-center">Estatus</th>
-              <th class="text-center" style="min-width: 150px;">SLA</th>
-              <th class="sortable" (click)="onSort('fecha_creacion')">
+              <th scope="col">Responsable</th>
+              <th scope="col" class="text-center">Estatus</th>
+              <th scope="col" class="text-center" style="min-width: 150px;">SLA</th>
+              <th scope="col" class="sortable" (click)="onSort('fecha_creacion')" role="button" tabindex="0" (keydown.enter)="onSort('fecha_creacion')">
                 Fecha
-                <i [class]="getSortIcon('fecha_creacion')"></i>
+                <i [class]="getSortIcon('fecha_creacion')" aria-hidden="true"></i>
               </th>
-              <th class="text-center" style="width: 100px;">Acciones</th>
+              <th scope="col" class="text-center" style="width: 100px;">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -220,13 +242,16 @@
                         class="rounded-circle me-2"
                         width="28"
                         height="28"
-                        [alt]="ticket.responsable_nombre"
+                        [alt]="'Avatar de ' + ticket.responsable_nombre"
                         style="object-fit: cover;"
                       />
                       <span class="small">{{ ticket.responsable_nombre }}</span>
                     </div>
                   } @else {
-                    <span class="badge bg-warning text-dark">Sin asignar</span>
+                    <span class="badge bg-warning text-dark" role="status">
+                      <i class="feather icon-alert-triangle me-1" aria-hidden="true" style="font-size: 10px;"></i>
+                      Sin asignar
+                    </span>
                   }
                 </td>
                 <td class="text-center">
@@ -255,20 +280,22 @@
                   <span class="small text-muted">{{ formatDate(ticket.fecha_creacion) }}</span>
                 </td>
                 <td class="text-center">
-                  <div class="btn-group btn-group-sm">
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Acciones del ticket">
                     <button
                       class="btn btn-outline-primary"
                       (click)="viewTicket(ticket)"
                       ngbTooltip="Ver detalles"
+                      [attr.aria-label]="'Ver detalles del ticket ' + ticket.folio"
                     >
-                      <i class="feather icon-eye"></i>
+                      <i class="feather icon-eye" aria-hidden="true"></i>
                     </button>
                     <button
                       class="btn btn-outline-secondary"
                       (click)="editTicket(ticket)"
                       ngbTooltip="Editar"
+                      [attr.aria-label]="'Editar ticket ' + ticket.folio"
                     >
-                      <i class="feather icon-edit"></i>
+                      <i class="feather icon-edit" aria-hidden="true"></i>
                     </button>
                   </div>
                 </td>
@@ -278,23 +305,26 @@
         </table>
       </div>
 
-      <!-- Paginación -->
-      <div class="d-flex justify-content-between align-items-center mt-4">
-        <div class="text-muted">
+      <!-- Paginacion -->
+      <nav class="d-flex justify-content-between align-items-center mt-4" aria-label="Paginacion de tickets">
+        <div class="text-muted" aria-live="polite">
           Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
           {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
           de {{ totalItems() }} tickets
         </div>
         <div class="d-flex align-items-center gap-3">
+          <label for="page-size-select" class="visually-hidden">Tickets por pagina</label>
           <select
+            id="page-size-select"
             class="form-select form-select-sm"
             style="width: auto;"
             [ngModel]="pageSize()"
             (ngModelChange)="onPageSizeChange($event)"
+            aria-label="Seleccionar cantidad de tickets por pagina"
           >
-            <option [value]="10">10 por página</option>
-            <option [value]="25">25 por página</option>
-            <option [value]="50">50 por página</option>
+            <option [value]="10">10 por pagina</option>
+            <option [value]="25">25 por pagina</option>
+            <option [value]="50">50 por pagina</option>
           </select>
           <ngb-pagination
             [collectionSize]="totalItems()"
@@ -304,9 +334,10 @@
             [rotate]="true"
             [boundaryLinks]="true"
             (pageChange)="onPageChange($event)"
+            aria-label="Navegacion de paginas"
           ></ngb-pagination>
         </div>
-      </div>
+      </nav>
     }
   }
 </app-card>

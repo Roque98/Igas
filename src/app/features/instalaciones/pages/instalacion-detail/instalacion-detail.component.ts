@@ -4,7 +4,7 @@
 // Vista detallada de una instalación con tabs
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -43,7 +43,8 @@ import { FirmaDigitalComponent, FirmaData } from '../../components/firma-digital
     FirmaDigitalComponent
   ],
   templateUrl: './instalacion-detail.component.html',
-  styleUrls: ['./instalacion-detail.component.scss']
+  styleUrls: ['./instalacion-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InstalacionDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);

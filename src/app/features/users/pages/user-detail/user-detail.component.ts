@@ -4,7 +4,7 @@
 // Componente para ver el detalle de un usuario (vista administrador)
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModalModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -23,7 +23,8 @@ import { ProfileWithRelations, ProfileEstatus, Disponibilidad } from 'src/app/co
     SharedModule
   ],
   templateUrl: './user-detail.component.html',
-  styleUrls: ['./user-detail.component.scss']
+  styleUrls: ['./user-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserDetailComponent implements OnInit {
   private userService = inject(UserService);

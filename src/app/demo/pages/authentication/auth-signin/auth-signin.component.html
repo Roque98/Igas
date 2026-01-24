@@ -1,6 +1,6 @@
 <div class="auth-wrapper">
   <div class="auth-content">
-    <div class="auth-bg">
+    <div class="auth-bg" aria-hidden="true">
       <span class="r"></span>
       <span class="r s"></span>
       <span class="r s"></span>
@@ -8,40 +8,44 @@
     </div>
     <div class="card">
       <div class="card-body text-center">
-        <form (ngSubmit)="onSubmit($event)">
+        <form (ngSubmit)="onSubmit($event)" aria-labelledby="login-title">
           <!-- Logo iGAS -->
           <div class="mb-4">
-            <img src="assets/images/logo-igas.png" alt="iGAS" style="height: 60px; margin-bottom: 20px;" />
+            <img src="assets/images/logo-igas.png" alt="Logo de iGAS - Sistema de Mesa de Ayuda" style="height: 60px; margin-bottom: 20px;" />
           </div>
-          <h3 class="mb-2 text-igas-gray">Bienvenido</h3>
+          <h3 id="login-title" class="mb-2 text-igas-gray">Bienvenido</h3>
           <p class="text-muted mb-4">Sistema de Mesa de Ayuda iGAS</p>
           @if (inactivityMessage()) {
-            <div class="alert alert-warning d-flex align-items-center" role="alert">
-              <i class="feather icon-clock me-2"></i>
+            <div class="alert alert-warning d-flex align-items-center" role="alert" aria-live="polite">
+              <i class="feather icon-clock me-2" aria-hidden="true"></i>
               <div>
                 {{ inactivityMessage() }}
               </div>
             </div>
           }
           @if (error()) {
-            <div class="alert alert-danger d-flex align-items-center" role="alert">
-              <i class="feather icon-alert-circle me-2"></i>
+            <div class="alert alert-danger d-flex align-items-center" role="alert" aria-live="assertive">
+              <i class="feather icon-alert-circle me-2" aria-hidden="true"></i>
               <div>
                 <strong>Error:</strong> {{ error() }}
               </div>
             </div>
           }
           <div class="input-group mb-3">
+            <label for="email-input" class="visually-hidden">Correo Electronico</label>
             <input
               type="email"
               class="form-control"
-              id="floatingInput"
+              id="email-input"
               [class.is-invalid]="submitted() && loginForm.email().invalid()"
-              placeholder="Correo Electrónico"
+              placeholder="Correo Electronico"
               [field]="loginForm.email"
+              autocomplete="email"
+              aria-describedby="email-error"
+              [attr.aria-invalid]="submitted() && loginForm.email().invalid()"
             />
             @if (submitted() && loginForm.email().invalid()) {
-              <div class="invalid-feedback">
+              <div id="email-error" class="invalid-feedback" role="alert">
                 @for (error of loginForm.email().errors(); track error.kind) {
                   <div>{{ error.message }}</div>
                 }
@@ -49,32 +53,32 @@
             }
           </div>
           <div class="input-group mb-4">
-            @if (!showPassword()) {
-              <input
-                type="password"
-                id="password"
-                class="form-control"
-                [field]="loginForm.password"
-                [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Contraseña (mín. 8 caracteres)"
-              />
-            } @else {
-              <input
-                type="text"
-                id="password"
-                class="form-control"
-                [field]="loginForm.password"
-                [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
-                placeholder="Contraseña (mín. 8 caracteres)"
-              />
-            }
-            <i
-              [ngClass]="showPassword() ? 'feather icon-eye' : 'feather icon-eye-off'"
-              id="togglePassword"
+            <label for="password-input" class="visually-hidden">Contrasena</label>
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              id="password-input"
+              class="form-control"
+              [field]="loginForm.password"
+              [class.is-invalid]="submitted() && loginForm.password().errors().length > 0"
+              placeholder="Contrasena (min. 8 caracteres)"
+              autocomplete="current-password"
+              aria-describedby="password-error password-toggle-hint"
+              [attr.aria-invalid]="submitted() && loginForm.password().errors().length > 0"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary password-toggle"
               (click)="togglePasswordVisibility()"
-            ></i>
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              aria-controls="password-input"
+            >
+              <i [ngClass]="showPassword() ? 'feather icon-eye' : 'feather icon-eye-off'" aria-hidden="true"></i>
+            </button>
+            <span id="password-toggle-hint" class="visually-hidden">
+              Usa el boton de ojo para mostrar u ocultar la contrasena
+            </span>
             @if (submitted() && loginForm.password().errors().length > 0) {
-              <div class="invalid-feedback">
+              <div id="password-error" class="invalid-feedback" role="alert">
                 @for (error of loginForm.password().errors(); track error.kind) {
                   <div>{{ error.message }}</div>
                 }
@@ -85,25 +89,30 @@
             <div class="checkbox checkbox-fill d-inline">
               <input
                 type="checkbox"
-                name="checkbox-fill-1"
-                id="checkbox-fill-a1"
+                name="remember-me"
+                id="remember-me"
                 [checked]="rememberMe()"
                 (change)="rememberMe.set(!rememberMe())"
               />
-              <label for="checkbox-fill-a1" class="cr">Recordar datos</label>
+              <label for="remember-me" class="cr">Recordar datos</label>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mb-4" [disabled]="loading()">
+          <button
+            type="submit"
+            class="btn btn-primary mb-4"
+            [disabled]="loading()"
+            [attr.aria-busy]="loading()"
+          >
             @if (loading()) {
               <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Iniciando sesión...
+              <span>Iniciando sesion...</span>
             } @else {
-              Iniciar Sesión
+              Iniciar Sesion
             }
           </button>
           <p class="mb-2 text-muted">
-            ¿Olvidaste tu contraseña?
-            <a [routerLink]="['/forgot-password']">Recuperar</a>
+            ¿Olvidaste tu contrasena?
+            <a [routerLink]="['/forgot-password']">Recuperar contrasena</a>
           </p>
         </form>
       </div>

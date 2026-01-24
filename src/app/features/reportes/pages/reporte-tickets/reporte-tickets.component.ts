@@ -4,7 +4,7 @@
 // Página de reporte de tickets con filtros, gráficas y tabla
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -58,7 +58,8 @@ import {
     SharedModule
   ],
   templateUrl: './reporte-tickets.component.html',
-  styleUrls: ['./reporte-tickets.component.scss']
+  styleUrls: ['./reporte-tickets.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReporteTicketsComponent implements OnInit {
   private reporteService = inject(ReporteService);
@@ -66,6 +67,9 @@ export class ReporteTicketsComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private userService = inject(UserService);
   private ticketService = inject(TicketService);
+
+  // Exponer Math para uso en templates
+  Math = Math;
 
   // Estado
   loading = signal(false);

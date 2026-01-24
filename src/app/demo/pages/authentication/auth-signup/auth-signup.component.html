@@ -1,6 +1,6 @@
 <div class="auth-wrapper">
   <div class="auth-content">
-    <div class="auth-bg">
+    <div class="auth-bg" aria-hidden="true">
       <span class="r"></span>
       <span class="r s"></span>
       <span class="r s"></span>
@@ -8,22 +8,26 @@
     </div>
     <div class="card">
       <div class="card-body text-center">
-        <form (ngSubmit)="onSubmit($event)">
+        <form (ngSubmit)="onSubmit($event)" aria-labelledby="register-title">
           <div class="mb-4">
-            <i class="feather icon-user-plus auth-icon"></i>
+            <i class="feather icon-user-plus auth-icon" aria-hidden="true"></i>
           </div>
-          <h3 class="mb-4">Registrarse</h3>
+          <h3 id="register-title" class="mb-4">Registrarse</h3>
           <div class="input-group mb-3">
+            <label for="username-input" class="visually-hidden">Nombre de Usuario</label>
             <input
               type="text"
-              id="username"
+              id="username-input"
               class="form-control"
               placeholder="Nombre de Usuario"
               [field]="registerForm.username"
               [class.is-invalid]="submitted() && registerForm.username().errors().length > 0"
+              autocomplete="username"
+              aria-describedby="username-error"
+              [attr.aria-invalid]="submitted() && registerForm.username().errors().length > 0"
             />
             @if (submitted() && registerForm.username().errors().length > 0) {
-              <div class="invalid-feedback">
+              <div id="username-error" class="invalid-feedback" role="alert">
                 @for (error of registerForm.username().errors(); track error.kind) {
                   <div>{{ error.message }}</div>
                 }
@@ -31,16 +35,20 @@
             }
           </div>
           <div class="input-group mb-3">
+            <label for="email-input" class="visually-hidden">Correo Electronico</label>
             <input
               type="email"
               class="form-control"
-              id="floatingInput"
+              id="email-input"
               [class.is-invalid]="submitted() && registerForm.email().invalid()"
-              placeholder="Correo Electrónico"
+              placeholder="Correo Electronico"
               [field]="registerForm.email"
+              autocomplete="email"
+              aria-describedby="email-error"
+              [attr.aria-invalid]="submitted() && registerForm.email().invalid()"
             />
             @if (submitted() && registerForm.email().invalid()) {
-              <div class="invalid-feedback">
+              <div id="email-error" class="invalid-feedback" role="alert">
                 @for (error of registerForm.email().errors(); track error.kind) {
                   <div>{{ error.message }}</div>
                 }
@@ -48,32 +56,29 @@
             }
           </div>
           <div class="input-group mb-4">
-            @if (!showPassword()) {
-              <input
-                type="password"
-                id="password"
-                class="form-control"
-                [field]="registerForm.password"
-                [class.is-invalid]="submitted() && registerForm.password().errors().length > 0"
-                placeholder="Contraseña (mín. 8 caracteres)"
-              />
-            } @else {
-              <input
-                type="text"
-                id="password"
-                class="form-control"
-                [field]="registerForm.password"
-                [class.is-invalid]="submitted() && registerForm.password().errors().length > 0"
-                placeholder="Contraseña (mín. 8 caracteres)"
-              />
-            }
-            <i
-              [ngClass]="showPassword() ? 'feather icon-eye' : 'feather icon-eye-off'"
-              id="togglePassword"
+            <label for="password-input" class="visually-hidden">Contrasena</label>
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              id="password-input"
+              class="form-control"
+              [field]="registerForm.password"
+              [class.is-invalid]="submitted() && registerForm.password().errors().length > 0"
+              placeholder="Contrasena (min. 8 caracteres)"
+              autocomplete="new-password"
+              aria-describedby="password-error"
+              [attr.aria-invalid]="submitted() && registerForm.password().errors().length > 0"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-secondary password-toggle"
               (click)="togglePasswordVisibility()"
-            ></i>
+              [attr.aria-label]="showPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              aria-controls="password-input"
+            >
+              <i [ngClass]="showPassword() ? 'feather icon-eye' : 'feather icon-eye-off'" aria-hidden="true"></i>
+            </button>
             @if (submitted() && registerForm.password().errors().length > 0) {
-              <div class="invalid-feedback">
+              <div id="password-error" class="invalid-feedback" role="alert">
                 @for (error of registerForm.password().errors(); track error.kind) {
                   <div>{{ error.message }}</div>
                 }
@@ -82,15 +87,15 @@
           </div>
           <div class="form-group text-start">
             <div class="checkbox checkbox-fill d-inline">
-              <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-1" checked="" />
-              <label for="checkbox-fill-1" class="cr">Recordar datos</label>
+              <input type="checkbox" name="remember-data" id="remember-data" checked="" />
+              <label for="remember-data" class="cr">Recordar datos</label>
             </div>
           </div>
           <button type="submit" class="btn btn-primary shadow-2 mb-4">Registrarse</button>
         </form>
         <p class="mb-0 text-muted">
           ¿Ya tienes cuenta?
-          <a [routerLink]="['/login']">Iniciar Sesión</a>
+          <a [routerLink]="['/login']">Iniciar Sesion</a>
         </p>
       </div>
     </div>

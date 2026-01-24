@@ -19,7 +19,8 @@ import {
   ServiceResponse
 } from '../models';
 import { compressImage, IMAGE_PRESETS } from '../helpers/image.utils';
-
+import { environment } from '../../../environments/environment';
+import { TABLES, STORAGE_BUCKETS } from '../constants/tables';
 // Interfaz para el perfil del usuario actual (navbar, etc.)
 export interface CurrentUserProfile {
   id: string;
@@ -61,7 +62,7 @@ export class UserService {
     if (!userId) return;
 
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select('id, nombre_completo, avatar_url, email, rol_id, roles(nombre)')
       .eq('id', userId)
       .single();
@@ -129,7 +130,7 @@ export class UserService {
       .rpc('get_all_users');
 
     if (rpcError) {
-      console.error('Error fetching users via RPC:', rpcError);
+      if (!environment.production) { console.error('Error fetching users via RPC:', rpcError); }
       // Fallback a consulta directa si la función RPC no existe
       return this.fetchUsersDirectQuery(filters, pagination);
     }
@@ -142,9 +143,9 @@ export class UserService {
 
     // Obtener roles, equipos y horarios en paralelo
     const [rolesResult, equiposResult, horariosResult] = await Promise.all([
-      this.supabase.client.from('roles').select('*'),
-      this.supabase.client.from('equipos').select('*'),
-      this.supabase.client.from('horarios').select('*')
+      this.supabase.client.from(TABLES.ROLES).select('*'),
+      this.supabase.client.from(TABLES.EQUIPOS).select('*'),
+      this.supabase.client.from(TABLES.HORARIOS).select('*')
     ]);
 
     const rolesMap = new Map((rolesResult.data || []).map(r => [r.id, r]));
@@ -219,7 +220,7 @@ export class UserService {
     const to = from + pageSize - 1;
 
     let query = this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select(`
         *,
         rol:roles(*),
@@ -252,7 +253,7 @@ export class UserService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching users:', error);
+      if (!environment.production) { console.error('Error fetching users:', error); }
       return {
         data: [],
         total: 0,
@@ -281,7 +282,7 @@ export class UserService {
 
   private async fetchUserById(id: string): Promise<ServiceResponse<ProfileWithRelations>> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select(`
         *,
         rol:roles(*),
@@ -292,7 +293,7 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Error fetching user by ID:', error);
+      if (!environment.production) { console.error('Error fetching user by ID:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -337,7 +338,7 @@ export class UserService {
       });
 
       if (authError) {
-        console.error('Error creating auth user:', authError);
+        if (!environment.production) { console.error('Error creating auth user:', authError); }
         return { data: null, error: this.mapAuthError(authError.message), success: false };
       }
 
@@ -347,7 +348,7 @@ export class UserService {
 
       // 2. Crear el profile directamente (sin depender del trigger)
       const { data: profileData, error: profileError } = await this.supabase.client
-        .from('profiles')
+        .from(TABLES.PROFILES)
         .insert({
           id: authData.user.id,
           nombre_completo: userData.nombre_completo,
@@ -362,14 +363,14 @@ export class UserService {
         .single();
 
       if (profileError) {
-        console.error('Error updating profile:', profileError);
+        if (!environment.production) { console.error('Error updating profile:', profileError); }
         // El usuario fue creado pero el profile no se actualizó completamente
         return { data: null, error: 'Usuario creado pero error al actualizar perfil', success: false };
       }
 
       return { data: profileData as Profile, error: null, success: true };
     } catch (error: any) {
-      console.error('Unexpected error creating user:', error);
+      if (!environment.production) { console.error('Unexpected error creating user:', error); }
       return { data: null, error: error.message || 'Error inesperado', success: false };
     }
   }
@@ -405,7 +406,7 @@ export class UserService {
     data: UpdateProfileDTO | UpdateUserDTO
   ): Promise<ServiceResponse<Profile>> {
     const { data: profileData, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         ...data,
         updated_at: new Date().toISOString()
@@ -415,7 +416,7 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Error updating profile:', error);
+      if (!environment.production) { console.error('Error updating profile:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -443,7 +444,7 @@ export class UserService {
 
   private async deactivateUserAsync(id: string): Promise<ServiceResponse<Profile>> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         estatus: 'Inactivo',
         disponibilidad: 'Fuera de turno',
@@ -454,7 +455,7 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Error deactivating user:', error);
+      if (!environment.production) { console.error('Error deactivating user:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -470,7 +471,7 @@ export class UserService {
 
   private async activateUserAsync(id: string): Promise<ServiceResponse<Profile>> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         estatus: 'Activo',
         updated_at: new Date().toISOString()
@@ -480,7 +481,7 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Error activating user:', error);
+      if (!environment.production) { console.error('Error activating user:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -509,9 +510,9 @@ export class UserService {
       if (file.type.startsWith('image/')) {
         try {
           processedFile = await compressImage(file, IMAGE_PRESETS.avatar);
-          console.log(`Avatar comprimido: ${file.size} bytes -> ${processedFile.size} bytes`);
+          if (!environment.production) { console.log(`Avatar comprimido: ${file.size} bytes -> ${processedFile.size} bytes`); }
         } catch (compressionError) {
-          console.warn('No se pudo comprimir la imagen, usando original:', compressionError);
+          if (!environment.production) { console.warn('No se pudo comprimir la imagen, usando original:', compressionError); }
         }
       }
 
@@ -520,20 +521,20 @@ export class UserService {
 
       // Subir archivo al storage
       const { data: uploadData, error: uploadError } = await this.supabase.client.storage
-        .from('avatars')
+        .from(STORAGE_BUCKETS.AVATARS)
         .upload(fileName, processedFile, {
           upsert: true, // Sobrescribir si existe
           contentType: processedFile.type
         });
 
       if (uploadError) {
-        console.error('Error uploading avatar:', uploadError);
+        if (!environment.production) { console.error('Error uploading avatar:', uploadError); }
         return { data: null, error: 'Error al subir imagen', success: false };
       }
 
       // Obtener URL pública con cache-busting
       const { data: urlData } = this.supabase.client.storage
-        .from('avatars')
+        .from(STORAGE_BUCKETS.AVATARS)
         .getPublicUrl(fileName);
 
       // Agregar timestamp para evitar caché del navegador
@@ -547,7 +548,7 @@ export class UserService {
 
       return { data: avatarUrl, error: null, success: true };
     } catch (error: any) {
-      console.error('Unexpected error uploading avatar:', error);
+      if (!environment.production) { console.error('Unexpected error uploading avatar:', error); }
       return { data: null, error: error.message || 'Error inesperado', success: false };
     }
   }
@@ -567,11 +568,11 @@ export class UserService {
     try {
       // Listar archivos del usuario
       const { data: files, error: listError } = await this.supabase.client.storage
-        .from('avatars')
+        .from(STORAGE_BUCKETS.AVATARS)
         .list(userId);
 
       if (listError) {
-        console.error('Error listing avatar files:', listError);
+        if (!environment.production) { console.error('Error listing avatar files:', listError); }
         return { data: null, error: 'Error al buscar avatar', success: false };
       }
 
@@ -579,11 +580,11 @@ export class UserService {
         // Eliminar archivos
         const filePaths = files.map(file => `${userId}/${file.name}`);
         const { error: deleteError } = await this.supabase.client.storage
-          .from('avatars')
+          .from(STORAGE_BUCKETS.AVATARS)
           .remove(filePaths);
 
         if (deleteError) {
-          console.error('Error deleting avatar:', deleteError);
+          if (!environment.production) { console.error('Error deleting avatar:', deleteError); }
           return { data: null, error: 'Error al eliminar avatar', success: false };
         }
       }
@@ -596,7 +597,7 @@ export class UserService {
 
       return { data: true, error: null, success: true };
     } catch (error: any) {
-      console.error('Unexpected error deleting avatar:', error);
+      if (!environment.production) { console.error('Unexpected error deleting avatar:', error); }
       return { data: null, error: error.message || 'Error inesperado', success: false };
     }
   }
@@ -614,12 +615,12 @@ export class UserService {
 
   private async fetchRoles(): Promise<ServiceResponse<any[]>> {
     const { data, error } = await this.supabase.client
-      .from('roles')
+      .from(TABLES.ROLES)
       .select('*')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching roles:', error);
+      if (!environment.production) { console.error('Error fetching roles:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -635,13 +636,13 @@ export class UserService {
 
   private async fetchEquipos(): Promise<ServiceResponse<any[]>> {
     const { data, error } = await this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .select('*')
       .eq('estatus', 'Activo')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching equipos:', error);
+      if (!environment.production) { console.error('Error fetching equipos:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -657,12 +658,12 @@ export class UserService {
 
   private async fetchHorarios(): Promise<ServiceResponse<any[]>> {
     const { data, error } = await this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .select('*')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching horarios:', error);
+      if (!environment.production) { console.error('Error fetching horarios:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -727,8 +728,8 @@ export class UserService {
 
       // Obtener roles y equipos para nombres
       const [rolesResult, equiposResult] = await Promise.all([
-        this.supabase.client.from('roles').select('*'),
-        this.supabase.client.from('equipos').select('*')
+        this.supabase.client.from(TABLES.ROLES).select('*'),
+        this.supabase.client.from(TABLES.EQUIPOS).select('*')
       ]);
 
       const rolesMap = new Map((rolesResult.data || []).map(r => [r.id, r.nombre]));
@@ -783,7 +784,7 @@ export class UserService {
 
       return { total, activos, inactivos, porRol, porEquipo, porDisponibilidad };
     } catch (error) {
-      console.error('Error getting user stats:', error);
+      if (!environment.production) { console.error('Error getting user stats:', error); }
       return {
         total: 0,
         activos: 0,

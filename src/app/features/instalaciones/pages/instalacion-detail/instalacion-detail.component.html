@@ -100,10 +100,10 @@
                             <td>{{ formatDateTime(instalacion()!.fecha_inicio) }}</td>
                           </tr>
                         }
-                        @if (instalacion()!.fecha_cierre) {
+                        @if (instalacion()!.fecha_fin) {
                           <tr>
                             <td class="text-muted">Cerrada</td>
-                            <td>{{ formatDateTime(instalacion()!.fecha_cierre) }}</td>
+                            <td>{{ formatDateTime(instalacion()!.fecha_fin) }}</td>
                           </tr>
                         }
                       </tbody>
@@ -206,7 +206,7 @@
                   <app-checklist-execution
                     [checklistItems]="checklistItems()"
                     [isDisabled]="!canExecuteChecklist()"
-                    [groupByModule]="true"
+                    [showModuleGroups]="true"
                     (itemExecuted)="onChecklistItemExecuted($event)">
                   </app-checklist-execution>
                 }
@@ -261,8 +261,8 @@
                   <app-evidencias-upload
                     [evidenciasList]="evidencias()"
                     [isDisabled]="!canUploadEvidencias()"
-                    (uploadEvidencia)="onUploadEvidencia($event)"
-                    (deleteEvidencia)="onDeleteEvidencia($event)">
+                    (uploadFile)="onUploadEvidencia($event)"
+                    (deleteFile)="onDeleteEvidencia($event)">
                   </app-evidencias-upload>
                 }
               </div>
@@ -283,7 +283,7 @@
                   [existingFirma]="instalacion()!.firma_cliente_url"
                   [existingNombre]="instalacion()!.nombre_firmante"
                   [existingPuesto]="instalacion()!.puesto_firmante"
-                  [existingFecha]="instalacion()!.fecha_firma"
+                  [existingFecha]="instalacion()!.firmado_at"
                   [isDisabled]="!canCaptureFirma()"
                   [isSaving]="savingFirma()"
                   (firmaConfirmada)="onFirmaConfirmada($event)">

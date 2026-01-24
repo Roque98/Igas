@@ -4,7 +4,7 @@
 // Lista de instalaciones con vista de tabs por estatus (pipeline)
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -25,6 +25,7 @@ import {
   Cliente,
   Profile
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-instalacion-list',
@@ -38,7 +39,8 @@ import {
     SharedModule
   ],
   templateUrl: './instalacion-list.component.html',
-  styleUrls: ['./instalacion-list.component.scss']
+  styleUrls: ['./instalacion-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InstalacionListComponent implements OnInit {
   private instalacionService = inject(InstalacionService);
@@ -135,7 +137,7 @@ export class InstalacionListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading instalaciones:', err);
+        if (!environment.production) { console.error('Error loading instalaciones:', err); }
         this.error.set('Error al cargar instalaciones');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de instalaciones');

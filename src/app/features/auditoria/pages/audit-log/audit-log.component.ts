@@ -4,7 +4,7 @@
 // Componente para visualizar logs de auditoría y sesiones (solo admin)
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule, NgbPaginationModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
@@ -36,10 +36,14 @@ import {
     SharedModule
   ],
   templateUrl: './audit-log.component.html',
-  styleUrls: ['./audit-log.component.scss']
+  styleUrls: ['./audit-log.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuditLogComponent implements OnInit {
   private auditService = inject(AuditService);
+
+  // Exponer Math para uso en templates
+  Math = Math;
 
   // ============================================================================
   // Signals - Estado reactivo

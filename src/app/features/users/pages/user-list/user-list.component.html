@@ -1,27 +1,36 @@
-<app-card [options]="false" cardTitle="Gestión de Usuarios">
+<app-card [options]="false" cardTitle="Gestion de Usuarios">
 
   <!-- Barra de herramientas -->
-  <div class="row mb-4">
-    <!-- Búsqueda -->
+  <div class="row mb-4" role="search" aria-label="Filtros de usuarios">
+    <!-- Busqueda -->
     <div class="col-md-4 mb-2">
+      <label for="search-users" class="visually-hidden">Buscar usuarios</label>
       <div class="input-group">
         <input
-          type="text"
+          type="search"
+          id="search-users"
           class="form-control"
           placeholder="Buscar por nombre o email..."
           [ngModel]="searchTerm()"
           (ngModelChange)="searchTerm.set($event)"
           (keyup.enter)="onSearch()"
         />
-        <button class="btn btn-outline-primary" type="button" (click)="onSearch()">
-          <i class="feather icon-search"></i>
+        <button
+          class="btn btn-outline-primary"
+          type="button"
+          (click)="onSearch()"
+          aria-label="Buscar usuarios"
+        >
+          <i class="feather icon-search" aria-hidden="true"></i>
         </button>
       </div>
     </div>
 
     <!-- Filtro por Rol -->
     <div class="col-md-2 mb-2">
+      <label for="filter-rol" class="visually-hidden">Filtrar por rol</label>
       <select
+        id="filter-rol"
         class="form-select"
         [ngModel]="selectedRolId()"
         (ngModelChange)="selectedRolId.set($event); onFilterChange()"
@@ -35,7 +44,9 @@
 
     <!-- Filtro por Equipo -->
     <div class="col-md-2 mb-2">
+      <label for="filter-equipo" class="visually-hidden">Filtrar por equipo</label>
       <select
+        id="filter-equipo"
         class="form-select"
         [ngModel]="selectedEquipoId()"
         (ngModelChange)="selectedEquipoId.set($event); onFilterChange()"
@@ -49,7 +60,9 @@
 
     <!-- Filtro por Estatus -->
     <div class="col-md-2 mb-2">
+      <label for="filter-estatus" class="visually-hidden">Filtrar por estatus</label>
       <select
+        id="filter-estatus"
         class="form-select"
         [ngModel]="selectedEstatus()"
         (ngModelChange)="selectedEstatus.set($event); onFilterChange()"
@@ -62,44 +75,54 @@
 
     <!-- Acciones -->
     <div class="col-md-2 mb-2 text-end">
-      <button class="btn btn-outline-secondary me-2" (click)="clearFilters()" ngbTooltip="Limpiar filtros">
-        <i class="feather icon-x"></i>
+      <button
+        class="btn btn-outline-secondary me-2"
+        (click)="clearFilters()"
+        ngbTooltip="Limpiar filtros"
+        aria-label="Limpiar todos los filtros"
+      >
+        <i class="feather icon-x" aria-hidden="true"></i>
       </button>
       <button
         class="btn btn-outline-success me-2"
         (click)="exportToCSV()"
         [disabled]="exporting()"
         ngbTooltip="Exportar a CSV"
+        aria-label="Exportar lista de usuarios a CSV"
+        [attr.aria-busy]="exporting()"
       >
         @if (exporting()) {
-          <span class="spinner-border spinner-border-sm"></span>
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+          <span class="visually-hidden">Exportando...</span>
         } @else {
-          <i class="feather icon-download"></i>
+          <i class="feather icon-download" aria-hidden="true"></i>
         }
       </button>
-      <a routerLink="/usuarios/nuevo" class="btn btn-primary">
-        <i class="feather icon-plus me-1"></i> Nuevo
+      <a routerLink="/usuarios/nuevo" class="btn btn-primary" aria-label="Crear nuevo usuario">
+        <i class="feather icon-plus me-1" aria-hidden="true"></i> Nuevo
       </a>
     </div>
   </div>
 
   <!-- Indicador de carga -->
   @if (loading()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando...</span>
-      </div>
+    <div class="text-center py-5" role="status" aria-live="polite">
+      <div class="spinner-border text-primary" aria-hidden="true"></div>
       <p class="mt-2 text-muted">Cargando usuarios...</p>
     </div>
   }
 
   <!-- Mensaje de error -->
   @if (error()) {
-    <div class="alert alert-danger" role="alert">
-      <i class="feather icon-alert-circle me-2"></i>
+    <div class="alert alert-danger" role="alert" aria-live="assertive">
+      <i class="feather icon-alert-circle me-2" aria-hidden="true"></i>
       {{ error() }}
-      <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadUsers()">
-        <i class="feather icon-refresh-cw me-1"></i> Reintentar
+      <button
+        class="btn btn-sm btn-outline-danger ms-3"
+        (click)="loadUsers()"
+        aria-label="Reintentar carga de usuarios"
+      >
+        <i class="feather icon-refresh-cw me-1" aria-hidden="true"></i> Reintentar
       </button>
     </div>
   }
@@ -107,28 +130,28 @@
   <!-- Tabla de usuarios -->
   @if (!loading() && !error()) {
     @if (users().length === 0) {
-      <div class="text-center py-5">
-        <i class="feather icon-users" style="font-size: 48px; color: #ccc;"></i>
+      <div class="text-center py-5" role="status" aria-live="polite">
+        <i class="feather icon-users" style="font-size: 48px; color: #ccc;" aria-hidden="true"></i>
         <p class="mt-3 text-muted">No se encontraron usuarios</p>
         @if (searchTerm() || selectedRolId() || selectedEquipoId() || selectedEstatus()) {
-          <button class="btn btn-outline-primary" (click)="clearFilters()">
+          <button class="btn btn-outline-primary" (click)="clearFilters()" aria-label="Limpiar filtros para ver todos los usuarios">
             Limpiar filtros
           </button>
         }
       </div>
     } @else {
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle" aria-label="Lista de usuarios">
           <thead class="table-light">
             <tr>
-              <th style="width: 50px;"></th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Equipo</th>
-              <th class="text-center">Estatus</th>
-              <th class="text-center">Disponibilidad</th>
-              <th class="text-center" style="width: 120px;">Acciones</th>
+              <th scope="col" style="width: 50px;"><span class="visually-hidden">Avatar</span></th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Email</th>
+              <th scope="col">Rol</th>
+              <th scope="col">Equipo</th>
+              <th scope="col" class="text-center">Estatus</th>
+              <th scope="col" class="text-center">Disponibilidad</th>
+              <th scope="col" class="text-center" style="width: 120px;">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -140,7 +163,7 @@
                     class="rounded-circle"
                     width="40"
                     height="40"
-                    [alt]="user.nombre_completo"
+                    [alt]="'Avatar de ' + user.nombre_completo"
                     style="object-fit: cover;"
                   />
                 </td>
@@ -152,7 +175,7 @@
                 <td>{{ user.email }}</td>
                 <td>
                   @if (user.rol) {
-                    <span class="badge bg-light text-dark">{{ user.rol.nombre }}</span>
+                    <span class="badge bg-light text-dark" role="status">{{ user.rol.nombre }}</span>
                   } @else {
                     <span class="text-muted">-</span>
                   }
@@ -165,46 +188,51 @@
                   }
                 </td>
                 <td class="text-center">
-                  <span [class]="getEstatusBadgeClass(user.estatus)">
+                  <span [class]="getEstatusBadgeClass(user.estatus)" role="status" [attr.aria-label]="'Estatus: ' + user.estatus">
+                    <i [class]="user.estatus === 'Activo' ? 'feather icon-check-circle me-1' : 'feather icon-x-circle me-1'" aria-hidden="true" style="font-size: 10px;"></i>
                     {{ user.estatus }}
                   </span>
                 </td>
                 <td class="text-center">
-                  <span [class]="getDisponibilidadBadgeClass(user.disponibilidad)">
+                  <span [class]="getDisponibilidadBadgeClass(user.disponibilidad)" role="status" [attr.aria-label]="'Disponibilidad: ' + user.disponibilidad">
                     {{ user.disponibilidad }}
                   </span>
                 </td>
                 <td class="text-center">
-                  <div class="btn-group btn-group-sm">
+                  <div class="btn-group btn-group-sm" role="group" [attr.aria-label]="'Acciones para ' + user.nombre_completo">
                     <button
                       class="btn btn-outline-primary"
                       (click)="viewUser(user)"
                       ngbTooltip="Ver detalles"
+                      [attr.aria-label]="'Ver detalles de ' + user.nombre_completo"
                     >
-                      <i class="feather icon-eye"></i>
+                      <i class="feather icon-eye" aria-hidden="true"></i>
                     </button>
                     <button
                       class="btn btn-outline-secondary"
                       (click)="editUser(user)"
                       ngbTooltip="Editar"
+                      [attr.aria-label]="'Editar ' + user.nombre_completo"
                     >
-                      <i class="feather icon-edit"></i>
+                      <i class="feather icon-edit" aria-hidden="true"></i>
                     </button>
                     @if (user.estatus === 'Activo') {
                       <button
                         class="btn btn-outline-danger"
                         (click)="openDeactivateModal(deactivateModal, user)"
                         ngbTooltip="Desactivar"
+                        [attr.aria-label]="'Desactivar ' + user.nombre_completo"
                       >
-                        <i class="feather icon-user-x"></i>
+                        <i class="feather icon-user-x" aria-hidden="true"></i>
                       </button>
                     } @else {
                       <button
                         class="btn btn-outline-success"
                         (click)="activateUser(user)"
                         ngbTooltip="Activar"
+                        [attr.aria-label]="'Activar ' + user.nombre_completo"
                       >
-                        <i class="feather icon-user-check"></i>
+                        <i class="feather icon-user-check" aria-hidden="true"></i>
                       </button>
                     }
                   </div>
@@ -215,23 +243,25 @@
         </table>
       </div>
 
-      <!-- Paginación -->
-      <div class="d-flex justify-content-between align-items-center mt-4">
-        <div class="text-muted">
+      <!-- Paginacion -->
+      <nav class="d-flex justify-content-between align-items-center mt-4" aria-label="Paginacion de usuarios">
+        <div class="text-muted" aria-live="polite">
           Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
           {{ currentPage() * pageSize() > totalItems() ? totalItems() : currentPage() * pageSize() }}
           de {{ totalItems() }} usuarios
         </div>
         <div class="d-flex align-items-center gap-3">
+          <label for="user-page-size" class="visually-hidden">Usuarios por pagina</label>
           <select
+            id="user-page-size"
             class="form-select form-select-sm"
             style="width: auto;"
             [ngModel]="pageSize()"
             (ngModelChange)="onPageSizeChange($event)"
           >
-            <option [value]="10">10 por página</option>
-            <option [value]="25">25 por página</option>
-            <option [value]="50">50 por página</option>
+            <option [value]="10">10 por pagina</option>
+            <option [value]="25">25 por pagina</option>
+            <option [value]="50">50 por pagina</option>
           </select>
           <ngb-pagination
             [collectionSize]="totalItems()"
@@ -241,29 +271,30 @@
             [rotate]="true"
             [boundaryLinks]="true"
             (pageChange)="onPageChange($event)"
+            aria-label="Navegacion de paginas"
           ></ngb-pagination>
         </div>
-      </div>
+      </nav>
     }
   }
 </app-card>
 
-<!-- Modal de confirmación de desactivación -->
+<!-- Modal de confirmacion de desactivacion -->
 <ng-template #deactivateModal let-modal>
   <div class="modal-header">
-    <h5 class="modal-title">Confirmar Desactivación</h5>
-    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+    <h5 class="modal-title" id="deactivate-modal-title">Confirmar Desactivacion</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()" aria-label="Cerrar"></button>
   </div>
   <div class="modal-body">
     @if (selectedUser()) {
-      <p>¿Está seguro que desea desactivar al usuario <strong>{{ selectedUser()!.nombre_completo }}</strong>?</p>
-      <p class="text-muted small">El usuario no podrá acceder al sistema hasta que sea reactivado.</p>
+      <p>¿Esta seguro que desea desactivar al usuario <strong>{{ selectedUser()!.nombre_completo }}</strong>?</p>
+      <p class="text-muted small">El usuario no podra acceder al sistema hasta que sea reactivado.</p>
     }
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
     <button type="button" class="btn btn-danger" (click)="confirmDeactivate()">
-      <i class="feather icon-user-x me-1"></i> Desactivar
+      <i class="feather icon-user-x me-1" aria-hidden="true"></i> Desactivar
     </button>
   </div>
 </ng-template>

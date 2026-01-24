@@ -4,7 +4,7 @@
 // Componente para mostrar la barra de progreso del SLA con colores
 // ============================================================================
 
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SemaforoSLA, SEMAFORO_CONFIG } from 'src/app/core/models';

@@ -4,7 +4,7 @@
 // Componente para mostrar la prioridad del ticket con colores
 // ============================================================================
 
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Prioridad, PRIORIDAD_CONFIG } from 'src/app/core/models';
@@ -18,11 +18,13 @@ import { Prioridad, PRIORIDAD_CONFIG } from 'src/app/core/models';
       [class]="badgeClasses()"
       [style.background-color]="config().color"
       [ngbTooltip]="config().descripcion"
+      role="status"
+      [attr.aria-label]="'Prioridad: ' + config().label + '. ' + config().descripcion"
     >
       @if (showIcon) {
-        <i [class]="iconClass()"></i>
+        <i [class]="iconClass()" aria-hidden="true"></i>
       }
-      {{ config().label }}
+      <span class="badge-text">{{ config().label }}</span>
     </span>
   `,
   styles: [`
@@ -43,15 +45,20 @@ import { Prioridad, PRIORIDAD_CONFIG } from 'src/app/core/models';
       padding: 2px 6px;
       font-size: 11px;
     }
+    .prioridad-badge.medium {
+      padding: 5px 12px;
+      font-size: 13px;
+    }
     .prioridad-badge i {
       font-size: 1em;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrioridadBadgeComponent {
   @Input({ required: true }) prioridad!: Prioridad;
   @Input() showIcon = true;
-  @Input() size: 'small' | 'normal' = 'normal';
+  @Input() size: 'small' | 'normal' | 'medium' = 'normal';
 
   config = computed(() => {
     return PRIORIDAD_CONFIG[this.prioridad] || {

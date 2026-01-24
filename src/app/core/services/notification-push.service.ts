@@ -20,6 +20,8 @@ import {
   NOTIFICATION_CATEGORY_NAMES,
   TipoNotificacion
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -69,19 +71,19 @@ export class NotificationPushService implements OnDestroy {
   private subscribeToRealtime(): void {
     const userId = this.supabase.user?.id;
     if (!userId) {
-      console.log('🔔 No user ID for realtime subscription');
+      if (!environment.production) { console.log('🔔 No user ID for realtime subscription'); }
       return;
     }
 
     if (this.isSubscribed) {
-      console.log('🔔 Already subscribed to notifications');
+      if (!environment.production) { console.log('🔔 Already subscribed to notifications'); }
       return;
     }
 
     // Limpiar canal anterior si existe
     this.unsubscribeFromRealtime();
 
-    console.log(`🔔 Subscribing to notifications for user: ${userId}`);
+    if (!environment.production) { console.log(`🔔 Subscribing to notifications for user: ${userId}`); }
 
     this.realtimeChannel = this.supabase.client
       .channel(`notifications-${userId}`)
@@ -94,7 +96,7 @@ export class NotificationPushService implements OnDestroy {
           filter: `usuario_id=eq.${userId}`
         },
         (payload) => {
-          console.log('🔔 New notification received:', payload.new);
+          if (!environment.production) { console.log('🔔 New notification received:', payload.new); }
           const newNotification = payload.new as Notification;
           this.newNotification$.next(newNotification);
           this.unreadCount.update(count => count + 1);
@@ -104,10 +106,10 @@ export class NotificationPushService implements OnDestroy {
         }
       )
       .subscribe((status) => {
-        console.log(`🔔 Realtime subscription status: ${status}`);
+        if (!environment.production) { console.log(`🔔 Realtime subscription status: ${status}`); }
         this.isSubscribed = status === 'SUBSCRIBED';
         if (status === 'CHANNEL_ERROR') {
-          console.error('🔔 Realtime channel error, retrying in 5s...');
+          if (!environment.production) { console.error('🔔 Realtime channel error, retrying in 5s...'); }
           this.isSubscribed = false;
           setTimeout(() => this.subscribeToRealtime(), 5000);
         }
@@ -136,16 +138,16 @@ export class NotificationPushService implements OnDestroy {
    * Carga el conteo de notificaciones no leídas
    */
   async loadUnreadCount(): Promise<void> {
-    console.log('🔔 Loading unread notification count...');
+    if (!environment.production) { console.log('🔔 Loading unread notification count...'); }
     const { data, error } = await this.supabase.client
       .rpc('contar_notificaciones_no_leidas');
 
     if (error) {
-      console.error('🔔 Error loading unread count:', error);
+      if (!environment.production) { console.error('🔔 Error loading unread count:', error); }
       return;
     }
 
-    console.log(`🔔 Unread count: ${data}`);
+    if (!environment.production) { console.log(`🔔 Unread count: ${data}`); }
     this.unreadCount.set(data ?? 0);
   }
 
@@ -174,7 +176,7 @@ export class NotificationPushService implements OnDestroy {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('notificaciones')
+      .from(TABLES.NOTIFICACIONES)
       .select('*', { count: 'exact' })
       .eq('usuario_id', userId);
 
@@ -201,7 +203,7 @@ export class NotificationPushService implements OnDestroy {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching notifications:', error);
+      if (!environment.production) { console.error('Error fetching notifications:', error); }
       return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
 
@@ -230,12 +232,12 @@ export class NotificationPushService implements OnDestroy {
 
   private async markAsReadAsync(notificationId: string): Promise<ServiceResponse<boolean>> {
     const { error } = await this.supabase.client
-      .from('notificaciones')
+      .from(TABLES.NOTIFICACIONES)
       .update({ leida: true })
       .eq('id', notificationId);
 
     if (error) {
-      console.error('Error marking notification as read:', error);
+      if (!environment.production) { console.error('Error marking notification as read:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -262,7 +264,7 @@ export class NotificationPushService implements OnDestroy {
       .rpc('marcar_notificaciones_leidas', { p_notificacion_ids: notificationIds });
 
     if (error) {
-      console.error('Error marking notifications as read:', error);
+      if (!environment.production) { console.error('Error marking notifications as read:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -289,13 +291,13 @@ export class NotificationPushService implements OnDestroy {
     }
 
     const { error } = await this.supabase.client
-      .from('notificaciones')
+      .from(TABLES.NOTIFICACIONES)
       .update({ leida: true })
       .eq('usuario_id', userId)
       .eq('leida', false);
 
     if (error) {
-      console.error('Error marking all notifications as read:', error);
+      if (!environment.production) { console.error('Error marking all notifications as read:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -319,12 +321,12 @@ export class NotificationPushService implements OnDestroy {
     const wasUnread = notification && !notification.leida;
 
     const { error } = await this.supabase.client
-      .from('notificaciones')
+      .from(TABLES.NOTIFICACIONES)
       .delete()
       .eq('id', notificationId);
 
     if (error) {
-      console.error('Error deleting notification:', error);
+      if (!environment.production) { console.error('Error deleting notification:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -353,7 +355,7 @@ export class NotificationPushService implements OnDestroy {
     }
 
     const { data, error } = await this.supabase.client
-      .from('notificaciones')
+      .from(TABLES.NOTIFICACIONES)
       .select('*')
       .eq('usuario_id', userId)
       .eq('leida', false)
@@ -361,7 +363,7 @@ export class NotificationPushService implements OnDestroy {
       .limit(limit);
 
     if (error) {
-      console.error('Error fetching recent unread notifications:', error);
+      if (!environment.production) { console.error('Error fetching recent unread notifications:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -389,7 +391,7 @@ export class NotificationPushService implements OnDestroy {
       .rpc('get_preferencias_notificaciones', { p_usuario_id: userId });
 
     if (error) {
-      console.error('Error fetching notification preferences:', error);
+      if (!environment.production) { console.error('Error fetching notification preferences:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -462,7 +464,7 @@ export class NotificationPushService implements OnDestroy {
       });
 
     if (error) {
-      console.error('Error updating notification preference:', error);
+      if (!environment.production) { console.error('Error updating notification preference:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -478,14 +480,14 @@ export class NotificationPushService implements OnDestroy {
 
   private async fetchTiposNotificacion(): Promise<ServiceResponse<TipoNotificacion[]>> {
     const { data, error } = await this.supabase.client
-      .from('tipos_notificacion')
+      .from(TABLES.TIPOS_NOTIFICACION)
       .select('*')
       .eq('activo', true)
       .order('categoria')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching notification types:', error);
+      if (!environment.production) { console.error('Error fetching notification types:', error); }
       return { data: null, error: error.message, success: false };
     }
 

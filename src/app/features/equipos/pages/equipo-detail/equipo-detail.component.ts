@@ -4,7 +4,7 @@
 // Componente para ver detalles de un equipo y gestionar sus miembros
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModalModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -14,7 +14,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { EquipoService } from 'src/app/core/services/equipo.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { EquipoWithRelations, EquipoMember } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-equipo-detail',
   standalone: true,
@@ -26,7 +26,8 @@ import { EquipoWithRelations, EquipoMember } from 'src/app/core/models';
     SharedModule
   ],
   templateUrl: './equipo-detail.component.html',
-  styleUrls: ['./equipo-detail.component.scss']
+  styleUrls: ['./equipo-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipoDetailComponent implements OnInit {
   private equipoService = inject(EquipoService);
@@ -88,7 +89,7 @@ export class EquipoDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading equipo:', err);
+        if (!environment.production) { console.error('Error loading equipo:', err); }
         this.error.set('Error al cargar el equipo');
         this.loading.set(false);
       }

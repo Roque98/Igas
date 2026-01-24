@@ -4,7 +4,7 @@
 // Componente para crear y editar usuarios
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,7 +21,7 @@ import {
   getPasswordStrengthMessage
 } from 'src/app/core/validators';
 import { ProfileWithRelations } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-user-form',
   standalone: true,
@@ -32,7 +32,8 @@ import { ProfileWithRelations } from 'src/app/core/models';
     SharedModule
   ],
   templateUrl: './user-form.component.html',
-  styleUrls: ['./user-form.component.scss']
+  styleUrls: ['./user-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -213,7 +214,7 @@ export class UserFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error creating user:', err);
+        if (!environment.production) { console.error('Error creating user:', err); }
         this.notificationService.error('Error al crear usuario');
         this.submitting.set(false);
       }
@@ -243,7 +244,7 @@ export class UserFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error updating user:', err);
+        if (!environment.production) { console.error('Error updating user:', err); }
         this.notificationService.error('Error al actualizar usuario');
         this.submitting.set(false);
       }

@@ -4,7 +4,7 @@
 // Componente para listar clientes con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,6 +22,7 @@ import {
   ESTATUS_CLIENTE,
   PaginationOptions
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-cliente-list',
@@ -35,7 +36,8 @@ import {
     SharedModule
   ],
   templateUrl: './cliente-list.component.html',
-  styleUrls: ['./cliente-list.component.scss']
+  styleUrls: ['./cliente-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClienteListComponent implements OnInit {
   private clienteService = inject(ClienteService);
@@ -111,7 +113,7 @@ export class ClienteListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading clientes:', err);
+        if (!environment.production) { console.error('Error loading clientes:', err); }
         this.error.set('Error al cargar clientes');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de clientes');

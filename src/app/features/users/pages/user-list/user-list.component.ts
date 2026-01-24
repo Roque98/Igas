@@ -4,7 +4,7 @@
 // Componente para listar usuarios con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,7 +20,7 @@ import {
   ProfileEstatus,
   Disponibilidad
 } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-user-list',
   standalone: true,
@@ -34,7 +34,8 @@ import {
     SharedModule
   ],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  styleUrls: ['./user-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserListComponent implements OnInit {
   private userService = inject(UserService);
@@ -124,7 +125,7 @@ export class UserListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading users:', err);
+        if (!environment.production) { console.error('Error loading users:', err); }
         this.error.set('Error al cargar usuarios');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de usuarios');
@@ -292,7 +293,7 @@ export class UserListComponent implements OnInit {
 
       this.notificationService.success(`Se exportaron ${users.length} usuarios correctamente`);
     } catch (error) {
-      console.error('Error exporting users:', error);
+      if (!environment.production) { console.error('Error exporting users:', error); }
       this.notificationService.error('Error al exportar usuarios');
     } finally {
       this.exporting.set(false);

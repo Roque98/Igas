@@ -4,7 +4,7 @@
 // Centro de notificaciones con filtros, tabs y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,6 +20,7 @@ import {
   NOTIFICATION_CATEGORY_NAMES,
   NotificationCategory
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 type TabFilter = 'todas' | 'no_leidas' | 'leidas';
 
@@ -41,7 +42,8 @@ interface GroupedNotifications {
     NgbTooltipModule
   ],
   templateUrl: './notification-center.component.html',
-  styleUrls: ['./notification-center.component.scss']
+  styleUrls: ['./notification-center.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationCenterComponent implements OnInit {
   notificationPushService = inject(NotificationPushService);
@@ -120,7 +122,7 @@ export class NotificationCenterComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading notifications:', err);
+        if (!environment.production) { console.error('Error loading notifications:', err); }
         this.toastService.error('Error al cargar las notificaciones');
         this.loading.set(false);
       }

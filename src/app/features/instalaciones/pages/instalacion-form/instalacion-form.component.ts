@@ -4,7 +4,7 @@
 // Formulario para crear/editar instalaciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -34,7 +34,8 @@ import {
     SharedModule
   ],
   templateUrl: './instalacion-form.component.html',
-  styleUrls: ['./instalacion-form.component.scss']
+  styleUrls: ['./instalacion-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InstalacionFormComponent implements OnInit {
   private fb = inject(FormBuilder);

@@ -4,7 +4,7 @@
 // Componente para listar equipos/áreas con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,6 +20,7 @@ import {
   EquipoEstatus,
   PaginationOptions
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-equipo-list',
@@ -34,7 +35,8 @@ import {
     SharedModule
   ],
   templateUrl: './equipo-list.component.html',
-  styleUrls: ['./equipo-list.component.scss']
+  styleUrls: ['./equipo-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipoListComponent implements OnInit {
   private equipoService = inject(EquipoService);
@@ -113,7 +115,7 @@ export class EquipoListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading equipos:', err);
+        if (!environment.production) { console.error('Error loading equipos:', err); }
         this.error.set('Error al cargar equipos');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de equipos');

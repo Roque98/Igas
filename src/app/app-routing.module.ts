@@ -1,16 +1,19 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 
 // project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
 import { authGuard, publicGuard } from './core/guards/auth.guard';
+import { SelectivePreloadingStrategy } from './core/strategies/selective-preloading.strategy';
 
 // ============================================================================
 // CONFIGURACIÓN DE RUTAS CON LAZY LOADING
 // ============================================================================
 // - Todas las rutas usan lazy loading para optimizar el bundle inicial
-// - PreloadAllModules: Precarga módulos en segundo plano después de la carga inicial
+// - SelectivePreloadingStrategy: Solo precarga módulos marcados con preload: true
+// - Módulos críticos (dashboard, tickets, casos) se precargan automáticamente
+// - Módulos secundarios se cargan bajo demanda para ahorrar ancho de banda
 // - Rutas organizadas por layout: Admin (autenticado) y Guest (público)
 // ============================================================================
 
@@ -29,10 +32,11 @@ const routes: Routes = [
         redirectTo: 'dashboard',
         pathMatch: 'full'
       },
-      // Dashboard principal
+      // Dashboard principal - PRECARGA (módulo crítico)
       {
         path: 'dashboard',
-        loadComponent: () => import('./demo/dashboard/dashboard.component').then((c) => c.DashboardComponent)
+        loadComponent: () => import('./demo/dashboard/dashboard.component').then((c) => c.DashboardComponent),
+        data: { preload: true }
       },
       // Componentes de demostración (ocultos en navegación)
       {
@@ -84,16 +88,18 @@ const routes: Routes = [
         loadChildren: () => import('./features/auditoria/auditoria.routes').then((m) => m.AUDITORIA_ROUTES)
       },
 
-      // Gestión de Tickets de Soporte
+      // Gestión de Tickets de Soporte - PRECARGA (módulo crítico)
       {
         path: 'tickets',
-        loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES)
+        loadChildren: () => import('./features/tickets/tickets.routes').then((m) => m.TICKETS_ROUTES),
+        data: { preload: true }
       },
 
-      // Gestión de Casos (Escalamientos)
+      // Gestión de Casos (Escalamientos) - PRECARGA (módulo crítico)
       {
         path: 'casos',
-        loadChildren: () => import('./features/casos/casos.routes').then((m) => m.CASOS_ROUTES)
+        loadChildren: () => import('./features/casos/casos.routes').then((m) => m.CASOS_ROUTES),
+        data: { preload: true }
       },
 
       // Gestión de Clientes
@@ -120,10 +126,11 @@ const routes: Routes = [
         loadChildren: () => import('./features/reportes/reportes.routes').then((m) => m.REPORTES_ROUTES)
       },
 
-      // Centro de Notificaciones
+      // Centro de Notificaciones - PRECARGA (módulo crítico)
       {
         path: 'notificaciones',
-        loadChildren: () => import('./features/notificaciones/notificaciones.routes').then((m) => m.NOTIFICACIONES_ROUTES)
+        loadChildren: () => import('./features/notificaciones/notificaciones.routes').then((m) => m.NOTIFICACIONES_ROUTES),
+        data: { preload: true }
       }
     ]
   },
@@ -177,8 +184,10 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-      // Estrategia de precarga: carga módulos en segundo plano
-      preloadingStrategy: PreloadAllModules,
+      // Estrategia de precarga selectiva: solo módulos marcados con preload: true
+      // Módulos críticos: dashboard, tickets, casos, notificaciones
+      // Otros módulos se cargan bajo demanda para ahorrar ancho de banda
+      preloadingStrategy: SelectivePreloadingStrategy,
       // Habilitar scroll hacia arriba en navegación
       scrollPositionRestoration: 'enabled',
       // Guardar posición de scroll en historial

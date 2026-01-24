@@ -1,5 +1,5 @@
 // angular import
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy} from '@angular/core';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
@@ -10,7 +10,8 @@ import { NavContentComponent } from './nav-content/nav-content.component';
   selector: 'app-navigation',
   imports: [SharedModule, NavLogoComponent, NavContentComponent],
   templateUrl: './navigation.component.html',
-  styleUrls: ['./navigation.component.scss']
+  styleUrls: ['./navigation.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavigationComponent {
   // public props

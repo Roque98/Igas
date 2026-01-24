@@ -4,7 +4,7 @@
 // Dashboard principal de casos con widgets, gráficas y alertas
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -28,6 +28,7 @@ import {
   ApexNonAxisChartSeries,
   ApexResponsive
 } from 'ng-apexcharts';
+import { environment } from '../../../../../environments/environment';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries | ApexNonAxisChartSeries;
@@ -55,7 +56,8 @@ export type ChartOptions = {
     SharedModule
   ],
   templateUrl: './caso-dashboard.component.html',
-  styleUrls: ['./caso-dashboard.component.scss']
+  styleUrls: ['./caso-dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CasoDashboardComponent implements OnInit {
   private casoService = inject(CasoService);
@@ -127,7 +129,7 @@ export class CasoDashboardComponent implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error loading dashboard:', error);
+      if (!environment.production) { console.error('Error loading dashboard:', error); }
       this.notificationService.error('Error al cargar el dashboard');
     } finally {
       this.loading.set(false);

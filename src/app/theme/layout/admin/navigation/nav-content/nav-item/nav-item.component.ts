@@ -1,5 +1,5 @@
 // angular import
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy} from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 // project import
@@ -10,7 +10,8 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
   selector: 'app-nav-item',
   imports: [SharedModule, RouterModule],
   templateUrl: './nav-item.component.html',
-  styleUrls: ['./nav-item.component.scss']
+  styleUrls: ['./nav-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavItemComponent {
   // public props

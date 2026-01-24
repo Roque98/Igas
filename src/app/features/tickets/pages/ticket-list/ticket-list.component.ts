@@ -4,7 +4,7 @@
 // Componente para listar tickets con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -28,6 +28,7 @@ import {
   EstatusBadgeComponent,
   ProgressBarSLAComponent
 } from '../../components';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-ticket-list',
@@ -46,7 +47,8 @@ import {
     ProgressBarSLAComponent
   ],
   templateUrl: './ticket-list.component.html',
-  styleUrls: ['./ticket-list.component.scss']
+  styleUrls: ['./ticket-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketListComponent implements OnInit {
   private ticketService = inject(TicketService);
@@ -180,7 +182,7 @@ export class TicketListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading tickets:', err);
+        if (!environment.production) { console.error('Error loading tickets:', err); }
         this.error.set('Error al cargar tickets');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de tickets');

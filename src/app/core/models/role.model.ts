@@ -8,6 +8,7 @@ export interface Role {
   id: string;
   nombre: RoleName;
   descripcion?: string;
+  nivel_acceso?: number;
   permisos: Record<string, any>;
   created_at: string;
   updated_at: string;

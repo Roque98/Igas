@@ -4,7 +4,7 @@
 // Componente para mostrar el detalle de un ticket con bitácora y acciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -32,6 +32,7 @@ import {
   EstatusBadgeComponent,
   ProgressBarSLAComponent
 } from '../../components';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-ticket-detail',
@@ -49,7 +50,8 @@ import {
     ProgressBarSLAComponent
   ],
   templateUrl: './ticket-detail.component.html',
-  styleUrls: ['./ticket-detail.component.scss']
+  styleUrls: ['./ticket-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -153,7 +155,7 @@ export class TicketDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading ticket:', err);
+        if (!environment.production) { console.error('Error loading ticket:', err); }
         this.error.set('Error al cargar el ticket');
         this.loading.set(false);
       }

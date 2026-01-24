@@ -1,30 +1,165 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { TABLES } from '../constants/tables';
+
+// Security configuration constants
+const SECURITY_CONFIG = {
+  STORAGE_KEY: 'igas-auth-token',
+  HIDDEN_TIMESTAMP_KEY: 'igas-hidden-at',
+  MAX_HIDDEN_DURATION_MS: 30 * 60 * 1000, // 30 minutes - revalidate session after this
+  SESSION_CHECK_INTERVAL_MS: 5 * 60 * 1000 // 5 minutes - periodic session check
+} as const;
 
 @Injectable({
   providedIn: 'root'
 })
-export class SupabaseService {
+export class SupabaseService implements OnDestroy {
   private supabase: SupabaseClient;
   private currentUser: BehaviorSubject<User | null> = new BehaviorSubject<User | null>(null);
   public currentUser$: Observable<User | null> = this.currentUser.asObservable();
 
+  // Security: Store bound event handlers for proper cleanup
+  private boundVisibilityHandler: () => void;
+  private sessionCheckInterval: ReturnType<typeof setInterval> | null = null;
+
   constructor() {
-    // Create Supabase client with explicit auth configuration
+    // Create Supabase client with enhanced security configuration
     this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
       auth: {
-        autoRefreshToken: true, // Automatically refresh the token before expiry
-        persistSession: true, // Persist session in localStorage
-        detectSessionInUrl: true, // Detect OAuth session in URL (for password reset)
-        storage: window.localStorage, // Use localStorage for session persistence
-        storageKey: 'igas-auth-token', // Custom storage key for better organization
-        flowType: 'pkce' // Use PKCE flow for better security
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        // SECURITY: Use sessionStorage instead of localStorage
+        // sessionStorage is cleared when browser/tab closes, reducing token exposure
+        storage: window.sessionStorage,
+        storageKey: SECURITY_CONFIG.STORAGE_KEY,
+        flowType: 'pkce'
       }
     });
+
+    // Bind handlers for proper cleanup
+    this.boundVisibilityHandler = this.handleVisibilityChange.bind(this);
+
+    // Initialize security listeners
+    this.setupSecurityListeners();
+
     this.loadUser();
     this.authChanges();
+  }
+
+  /**
+   * Cleanup on service destroy
+   */
+  ngOnDestroy(): void {
+    this.removeSecurityListeners();
+  }
+
+  /**
+   * Setup security event listeners
+   * - Monitors page visibility to detect prolonged inactivity
+   * - Periodically validates session integrity
+   */
+  private setupSecurityListeners(): void {
+    // Monitor page visibility changes
+    document.addEventListener('visibilitychange', this.boundVisibilityHandler);
+
+    // Periodic session validation (defense in depth)
+    this.sessionCheckInterval = setInterval(() => {
+      this.validateSessionIntegrity();
+    }, SECURITY_CONFIG.SESSION_CHECK_INTERVAL_MS);
+  }
+
+  /**
+   * Remove security event listeners (prevents memory leaks)
+   */
+  private removeSecurityListeners(): void {
+    document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+
+    if (this.sessionCheckInterval) {
+      clearInterval(this.sessionCheckInterval);
+      this.sessionCheckInterval = null;
+    }
+
+    // Cleanup hidden timestamp
+    sessionStorage.removeItem(SECURITY_CONFIG.HIDDEN_TIMESTAMP_KEY);
+  }
+
+  /**
+   * Handle page visibility changes
+   * Tracks when page becomes hidden and validates session when it returns
+   */
+  private handleVisibilityChange(): void {
+    if (document.hidden) {
+      // Page is now hidden - record timestamp
+      sessionStorage.setItem(SECURITY_CONFIG.HIDDEN_TIMESTAMP_KEY, Date.now().toString());
+    } else {
+      // Page is visible again - check how long it was hidden
+      this.checkHiddenDuration();
+    }
+  }
+
+  /**
+   * Check how long the page was hidden and revalidate session if needed
+   */
+  private async checkHiddenDuration(): Promise<void> {
+    const hiddenAt = sessionStorage.getItem(SECURITY_CONFIG.HIDDEN_TIMESTAMP_KEY);
+
+    if (hiddenAt) {
+      const hiddenDuration = Date.now() - parseInt(hiddenAt, 10);
+      sessionStorage.removeItem(SECURITY_CONFIG.HIDDEN_TIMESTAMP_KEY);
+
+      // If hidden for too long, force session revalidation
+      if (hiddenDuration > SECURITY_CONFIG.MAX_HIDDEN_DURATION_MS) {
+        if (!environment.production) {
+          console.log('🔒 Session revalidation triggered after prolonged inactivity');
+        }
+        await this.forceSessionRefresh();
+      }
+    }
+  }
+
+  /**
+   * Force session refresh - used after prolonged inactivity
+   */
+  private async forceSessionRefresh(): Promise<void> {
+    try {
+      const { error } = await this.supabase.auth.refreshSession();
+
+      if (error) {
+        // Session invalid - sign out user
+        if (!environment.production) {
+          console.warn('🔒 Session refresh failed, signing out user');
+        }
+        await this.signOut();
+      }
+    } catch {
+      // On any error, sign out for security
+      await this.signOut();
+    }
+  }
+
+  /**
+   * Periodic session integrity validation
+   * Ensures session hasn't been tampered with
+   */
+  private async validateSessionIntegrity(): Promise<void> {
+    if (!this.currentUser.value) return;
+
+    try {
+      const { data, error } = await this.supabase.auth.getSession();
+
+      if (error || !data.session) {
+        // Session is invalid but we think user is logged in - clear state
+        if (!environment.production) {
+          console.warn('🔒 Session integrity check failed');
+        }
+        this.currentUser.next(null);
+      }
+    } catch {
+      // Silent fail - don't interrupt user experience
+    }
   }
 
   /**
@@ -44,14 +179,14 @@ export class SupabaseService {
   /**
    * Load the current user from session
    */
-  private async loadUser() {
+  private async loadUser(): Promise<void> {
     try {
       const { data, error } = await this.supabase.auth.getSession();
 
       if (error) {
         // If there's an error getting the session (e.g., invalid refresh token),
         // clear the session to avoid repeated errors
-        console.error('Error loading session:', error);
+        this.logDebug('Error loading session:', error);
         await this.supabase.auth.signOut();
         this.currentUser.next(null);
         return;
@@ -59,8 +194,22 @@ export class SupabaseService {
 
       this.currentUser.next(data.session?.user ?? null);
     } catch (error) {
-      console.error('Unexpected error loading user:', error);
+      this.logDebug('Unexpected error loading user:', error);
       this.currentUser.next(null);
+    }
+  }
+
+  /**
+   * Development-only logging utility
+   * Prevents sensitive information from being logged in production
+   */
+  private logDebug(message: string, data?: unknown): void {
+    if (!environment.production) {
+      if (data) {
+        if (!environment.production) { console.log(message, data); }
+      } else {
+        if (!environment.production) { console.log(message); }
+      }
     }
   }
 
@@ -68,28 +217,29 @@ export class SupabaseService {
    * Listen to auth state changes
    * Handles automatic token refresh and session management
    */
-  private authChanges() {
+  private authChanges(): void {
     this.supabase.auth.onAuthStateChange(async (event, session) => {
-      // Log authentication events for debugging
+      // Log authentication events for debugging (only in development)
       switch (event) {
         case 'SIGNED_IN':
-          console.log('✅ User signed in successfully');
+          this.logDebug('User signed in successfully');
           break;
         case 'SIGNED_OUT':
-          console.log('👋 User signed out');
+          this.logDebug('User signed out');
+          // Security: Clear any residual data on sign out
+          this.clearSecurityData();
           break;
         case 'TOKEN_REFRESHED':
-          console.log('🔄 Token refreshed automatically');
-          // Token was successfully refreshed before expiry
+          this.logDebug('Token refreshed automatically');
           break;
         case 'USER_UPDATED':
-          console.log('👤 User profile updated');
+          this.logDebug('User profile updated');
           break;
         case 'PASSWORD_RECOVERY':
-          console.log('🔑 Password recovery initiated');
+          this.logDebug('Password recovery initiated');
           break;
         default:
-          console.log(`🔔 Auth event: ${event}`);
+          this.logDebug(`Auth event: ${event}`);
       }
 
       // Update current user observable
@@ -97,9 +247,16 @@ export class SupabaseService {
 
       // Handle session expiry or refresh errors
       if (!session && event !== 'SIGNED_OUT') {
-        console.warn('⚠️ Session lost - user may need to re-authenticate');
+        this.logDebug('Session lost - user may need to re-authenticate');
       }
     });
+  }
+
+  /**
+   * Clear all security-related data from storage
+   */
+  private clearSecurityData(): void {
+    sessionStorage.removeItem(SECURITY_CONFIG.HIDDEN_TIMESTAMP_KEY);
   }
 
   /**
@@ -179,16 +336,16 @@ export class SupabaseService {
       const { data, error } = await this.supabase.auth.refreshSession();
 
       if (error) {
-        console.error('❌ Error refreshing session:', error);
+        this.logDebug('Error refreshing session:', error);
         // If refresh fails, sign out to clear bad tokens
         await this.signOut();
         return { data: null, error };
       }
 
-      console.log('✅ Session refreshed manually');
+      this.logDebug('Session refreshed manually');
       return { data, error: null };
     } catch (error) {
-      console.error('❌ Unexpected error refreshing session:', error);
+      this.logDebug('Unexpected error refreshing session:', error);
       return { data: null, error };
     }
   }
@@ -237,7 +394,7 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('Error checking user blocked status:', error);
+        this.logDebug('Error checking user blocked status:', error);
         // On error, allow login attempt (fail open for better UX)
         return { isBlocked: false, secondsUntilUnblock: 0 };
       }
@@ -245,7 +402,7 @@ export class SupabaseService {
       if (data === true) {
         // User is blocked, get time until unblock from blocked_users view
         const { data: blockInfo } = await this.supabase
-          .from('blocked_users')
+          .from(TABLES.BLOCKED_USERS)
           .select('seconds_until_unblock')
           .eq('email', email)
           .single();
@@ -258,7 +415,7 @@ export class SupabaseService {
 
       return { isBlocked: false, secondsUntilUnblock: 0 };
     } catch (error) {
-      console.error('Unexpected error checking blocked status:', error);
+      this.logDebug('Unexpected error checking blocked status:', error);
       return { isBlocked: false, secondsUntilUnblock: 0 };
     }
   }
@@ -278,10 +435,10 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('Error recording failed attempt:', error);
+        this.logDebug('Error recording failed attempt:', error);
       }
     } catch (error) {
-      console.error('Unexpected error recording failed attempt:', error);
+      this.logDebug('Unexpected error recording failed attempt:', error);
     }
   }
 
@@ -297,13 +454,13 @@ export class SupabaseService {
       });
 
       if (error) {
-        console.error('Error getting remaining attempts:', error);
+        this.logDebug('Error getting remaining attempts:', error);
         return 5; // Default to max attempts on error
       }
 
       return data ?? 5;
     } catch (error) {
-      console.error('Unexpected error getting remaining attempts:', error);
+      this.logDebug('Unexpected error getting remaining attempts:', error);
       return 5;
     }
   }

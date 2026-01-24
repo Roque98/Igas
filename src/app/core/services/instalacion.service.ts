@@ -32,6 +32,8 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS, STORAGE_BUCKETS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -66,7 +68,7 @@ export class InstalacionService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_instalaciones_completo')
+      .from(VIEWS.V_INSTALACIONES_COMPLETO)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -113,7 +115,7 @@ export class InstalacionService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching instalaciones:', error);
+      if (!environment.production) { console.error('Error fetching instalaciones:', error); }
       return {
         data: [],
         total: 0,
@@ -142,13 +144,13 @@ export class InstalacionService {
 
   private async fetchInstalacionById(id: string): Promise<ServiceResponse<InstalacionCompleta>> {
     const { data, error } = await this.supabase.client
-      .from('v_instalaciones_completo')
+      .from(VIEWS.V_INSTALACIONES_COMPLETO)
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error fetching instalacion:', error);
+      if (!environment.production) { console.error('Error fetching instalacion:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -171,7 +173,7 @@ export class InstalacionService {
     const { modulos_ids, ...instalacionData } = dto;
 
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .insert({
         ...instalacionData,
         creado_por: userId
@@ -180,7 +182,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error creating instalacion:', error);
+      if (!environment.production) { console.error('Error creating instalacion:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -192,7 +194,7 @@ export class InstalacionService {
       }));
 
       await this.supabase.client
-        .from('instalacion_modulos')
+        .from(TABLES.INSTALACION_MODULOS)
         .insert(modulosData);
 
       // Copiar checklist de templates de cada módulo
@@ -211,14 +213,14 @@ export class InstalacionService {
 
   private async updateInstalacionAsync(id: string, dto: UpdateInstalacionDTO): Promise<ServiceResponse<Instalacion>> {
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .update(dto)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating instalacion:', error);
+      if (!environment.production) { console.error('Error updating instalacion:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -241,7 +243,7 @@ export class InstalacionService {
       .rpc('get_instalaciones_por_estatus');
 
     if (error) {
-      console.error('Error fetching instalaciones por estatus:', error);
+      if (!environment.production) { console.error('Error fetching instalaciones por estatus:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -257,14 +259,14 @@ export class InstalacionService {
 
   private async cambiarEstatusAsync(id: string, nuevoEstatusId: string): Promise<ServiceResponse<Instalacion>> {
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .update({ estatus_id: nuevoEstatusId })
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error changing estatus:', error);
+      if (!environment.production) { console.error('Error changing estatus:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -280,13 +282,13 @@ export class InstalacionService {
 
   private async iniciarInstalacionAsync(id: string): Promise<ServiceResponse<Instalacion>> {
     const { data: estatusEnProceso } = await this.supabase.client
-      .from('estatus_instalaciones')
+      .from(TABLES.ESTATUS_INSTALACIONES)
       .select('id')
       .eq('nombre', 'En proceso')
       .single();
 
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .update({
         estatus_id: estatusEnProceso?.id,
         fecha_inicio: new Date().toISOString()
@@ -296,7 +298,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error iniciando instalacion:', error);
+      if (!environment.production) { console.error('Error iniciando instalacion:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -316,7 +318,7 @@ export class InstalacionService {
 
   private async fetchModulos(instalacionId: string): Promise<ServiceResponse<InstalacionModulo[]>> {
     const { data, error } = await this.supabase.client
-      .from('instalacion_modulos')
+      .from(TABLES.INSTALACION_MODULOS)
       .select(`
         *,
         modulo:modulos_sistema(*)
@@ -324,7 +326,7 @@ export class InstalacionService {
       .eq('instalacion_id', instalacionId);
 
     if (error) {
-      console.error('Error fetching modulos:', error);
+      if (!environment.production) { console.error('Error fetching modulos:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -344,7 +346,7 @@ export class InstalacionService {
 
   private async fetchChecklist(instalacionId: string): Promise<ServiceResponse<InstalacionChecklist[]>> {
     const { data, error } = await this.supabase.client
-      .from('instalacion_checklist')
+      .from(TABLES.INSTALACION_CHECKLIST)
       .select(`
         *,
         modulo:modulos_sistema(nombre)
@@ -354,7 +356,7 @@ export class InstalacionService {
       .order('orden');
 
     if (error) {
-      console.error('Error fetching checklist:', error);
+      if (!environment.production) { console.error('Error fetching checklist:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -378,7 +380,7 @@ export class InstalacionService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('instalacion_checklist')
+      .from(TABLES.INSTALACION_CHECKLIST)
       .update({
         completado: dto.completado,
         completado_por: dto.completado ? userId : null,
@@ -390,7 +392,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error ejecutando checklist item:', error);
+      if (!environment.production) { console.error('Error ejecutando checklist item:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -400,7 +402,7 @@ export class InstalacionService {
   private async copiarChecklistPorModulos(instalacionId: string, modulosIds: string[]): Promise<void> {
     // Obtener templates de checklist para cada módulo
     const { data: templates } = await this.supabase.client
-      .from('checklist_templates')
+      .from(TABLES.CHECKLIST_TEMPLATES)
       .select(`
         *,
         items:checklist_items_template(*)
@@ -430,7 +432,7 @@ export class InstalacionService {
 
       if (checklistItems.length > 0) {
         await this.supabase.client
-          .from('instalacion_checklist')
+          .from(TABLES.INSTALACION_CHECKLIST)
           .insert(checklistItems);
       }
     }
@@ -449,7 +451,7 @@ export class InstalacionService {
 
   private async fetchPendientes(instalacionId: string): Promise<ServiceResponse<InstalacionPendiente[]>> {
     const { data, error } = await this.supabase.client
-      .from('instalacion_pendientes')
+      .from(TABLES.INSTALACION_PENDIENTES)
       .select(`
         *,
         ticket:tickets(folio)
@@ -458,7 +460,7 @@ export class InstalacionService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching pendientes:', error);
+      if (!environment.production) { console.error('Error fetching pendientes:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -481,7 +483,7 @@ export class InstalacionService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('instalacion_pendientes')
+      .from(TABLES.INSTALACION_PENDIENTES)
       .insert({
         instalacion_id: instalacionId,
         ...dto,
@@ -492,27 +494,27 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error creating pendiente:', error);
+      if (!environment.production) { console.error('Error creating pendiente:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Cambiar estatus de instalación a "Pendientes" si no lo está
     const { data: instalacion } = await this.supabase.client
-      .from('v_instalaciones_completo')
+      .from(VIEWS.V_INSTALACIONES_COMPLETO)
       .select('estatus_nombre')
       .eq('id', instalacionId)
       .single();
 
     if (instalacion && instalacion.estatus_nombre !== 'Pendientes' && instalacion.estatus_nombre !== 'Cerrada') {
       const { data: estatusPendientes } = await this.supabase.client
-        .from('estatus_instalaciones')
+        .from(TABLES.ESTATUS_INSTALACIONES)
         .select('id')
         .eq('nombre', 'Pendientes')
         .single();
 
       if (estatusPendientes) {
         await this.supabase.client
-          .from('instalaciones')
+          .from(TABLES.INSTALACIONES)
           .update({ estatus_id: estatusPendientes.id })
           .eq('id', instalacionId);
       }
@@ -530,14 +532,14 @@ export class InstalacionService {
 
   private async updatePendienteAsync(pendienteId: string, dto: UpdatePendienteDTO): Promise<ServiceResponse<InstalacionPendiente>> {
     const { data, error } = await this.supabase.client
-      .from('instalacion_pendientes')
+      .from(TABLES.INSTALACION_PENDIENTES)
       .update(dto)
       .eq('id', pendienteId)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating pendiente:', error);
+      if (!environment.production) { console.error('Error updating pendiente:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -555,7 +557,7 @@ export class InstalacionService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('instalacion_pendientes')
+      .from(TABLES.INSTALACION_PENDIENTES)
       .update({
         resuelto: true,
         resuelto_por: userId,
@@ -567,7 +569,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error resolviendo pendiente:', error);
+      if (!environment.production) { console.error('Error resolviendo pendiente:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -586,7 +588,7 @@ export class InstalacionService {
       .rpc('generar_ticket_desde_pendiente', { p_pendiente_id: pendienteId });
 
     if (error) {
-      console.error('Error generando ticket:', error);
+      if (!environment.production) { console.error('Error generando ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -606,13 +608,13 @@ export class InstalacionService {
 
   private async fetchEvidencias(instalacionId: string): Promise<ServiceResponse<InstalacionEvidencia[]>> {
     const { data, error } = await this.supabase.client
-      .from('instalacion_evidencias')
+      .from(TABLES.INSTALACION_EVIDENCIAS)
       .select('*')
       .eq('instalacion_id', instalacionId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching evidencias:', error);
+      if (!environment.production) { console.error('Error fetching evidencias:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -620,7 +622,7 @@ export class InstalacionService {
     const evidenciasConUrl = await Promise.all(
       (data as InstalacionEvidencia[]).map(async (ev) => {
         const { data: urlData } = await this.supabase.client.storage
-          .from('instalacion-evidencias')
+          .from(STORAGE_BUCKETS.INSTALACION_EVIDENCIAS)
           .createSignedUrl(ev.ruta_storage, 3600);
         return { ...ev, url: urlData?.signedUrl };
       })
@@ -659,25 +661,25 @@ export class InstalacionService {
     if (file.type.startsWith('image/')) {
       try {
         processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
-        console.log(`Evidencia comprimida: ${file.size} -> ${processedFile.size} bytes`);
+        if (!environment.production) { console.log(`Evidencia comprimida: ${file.size} -> ${processedFile.size} bytes`); }
       } catch (err) {
-        console.warn('No se pudo comprimir la imagen:', err);
+        if (!environment.production) { console.warn('No se pudo comprimir la imagen:', err); }
       }
     }
 
     const fileName = `${instalacionId}/${Date.now()}_${processedFile.name}`;
 
     const { error: uploadError } = await this.supabase.client.storage
-      .from('instalacion-evidencias')
+      .from(STORAGE_BUCKETS.INSTALACION_EVIDENCIAS)
       .upload(fileName, processedFile);
 
     if (uploadError) {
-      console.error('Error uploading file:', uploadError);
+      if (!environment.production) { console.error('Error uploading file:', uploadError); }
       return { data: null, error: 'Error al subir archivo', success: false };
     }
 
     const { data, error } = await this.supabase.client
-      .from('instalacion_evidencias')
+      .from(TABLES.INSTALACION_EVIDENCIAS)
       .insert({
         instalacion_id: instalacionId,
         checklist_item_id: checklistItemId,
@@ -693,14 +695,14 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error registering evidencia:', error);
+      if (!environment.production) { console.error('Error registering evidencia:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Actualizar checklist item si aplica
     if (checklistItemId) {
       await this.supabase.client
-        .from('instalacion_checklist')
+        .from(TABLES.INSTALACION_CHECKLIST)
         .update({ tiene_evidencia: true })
         .eq('id', checklistItemId);
     }
@@ -718,7 +720,7 @@ export class InstalacionService {
   private async eliminarEvidenciaAsync(evidenciaId: string): Promise<ServiceResponse<void>> {
     // Obtener la evidencia para saber el path en storage
     const { data: evidencia, error: fetchError } = await this.supabase.client
-      .from('instalacion_evidencias')
+      .from(TABLES.INSTALACION_EVIDENCIAS)
       .select('ruta_storage, checklist_item_id')
       .eq('id', evidenciaId)
       .single();
@@ -729,22 +731,22 @@ export class InstalacionService {
 
     // Eliminar del storage
     const { error: deleteStorageError } = await this.supabase.client.storage
-      .from('instalacion-evidencias')
+      .from(STORAGE_BUCKETS.INSTALACION_EVIDENCIAS)
       .remove([evidencia.ruta_storage]);
 
     if (deleteStorageError) {
-      console.error('Error deleting from storage:', deleteStorageError);
+      if (!environment.production) { console.error('Error deleting from storage:', deleteStorageError); }
       // Continuar de todas formas para eliminar el registro
     }
 
     // Eliminar registro
     const { error } = await this.supabase.client
-      .from('instalacion_evidencias')
+      .from(TABLES.INSTALACION_EVIDENCIAS)
       .delete()
       .eq('id', evidenciaId);
 
     if (error) {
-      console.error('Error deleting evidencia:', error);
+      if (!environment.production) { console.error('Error deleting evidencia:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -752,13 +754,13 @@ export class InstalacionService {
     if (evidencia.checklist_item_id) {
       // Verificar si quedan otras evidencias para ese item
       const { count } = await this.supabase.client
-        .from('instalacion_evidencias')
+        .from(TABLES.INSTALACION_EVIDENCIAS)
         .select('*', { count: 'exact', head: true })
         .eq('checklist_item_id', evidencia.checklist_item_id);
 
       if (count === 0) {
         await this.supabase.client
-          .from('instalacion_checklist')
+          .from(TABLES.INSTALACION_CHECKLIST)
           .update({ tiene_evidencia: false })
           .eq('id', evidencia.checklist_item_id);
       }
@@ -793,22 +795,22 @@ export class InstalacionService {
     const fileName = `${id}/${Date.now()}_firma.png`;
 
     const { error: uploadError } = await this.supabase.client.storage
-      .from('firmas-clientes')
+      .from(STORAGE_BUCKETS.FIRMAS_CLIENTES)
       .upload(fileName, blob);
 
     if (uploadError) {
-      console.error('Error uploading firma:', uploadError);
+      if (!environment.production) { console.error('Error uploading firma:', uploadError); }
       return { data: null, error: 'Error al subir firma', success: false };
     }
 
     // Obtener URL pública de la firma
     const { data: urlData } = await this.supabase.client.storage
-      .from('firmas-clientes')
+      .from(STORAGE_BUCKETS.FIRMAS_CLIENTES)
       .createSignedUrl(fileName, 31536000); // 1 año
 
     // Actualizar instalación
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .update({
         firma_cliente_url: urlData?.signedUrl || fileName,
         nombre_firmante: dto.nombre_firmante,
@@ -820,7 +822,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error updating instalacion con firma:', error);
+      if (!environment.production) { console.error('Error updating instalacion con firma:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -836,13 +838,13 @@ export class InstalacionService {
 
   private async cerrarInstalacionAsync(id: string): Promise<ServiceResponse<Instalacion>> {
     const { data: estatusCerrada } = await this.supabase.client
-      .from('estatus_instalaciones')
+      .from(TABLES.ESTATUS_INSTALACIONES)
       .select('id')
       .eq('nombre', 'Cerrada')
       .single();
 
     const { data, error } = await this.supabase.client
-      .from('instalaciones')
+      .from(TABLES.INSTALACIONES)
       .update({
         estatus_id: estatusCerrada?.id,
         fecha_fin: new Date().toISOString()
@@ -852,7 +854,7 @@ export class InstalacionService {
       .single();
 
     if (error) {
-      console.error('Error cerrando instalacion:', error);
+      if (!environment.production) { console.error('Error cerrando instalacion:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -872,7 +874,7 @@ export class InstalacionService {
 
   private async fetchEstatus(): Promise<ServiceResponse<EstatusInstalacion[]>> {
     const { data, error } = await this.supabase.client
-      .from('estatus_instalaciones')
+      .from(TABLES.ESTATUS_INSTALACIONES)
       .select('*')
       .order('orden');
 
@@ -892,7 +894,7 @@ export class InstalacionService {
 
   private async fetchModulosSistema(): Promise<ServiceResponse<ModuloSistema[]>> {
     const { data, error } = await this.supabase.client
-      .from('modulos_sistema')
+      .from(TABLES.MODULOS_SISTEMA)
       .select('*')
       .eq('activo', true)
       .order('orden');
@@ -914,7 +916,7 @@ export class InstalacionService {
   async getInstalacionStats(): Promise<InstalacionStats> {
     try {
       const { data: instalaciones } = await this.supabase.client
-        .from('v_instalaciones_completo')
+        .from(VIEWS.V_INSTALACIONES_COMPLETO)
         .select('*');
 
       if (!instalaciones || instalaciones.length === 0) {
@@ -929,7 +931,7 @@ export class InstalacionService {
 
       // Agrupar por módulo
       const { data: modulos } = await this.supabase.client
-        .from('instalacion_modulos')
+        .from(TABLES.INSTALACION_MODULOS)
         .select(`
           modulo:modulos_sistema(nombre)
         `);
@@ -957,7 +959,7 @@ export class InstalacionService {
         promedio_pendientes: Math.round(promedio_pendientes * 10) / 10
       };
     } catch (error) {
-      console.error('Error getting instalacion stats:', error);
+      if (!environment.production) { console.error('Error getting instalacion stats:', error); }
       return this.emptyStats();
     }
   }

@@ -4,7 +4,7 @@
 // Detalle de mantenimiento con checklist y evidencias
 // ============================================================================
 
-import { Component, OnInit, inject, signal, TemplateRef } from '@angular/core';
+import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -23,7 +23,7 @@ import {
 } from 'src/app/core/models';
 import { ChecklistExecutionComponent, ChecklistItem, ChecklistItemExecuteEvent, ChecklistItemEvidenciaEvent } from '../../components/checklist-execution/checklist-execution.component';
 import { EvidenciasUploadComponent, Evidencia, EvidenciaUploadEvent } from '../../components/evidencias-upload/evidencias-upload.component';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-mantenimiento-detail',
   standalone: true,
@@ -39,7 +39,8 @@ import { EvidenciasUploadComponent, Evidencia, EvidenciaUploadEvent } from '../.
     EvidenciasUploadComponent
   ],
   templateUrl: './mantenimiento-detail.component.html',
-  styleUrls: ['./mantenimiento-detail.component.scss']
+  styleUrls: ['./mantenimiento-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MantenimientoDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -103,7 +104,7 @@ export class MantenimientoDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading mantenimiento:', err);
+        if (!environment.production) { console.error('Error loading mantenimiento:', err); }
         this.error.set('Error al cargar el mantenimiento');
         this.loading.set(false);
         this.notificationService.error('Error al cargar el mantenimiento');

@@ -4,7 +4,7 @@
 // Componente para crear y editar clientes
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,6 +20,7 @@ import {
   TIPOS_CLIENTE,
   ESTATUS_CLIENTE
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-cliente-form',
@@ -32,7 +33,8 @@ import {
     SharedModule
   ],
   templateUrl: './cliente-form.component.html',
-  styleUrls: ['./cliente-form.component.scss']
+  styleUrls: ['./cliente-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClienteFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -115,7 +117,7 @@ export class ClienteFormComponent implements OnInit {
         this.loadingCliente.set(false);
       },
       error: (err) => {
-        console.error('Error loading cliente:', err);
+        if (!environment.production) { console.error('Error loading cliente:', err); }
         this.notificationService.error('Error al cargar el cliente');
         this.loadingCliente.set(false);
         this.router.navigate(['/clientes']);
@@ -179,7 +181,7 @@ export class ClienteFormComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error creating cliente:', err);
+        if (!environment.production) { console.error('Error creating cliente:', err); }
         this.notificationService.error('Error al crear el cliente');
         this.loading.set(false);
       }
@@ -201,7 +203,7 @@ export class ClienteFormComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error updating cliente:', err);
+        if (!environment.production) { console.error('Error updating cliente:', err); }
         this.notificationService.error('Error al actualizar el cliente');
         this.loading.set(false);
       }

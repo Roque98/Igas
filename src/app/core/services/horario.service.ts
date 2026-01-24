@@ -15,7 +15,8 @@ import {
   HorarioFilters
 } from '../models';
 import { ServiceResponse, PaginatedResponse, PaginationOptions } from '../models';
-
+import { environment } from '../../../environments/environment';
+import { TABLES } from '../constants/tables';
 @Injectable({
   providedIn: 'root'
 })
@@ -49,7 +50,7 @@ export class HorarioService {
     const to_idx = from_idx + pageSize - 1;
 
     let query = this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -73,7 +74,7 @@ export class HorarioService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching horarios:', error);
+      if (!environment.production) { console.error('Error fetching horarios:', error); }
       return {
         data: [],
         total: 0,
@@ -105,13 +106,13 @@ export class HorarioService {
 
   private async fetchHorarioById(id: string): Promise<ServiceResponse<HorarioWithCount>> {
     const { data, error } = await this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error fetching horario by ID:', error);
+      if (!environment.production) { console.error('Error fetching horario by ID:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -134,13 +135,13 @@ export class HorarioService {
 
   private async fetchHorariosActivos(): Promise<ServiceResponse<Horario[]>> {
     const { data, error } = await this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .select('*')
       .eq('estatus', 'Activo')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching horarios activos:', error);
+      if (!environment.production) { console.error('Error fetching horarios activos:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -156,7 +157,7 @@ export class HorarioService {
 
   private async fetchUsuariosByHorario(horarioId: string): Promise<ServiceResponse<any[]>> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select(`
         id,
         nombre_completo,
@@ -170,7 +171,7 @@ export class HorarioService {
       .order('nombre_completo');
 
     if (error) {
-      console.error('Error fetching usuarios by horario:', error);
+      if (!environment.production) { console.error('Error fetching usuarios by horario:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -200,7 +201,7 @@ export class HorarioService {
 
   private async createHorarioAsync(horarioData: CreateHorarioDTO): Promise<ServiceResponse<Horario>> {
     const { data, error } = await this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .insert({
         nombre: horarioData.nombre,
         descripcion: horarioData.descripcion,
@@ -214,7 +215,7 @@ export class HorarioService {
       .single();
 
     if (error) {
-      console.error('Error creating horario:', error);
+      if (!environment.production) { console.error('Error creating horario:', error); }
       return { data: null, error: this.mapError(error.message), success: false };
     }
 
@@ -234,7 +235,7 @@ export class HorarioService {
 
   private async updateHorarioAsync(id: string, horarioData: UpdateHorarioDTO): Promise<ServiceResponse<Horario>> {
     const { data, error } = await this.supabase.client
-      .from('horarios')
+      .from(TABLES.HORARIOS)
       .update({
         ...horarioData,
         updated_at: new Date().toISOString()
@@ -244,7 +245,7 @@ export class HorarioService {
       .single();
 
     if (error) {
-      console.error('Error updating horario:', error);
+      if (!environment.production) { console.error('Error updating horario:', error); }
       return { data: null, error: this.mapError(error.message), success: false };
     }
 
@@ -282,7 +283,7 @@ export class HorarioService {
 
   private async assignHorarioAsync(userId: string, horarioId: string): Promise<ServiceResponse<boolean>> {
     const { error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         turno_horario_id: horarioId,
         updated_at: new Date().toISOString()
@@ -290,7 +291,7 @@ export class HorarioService {
       .eq('id', userId);
 
     if (error) {
-      console.error('Error assigning horario to user:', error);
+      if (!environment.production) { console.error('Error assigning horario to user:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -306,7 +307,7 @@ export class HorarioService {
 
   private async removeHorarioAsync(userId: string): Promise<ServiceResponse<boolean>> {
     const { error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         turno_horario_id: null,
         updated_at: new Date().toISOString()
@@ -314,7 +315,7 @@ export class HorarioService {
       .eq('id', userId);
 
     if (error) {
-      console.error('Error removing horario from user:', error);
+      if (!environment.production) { console.error('Error removing horario from user:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -332,13 +333,13 @@ export class HorarioService {
     if (horarios.length === 0) return horarios;
 
     const { data: counts, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select('turno_horario_id')
       .eq('estatus', 'Activo')
       .not('turno_horario_id', 'is', null);
 
     if (error) {
-      console.error('Error fetching user counts:', error);
+      if (!environment.production) { console.error('Error fetching user counts:', error); }
       return horarios.map(h => ({ ...h, _count: { usuarios: 0 } }));
     }
 
@@ -359,13 +360,13 @@ export class HorarioService {
    */
   private async getUserCount(horarioId: string): Promise<number> {
     const { count, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select('*', { count: 'exact', head: true })
       .eq('turno_horario_id', horarioId)
       .eq('estatus', 'Activo');
 
     if (error) {
-      console.error('Error fetching user count:', error);
+      if (!environment.production) { console.error('Error fetching user count:', error); }
       return 0;
     }
 

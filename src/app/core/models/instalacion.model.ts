@@ -110,6 +110,9 @@ export interface InstalacionModulo {
 
   // Relaciones
   modulo?: ModuloSistema;
+
+  // Campos de vista
+  modulo_nombre?: string;
 }
 
 export interface InstalacionChecklist {

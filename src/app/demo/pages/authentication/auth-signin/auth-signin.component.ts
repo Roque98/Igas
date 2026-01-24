@@ -1,5 +1,5 @@
 // angular import
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
@@ -11,12 +11,13 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { AuditService } from 'src/app/core/services/audit.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 import { emailFormat as validateEmailFormat, noWhitespace as validateNoWhitespace } from 'src/app/core/validators/custom-validators';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-auth-signin',
   imports: [CommonModule, RouterModule, SharedModule, Field],
   templateUrl: './auth-signin.component.html',
-  styleUrls: ['./auth-signin.component.scss']
+  styleUrls: ['./auth-signin.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthSigninComponent implements OnInit {
   private supabase = inject(SupabaseService);
@@ -125,7 +126,7 @@ export class AuthSigninComponent implements OnInit {
         if (isNonCredentialError) {
           // Mostrar mensaje específico sin registrar intento fallido
           this.error.set(getErrorMessage(error));
-          console.error('Login error:', error);
+          if (!environment.production) { console.error('Login error:', error); }
         } else {
           // Record failed attempt solo para errores de credenciales
           await this.supabase.recordFailedAttempt(
@@ -153,10 +154,10 @@ export class AuthSigninComponent implements OnInit {
             // Normal error message
             this.error.set(getErrorMessage(error));
           }
-          console.error('Login error:', error);
+          if (!environment.production) { console.error('Login error:', error); }
         }
       } else if (data.user) {
-        console.log('User logged in successfully:', data.user);
+        if (!environment.production) { console.log('User logged in successfully:', data.user); }
 
         // Log successful login to session log
         this.auditService.logSessionEvent('login', data.user.id, credentials.email).subscribe();
@@ -176,7 +177,7 @@ export class AuthSigninComponent implements OnInit {
       }
     } catch (err: any) {
       this.error.set(getErrorMessage(err));
-      console.error('Unexpected error:', err);
+      if (!environment.production) { console.error('Unexpected error:', err); }
     } finally {
       this.loading.set(false);
     }
@@ -190,7 +191,7 @@ export class AuthSigninComponent implements OnInit {
     try {
       localStorage.setItem(this.REMEMBER_EMAIL_KEY, email);
     } catch (error) {
-      console.error('Error saving email to localStorage:', error);
+      if (!environment.production) { console.error('Error saving email to localStorage:', error); }
     }
   }
 
@@ -198,7 +199,7 @@ export class AuthSigninComponent implements OnInit {
     try {
       return localStorage.getItem(this.REMEMBER_EMAIL_KEY);
     } catch (error) {
-      console.error('Error reading email from localStorage:', error);
+      if (!environment.production) { console.error('Error reading email from localStorage:', error); }
       return null;
     }
   }
@@ -207,7 +208,7 @@ export class AuthSigninComponent implements OnInit {
     try {
       localStorage.removeItem(this.REMEMBER_EMAIL_KEY);
     } catch (error) {
-      console.error('Error clearing email from localStorage:', error);
+      if (!environment.production) { console.error('Error clearing email from localStorage:', error); }
     }
   }
 }

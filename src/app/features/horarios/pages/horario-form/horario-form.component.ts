@@ -4,7 +4,7 @@
 // Componente para crear y editar horarios/turnos
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,7 +14,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { HorarioService } from 'src/app/core/services/horario.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { HorarioWithCount, DIAS_SEMANA_NOMBRES } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-horario-form',
   standalone: true,
@@ -25,7 +25,8 @@ import { HorarioWithCount, DIAS_SEMANA_NOMBRES } from 'src/app/core/models';
     SharedModule
   ],
   templateUrl: './horario-form.component.html',
-  styleUrls: ['./horario-form.component.scss']
+  styleUrls: ['./horario-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HorarioFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -215,7 +216,7 @@ export class HorarioFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error creating horario:', err);
+        if (!environment.production) { console.error('Error creating horario:', err); }
         this.notificationService.error('Error al crear horario');
         this.submitting.set(false);
       }
@@ -247,7 +248,7 @@ export class HorarioFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error updating horario:', err);
+        if (!environment.production) { console.error('Error updating horario:', err); }
         this.notificationService.error('Error al actualizar horario');
         this.submitting.set(false);
       }

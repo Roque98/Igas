@@ -1,5 +1,5 @@
 // angular import
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { email, Field, form, required } from '@angular/forms/signals';
@@ -9,12 +9,13 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { SupabaseService } from 'src/app/core/services/supabase.service';
 import { ErrorMessages, getErrorMessage } from 'src/app/core/helpers/error-messages';
 import { emailFormat as validateEmailFormat, noWhitespace as validateNoWhitespace } from 'src/app/core/validators/custom-validators';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-auth-forgot-password',
   imports: [CommonModule, RouterModule, SharedModule, Field],
   templateUrl: './auth-forgot-password.component.html',
-  styleUrls: ['./auth-forgot-password.component.scss']
+  styleUrls: ['./auth-forgot-password.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthForgotPasswordComponent {
   private supabase = inject(SupabaseService);
@@ -69,14 +70,14 @@ export class AuthForgotPasswordComponent {
 
       if (error) {
         this.error.set(getErrorMessage(error));
-        console.error('Password reset error:', error);
+        if (!environment.production) { console.error('Password reset error:', error); }
       } else {
         this.success.set(true);
-        console.log('Password reset email sent successfully');
+        if (!environment.production) { console.log('Password reset email sent successfully'); }
       }
     } catch (err: any) {
       this.error.set(getErrorMessage(err));
-      console.error('Unexpected error:', err);
+      if (!environment.production) { console.error('Unexpected error:', err); }
     } finally {
       this.loading.set(false);
     }

@@ -3,7 +3,7 @@ import { Router, CanActivateFn } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
 import { UserService } from '../services/user.service';
 import { firstValueFrom } from 'rxjs';
-
+import { environment } from '../../../environments/environment';
 /**
  * Auth Guard - Protects routes that require authentication
  * Usage in routes:
@@ -104,11 +104,11 @@ export const roleGuard: CanActivateFn = async (route, state) => {
     }
 
     // User doesn't have required role - redirect to dashboard
-    console.warn(`Access denied: User role "${userRole}" not in required roles:`, requiredRoles);
+    if (!environment.production) { console.warn(`Access denied: User role "${userRole}" not in required roles:`, requiredRoles); }
     router.navigate(['/dashboard']);
     return false;
   } catch (error) {
-    console.error('Error checking user role:', error);
+    if (!environment.production) { console.error('Error checking user role:', error); }
     router.navigate(['/dashboard']);
     return false;
   }
@@ -134,11 +134,11 @@ export const adminGuard: CanActivateFn = async (route, state) => {
       return true;
     }
 
-    console.warn('Access denied: Admin role required');
+    if (!environment.production) { console.warn('Access denied: Admin role required'); }
     router.navigate(['/dashboard']);
     return false;
   } catch (error) {
-    console.error('Error checking admin status:', error);
+    if (!environment.production) { console.error('Error checking admin status:', error); }
     router.navigate(['/dashboard']);
     return false;
   }

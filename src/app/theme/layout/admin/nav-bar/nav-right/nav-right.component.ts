@@ -1,5 +1,5 @@
 // angular import
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ChangeDetectionStrategy} from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -13,14 +13,16 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { NotificationPushService } from 'src/app/core/services/notification-push.service';
 import { AuditService } from 'src/app/core/services/audit.service';
 import { UserService } from 'src/app/core/services/user.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
 import { Notification } from 'src/app/core/models';
-
+import { environment } from '../../../../../../environments/environment';
 @Component({
   selector: 'app-nav-right',
   imports: [SharedModule, CommonModule],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
-  providers: [NgbDropdownConfig]
+  providers: [NgbDropdownConfig],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavRightComponent implements OnInit {
   private supabase = inject(SupabaseService);
@@ -29,6 +31,7 @@ export class NavRightComponent implements OnInit {
   private notificationPushService = inject(NotificationPushService);
   private auditService = inject(AuditService);
   private userService = inject(UserService);
+  themeService = inject(ThemeService);
 
   // Observable para el usuario actual
   currentUser$ = this.supabase.currentUser$;
@@ -90,7 +93,7 @@ export class NavRightComponent implements OnInit {
 
     const { error } = await this.supabase.signOut();
     if (error) {
-      console.error('Error logging out:', error);
+      if (!environment.production) { console.error('Error logging out:', error); }
       this.notificationService.error('Error al cerrar sesión. Por favor, intenta de nuevo.');
     } else {
       this.notificationService.info('Has cerrado sesión correctamente.');

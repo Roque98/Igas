@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejoras del Proyecto - APP Mesa de Ayuda iGAS</title>
+    <style>
+        @page {
+            margin: 2cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+            padding-top: 60px;
+        }
+
+        /* Navegacion sticky */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3E3E3E;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar li {
+            margin: 0;
+        }
+
+        .navbar a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            background: rgba(249, 176, 0, 0.1);
+            color: #F9B000;
+        }
+
+        .navbar a.active {
+            color: #F9B000;
+            border-bottom-color: #F9B000;
+            background: rgba(249, 176, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            page-break-after: avoid;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #3E3E3E;
+            border-bottom: 3px solid #F9B000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .card-header.critical {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .card-header.high {
+            background: linear-gradient(135deg, #fd7e14 0%, #e66000 100%);
+        }
+
+        .card-header.medium {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #333;
+        }
+
+        .card-header.low {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
+        .card-header.info {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        }
+
+        .card-header.resolved {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .priority-p0 {
+            background: #dc3545;
+            color: white;
+        }
+
+        .priority-p1 {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .priority-p2 {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .priority-p3 {
+            background: #28a745;
+            color: white;
+        }
+
+        .priority-resolved {
+            background: #28a745;
+            color: white;
+        }
+
+        .issue-item {
+            background: #f8f9fa;
+            border-left: 4px solid #F9B000;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .issue-item h4 {
+            color: #3E3E3E;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .issue-item p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .issue-item .location {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .issue-item .solution {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .issue-item .solution strong {
+            color: #155724;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+
+        .code-block .comment {
+            color: #75715e;
+        }
+
+        .code-block .keyword {
+            color: #f92672;
+        }
+
+        .code-block .string {
+            color: #e6db74;
+        }
+
+        .code-block .function {
+            color: #66d9ef;
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background: #3E3E3E;
+            color: white;
+        }
+
+        .summary-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .summary-table tr:hover {
+            background: #fff3cd;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #F9B000;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .stat-card.critical .number {
+            color: #dc3545;
+        }
+
+        .stat-card.warning .number {
+            color: #fd7e14;
+        }
+
+        .stat-card.success .number {
+            color: #28a745;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .checklist li.done::before {
+            background: #28a745;
+            border-color: #28a745;
+            content: '\2713';
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .tech-badge {
+            background: #e9ecef;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tech-badge.current {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F9B000, #FDB913);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            margin-bottom: 15px;
+            color: #3E3E3E;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 5px 0;
+        }
+
+        .toc a {
+            color: #F9B000;
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        @media print {
+            .navbar {
+                display: none;
+            }
+            body {
+                padding-top: 0;
+            }
+            .card {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .navbar a {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="overview.html">Overview</a></li>
+            <li><a href="fase-0.html">Fase 0</a></li>
+            <li><a href="fase-1.html">Fase 1</a></li>
+            <li><a href="fase-2.html">Fase 2</a></li>
+            <li><a href="fase-3.html">Fase 3</a></li>
+            <li><a href="fase-4.html">Fase 4</a></li>
+            <li><a href="fase-5.html">Fase 5</a></li>
+            <li><a href="fase-6.html">Fase 6</a></li>
+            <li><a href="fase-7.html">Fase 7</a></li>
+            <li><a href="mejoras-proyecto.html" class="active">Mejoras</a></li>
+        </ul>
+    </nav>
+
+    <div class="header">
+        <div class="container">
+            <h1>Plan de Mejoras del Proyecto</h1>
+            <p>Analisis exhaustivo de areas de mejora - APP Mesa de Ayuda iGAS v2.0</p>
+            <p>Fecha de analisis: Enero 2026</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Resumen Ejecutivo -->
+        <section class="section">
+            <h2 class="section-title">Resumen Ejecutivo</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card critical">
+                    <div class="number">2</div>
+                    <div class="label">Problemas Criticos (P0)</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="number">1</div>
+                    <div class="label">Problemas Altos (P1)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">0</div>
+                    <div class="label">Problemas Medios (P2)</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="number">11</div>
+                    <div class="label">Problemas Resueltos</div>
+                </div>
+            </div>
+
+            <div class="alert alert-danger">
+                <strong>Atencion Inmediata Requerida:</strong> Se identificaron problemas criticos de seguridad que requieren accion inmediata, incluyendo credenciales expuestas en el repositorio y memory leaks que degradan el rendimiento progresivamente.
+            </div>
+        </section>
+
+        <!-- Stack Tecnologico -->
+        <section class="section">
+            <h2 class="section-title">Stack Tecnologico Actual</h2>
+
+            <div class="tech-stack">
+                <span class="tech-badge current">Angular 21.0.5</span>
+                <span class="tech-badge current">Bootstrap 5.3.8</span>
+                <span class="tech-badge current">TypeScript 5.9.3</span>
+                <span class="tech-badge current">Supabase 2.90.1</span>
+                <span class="tech-badge current">RxJS 7.8.2</span>
+                <span class="tech-badge current">ESLint 9.39.1</span>
+                <span class="tech-badge current">ApexCharts 5.3.6</span>
+                <span class="tech-badge">ng-bootstrap 20.0.0</span>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Punto Positivo:</strong> El proyecto utiliza versiones actualizadas de todas las dependencias principales. La arquitectura modular con lazy loading esta bien implementada.
+            </div>
+        </section>
+
+        <!-- Tabla de Contenidos -->
+        <section class="section">
+            <div class="toc">
+                <h3>Tabla de Contenidos</h3>
+                <ul>
+                    <li><a href="#seguridad">1. Seguridad (3 problemas criticos)</a></li>
+                    <li><a href="#rendimiento">2. Rendimiento (4 problemas)</a></li>
+                    <li><a href="#testing">3. Testing (estado critico)</a></li>
+                    <li><a href="#memoria">4. Gestion de Memoria</a></li>
+                    <li><a href="#accesibilidad">5. Accesibilidad</a></li>
+                    <li><a href="#mantenibilidad">6. Mantenibilidad</a></li>
+                    <li><a href="#documentacion">7. Documentacion</a></li>
+                    <li><a href="#checklist">8. Checklist de Implementacion</a></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCION 1: SEGURIDAD -->
+        <section class="section" id="seguridad">
+            <h2 class="section-title">1. Seguridad</h2>
+
+            <div class="card">
+                <div class="card-header critical">
+                    CRITICO: Credenciales Expuestas en Repositorio
+                </div>
+                <div class="card-body">
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p0">P0</span>
+                            Credenciales de Supabase en archivos versionados
+                        </h4>
+                        <p>Los archivos <code>.env</code>, <code>environment.ts</code> y <code>environment.prod.ts</code> contienen credenciales reales de Supabase que estan siendo versionadas en Git.</p>
+
+                        <p><span class="location">Archivos afectados: .env, src/environments/environment.ts, src/environments/environment.prod.ts</span></p>
+
+                        <div class="code-block">
+<span class="comment">// Credenciales expuestas (ejemplo sanitizado)</span>
+SUPABASE_URL=https://xxxxxx.supabase.co
+SUPABASE_ANON_KEY=sb_publishable__xxxxx
+                        </div>
+
+                        <div class="solution">
+                            <strong>Solucion:</strong>
+                            <ol>
+                                <li>Rotar inmediatamente todas las credenciales de Supabase</li>
+                                <li>Agregar <code>.env</code> al <code>.gitignore</code> (ya deberia estar)</li>
+                                <li>Usar variables de entorno del sistema operativo en produccion</li>
+                                <li>Considerar usar AWS Secrets Manager o similar</li>
+                                <li>Limpiar historial de Git con <code>git filter-branch</code> o BFG Repo-Cleaner</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header high">
+                    ALTO: Validacion y Proteccion Insuficiente
+                </div>
+                <div class="card-body">
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p1">P1</span>
+                            Sin proteccion CSRF visible
+                        </h4>
+                        <p>No se encontro implementacion explicita de proteccion CSRF en formularios.</p>
+                        <div class="solution">
+                            <strong>Solucion:</strong> Implementar tokens CSRF en formularios criticos o verificar que Supabase maneje esto apropiadamente.
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p1">P1</span>
+                            Errores exponen informacion interna
+                        </h4>
+                        <p>Algunos mensajes de error exponen detalles de la estructura de base de datos.</p>
+                        <p><span class="location">Archivo: src/app/core/services/user.service.ts:341</span></p>
+                        <div class="solution">
+                            <strong>Solucion:</strong> Sanitizar mensajes de error antes de mostrarlos al usuario. Usar mensajes genericos en produccion.
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge priority-p2" style="background: #28a745;">RESUELTO</span>
+                            localStorage para tokens
+                        </h4>
+                        <p><s>Los tokens de autenticacion se almacenan en localStorage, vulnerable a XSS.</s></p>
+                        <div class="solution">
+                            <strong>Implementado:</strong> Se migro a sessionStorage con las siguientes mejoras:
+                            <ul>
+                                <li>Tokens se borran al cerrar el navegador</li>
+                                <li>Revalidacion de sesion tras 30 min de inactividad</li>
+                                <li>Verificacion periodica cada 5 minutos</li>
+                                <li>Cleanup correcto de event listeners</li>
+                                <li>Logs solo en modo desarrollo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Aspectos Positivos de Seguridad:</strong>
+                <ul>
+                    <li>Guards de autenticacion bien implementados (authGuard, publicGuard, roleGuard, adminGuard)</li>
+                    <li>No hay uso de innerHTML o bypassSecurityTrustHtml (sin XSS directo)</li>
+                    <li>PKCE flow implementado correctamente</li>
+                    <li>RLS (Row Level Security) implementado en base de datos</li>
+                    <li>Encriptacion de contrasenas delegada a Supabase (bcrypt)</li>
+                    <li><strong>NUEVO:</strong> Tokens en sessionStorage (se borran al cerrar navegador)</li>
+                    <li><strong>NUEVO:</strong> Revalidacion de sesion por inactividad (30 min)</li>
+                    <li><strong>NUEVO:</strong> Verificacion periodica de integridad de sesion</li>
+                    <li><strong>NUEVO:</strong> Logs solo en modo desarrollo</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCION 2: RENDIMIENTO -->
+        <section class="section" id="rendimiento">
+            <h2 class="section-title">2. Rendimiento</h2>
+
+            <div class="card">
+                <div class="card-header low">
+                    RESUELTO: Optimizaciones de Angular Aplicadas
+                </div>
+                <div class="card-body">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            ChangeDetectionStrategy.OnPush implementado
+                        </h4>
+                        <p><s><strong>71 componentes</strong> sin estrategia de deteccion de cambios optimizada.</s></p>
+                        <p><strong>Actualizado:</strong> Todos los 71 componentes ahora usan OnPush para mejor rendimiento.</p>
+
+                        <div class="code-block">
+<span class="comment">// Implementado en todos los componentes</span>
+@Component({
+  selector: 'app-example',
+  templateUrl: './example.component.html',
+  <span class="keyword">changeDetection</span>: ChangeDetectionStrategy.<span class="function">OnPush</span>
+})
+                        </div>
+
+                        <div class="solution">
+                            <strong>Mejoras implementadas:</strong>
+                            <ul>
+                                <li>71 componentes actualizados con <code>ChangeDetectionStrategy.OnPush</code></li>
+                                <li>Import de <code>ChangeDetectionStrategy</code> agregado automaticamente</li>
+                                <li>Script <code>scripts/add-onpush.js</code> creado para futuras migraciones</li>
+                                <li>Los componentes ya usaban signals, compatibles con OnPush</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Track en @for (Angular 17+)
+                        </h4>
+                        <p><s>Ninguna directiva <code>*ngFor</code> utiliza <code>trackBy</code>.</s></p>
+                        <p><strong>Estado actual:</strong> El proyecto usa Angular 17+ con la nueva sintaxis <code>@for</code> que requiere <code>track</code> obligatoriamente.</p>
+
+                        <div class="code-block">
+<span class="comment">// Angular 17+ - track es OBLIGATORIO</span>
+@for (ticket of tickets(); track ticket.id) {
+  &lt;div&gt;{{ ticket.titulo }}&lt;/div&gt;
+}
+
+<span class="comment">// 124 loops @for con track implementado</span>
+<span class="comment">// - Mayoría usa .id (ticket.id, user.id, cliente.id)</span>
+<span class="comment">// - Algunos usan .value para enums</span>
+<span class="comment">// - 4 usan $index (casos válidos: meses, paginación)</span>
+                        </div>
+
+                        <div class="solution">
+                            <strong>Analisis completado:</strong>
+                            <ul>
+                                <li>124 loops <code>@for</code> encontrados</li>
+                                <li>100% tienen expresion <code>track</code> apropiada</li>
+                                <li>La sintaxis <code>@for</code> de Angular 17+ requiere track obligatorio</li>
+                                <li>No se usa <code>*ngFor</code> en el proyecto</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header low">
+                    RESUELTO: Console Logs en Produccion
+                </div>
+                <div class="card-body">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            237 console.log/error protegidos
+                        </h4>
+                        <p><s>Se encontraron 237 llamadas a console.log/error/warn ejecutandose en produccion.</s></p>
+                        <p>Envueltos con verificacion de <code>environment.production</code> en 49 archivos.</p>
+                        <p><span class="location">Archivos: core/services/logger.service.ts, scripts/wrap-console-logs.js</span></p>
+
+                        <div class="solution">
+                            <strong>Implementacion:</strong>
+                            <ol>
+                                <li>Creado <code>LoggerService</code> centralizado</li>
+                                <li>Envueltos todos los console statements con <code>if (!environment.production)</code></li>
+                                <li>Scripts de automatizacion para futuros casos</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header medium">
+                    MEDIO: Bundle Size y Lazy Loading
+                </div>
+                <div class="card-body">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            PreloadAllModules reemplazado por SelectivePreloadingStrategy
+                        </h4>
+                        <p><s>La estrategia PreloadAllModules precargaba todos los modulos, aumentando consumo de ancho de banda.</s></p>
+                        <p>Implementada estrategia selectiva que solo precarga modulos criticos (dashboard, tickets, casos, notificaciones).</p>
+                        <p><span class="location">Archivos: app-routing.module.ts, core/strategies/selective-preloading.strategy.ts</span></p>
+
+                        <div class="solution">
+                            <strong>Implementacion:</strong>
+                            <ol>
+                                <li>Creado <code>SelectivePreloadingStrategy</code> en core/strategies/</li>
+                                <li>4 modulos con precarga vs 12+ anteriormente</li>
+                                <li>8 modulos cargan bajo demanda</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p2">P2</span>
+                            ApexCharts cargado globalmente
+                        </h4>
+                        <p>ApexCharts esta cargado via script global en lugar de lazy loaded donde se necesita.</p>
+                        <div class="solution">
+                            <strong>Solucion:</strong> Cargar ApexCharts solo en los modulos que lo utilizan (reportes, dashboard).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCION 3: TESTING -->
+        <section class="section" id="testing">
+            <h2 class="section-title">3. Testing</h2>
+
+            <div class="card">
+                <div class="card-header critical">
+                    CRITICO: Sin Cobertura de Tests
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <strong>Estado Actual:</strong> CERO tests encontrados en todo el proyecto. No hay archivos <code>*.spec.ts</code>.
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p0">P0</span>
+                            Sin tests unitarios
+                        </h4>
+                        <p>El proyecto no tiene ninguna prueba unitaria. Esto expone el proyecto a regresiones no detectadas y dificulta el refactoring seguro.</p>
+
+                        <div class="solution">
+                            <strong>Plan de Implementacion de Tests:</strong>
+                            <ol>
+                                <li><strong>Prioridad 1 - Servicios Core:</strong>
+                                    <ul>
+                                        <li>supabase.service.ts</li>
+                                        <li>auth.service.ts</li>
+                                        <li>user.service.ts</li>
+                                        <li>ticket.service.ts</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Prioridad 2 - Guards:</strong>
+                                    <ul>
+                                        <li>auth.guard.ts</li>
+                                        <li>role.guard.ts</li>
+                                        <li>admin.guard.ts</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Prioridad 3 - Componentes:</strong>
+                                    <ul>
+                                        <li>Login/Register components</li>
+                                        <li>Ticket CRUD components</li>
+                                        <li>Dashboard component</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Prioridad 4 - E2E Tests:</strong>
+                                    <ul>
+                                        <li>Flow de autenticacion completo</li>
+                                        <li>CRUD de tickets</li>
+                                        <li>Gestion de usuarios</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <h4>Configuracion Recomendada</h4>
+                    <div class="code-block">
+<span class="comment">// Instalar dependencias de testing</span>
+npm install --save-dev jasmine-core karma karma-chrome-launcher karma-jasmine karma-coverage
+npm install --save-dev @cypress/schematic cypress
+
+<span class="comment">// Agregar scripts a package.json</span>
+"test": "ng test",
+"test:coverage": "ng test --code-coverage",
+"e2e": "ng e2e"
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCION 4: MEMORIA -->
+        <section class="section" id="memoria">
+            <h2 class="section-title">4. Gestion de Memoria</h2>
+
+            <div class="card">
+                <div class="card-header low">
+                    RESUELTO: Memory Leaks Corregidos
+                </div>
+                <div class="card-body">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            InactivityService - Listeners corregidos
+                        </h4>
+                        <p><s>El servicio creaba event listeners con funciones anonimas que no podian ser removidas correctamente.</s></p>
+                        <p><span class="location">Archivo: src/app/core/services/inactivity.service.ts</span></p>
+
+                        <div class="code-block">
+<span class="comment">// SOLUCION IMPLEMENTADA - Referencia bound guardada</span>
+<span class="keyword">private</span> boundOnUserActivity = this.onUserActivity.<span class="function">bind</span>(this);
+
+<span class="function">startWatching</span>() {
+  window.<span class="function">addEventListener</span>(event, this.boundOnUserActivity, true);
+}
+
+<span class="function">stopWatching</span>() {
+  window.<span class="function">removeEventListener</span>(event, this.boundOnUserActivity, true);
+}
+                        </div>
+
+                        <div class="solution">
+                            <strong>Mejoras implementadas:</strong>
+                            <ul>
+                                <li>Referencia <code>boundOnUserActivity</code> creada con <code>.bind(this)</code></li>
+                                <li>La misma referencia usada en <code>addEventListener</code> y <code>removeEventListener</code></li>
+                                <li>Implementado <code>OnDestroy</code> con cleanup completo</li>
+                                <li>Subscription del router almacenada y limpiada correctamente</li>
+                                <li>Tipado mejorado para <code>inactivityTimer</code></li>
+                                <li>Console.log solo en desarrollo</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p1">P1</span>
+                            Suscripciones sin cleanup consistente
+                        </h4>
+                        <p>Patrón inconsistente de desuscripción entre servicios.</p>
+
+                        <div class="code-block">
+<span class="comment">// Patron recomendado con takeUntilDestroyed</span>
+<span class="keyword">import</span> { takeUntilDestroyed } <span class="keyword">from</span> <span class="string">'@angular/core/rxjs-interop'</span>;
+
+@<span class="function">Injectable</span>()
+<span class="keyword">export class</span> MyService {
+  <span class="keyword">private</span> destroyRef = <span class="function">inject</span>(DestroyRef);
+
+  <span class="function">init</span>() {
+    this.observable$
+      .<span class="function">pipe</span>(<span class="function">takeUntilDestroyed</span>(this.destroyRef))
+      .<span class="function">subscribe</span>();
+  }
+}
+                        </div>
+
+                        <div class="solution">
+                            <strong>Solucion:</strong> Usar <code>takeUntilDestroyed</code> de Angular 16+ en todos los servicios y componentes con suscripciones.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCION 5: ACCESIBILIDAD -->
+        <section class="section" id="accesibilidad">
+            <h2 class="section-title">5. Accesibilidad (a11y)</h2>
+
+            <div class="card">
+                <div class="card-header low">
+                    RESUELTO: Mejoras de Accesibilidad Implementadas
+                </div>
+                <div class="card-body">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Inputs con labels asociados
+                        </h4>
+                        <p><s>Formularios de autenticacion y otros tienen inputs sin etiquetas.</s></p>
+                        <div class="solution">
+                            <strong>Implementado:</strong>
+                            <ul>
+                                <li>Labels con clase <code>visually-hidden</code> para lectores de pantalla</li>
+                                <li>Atributos <code>autocomplete</code> en todos los inputs</li>
+                                <li>Atributos <code>aria-describedby</code> para mensajes de error</li>
+                                <li>Atributos <code>aria-invalid</code> dinamicos</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Iconos con descripcion
+                        </h4>
+                        <p><s>Botones con solo iconos no tienen aria-label para lectores de pantalla.</s></p>
+                        <div class="solution">
+                            <strong>Implementado:</strong>
+                            <ul>
+                                <li>Todos los iconos decorativos tienen <code>aria-hidden="true"</code></li>
+                                <li>Botones con iconos tienen <code>aria-label</code> descriptivo</li>
+                                <li>Grupos de botones tienen <code>role="group"</code> con <code>aria-label</code></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Indicadores visuales adicionales
+                        </h4>
+                        <p><s>Badges de prioridad y estado usan solo color para indicar significado.</s></p>
+                        <div class="solution">
+                            <strong>Implementado:</strong>
+                            <ul>
+                                <li>Componentes de badge con <code>role="status"</code></li>
+                                <li>Atributos <code>aria-label</code> descriptivos en todos los badges</li>
+                                <li>Iconos agregados junto al color para mejor distincion</li>
+                                <li>Badges de estatus incluyen iconos (check, x-circle, etc.)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Modo oscuro completo implementado
+                        </h4>
+                        <p>Se implemento modo oscuro completo usando Bootstrap 5 <code>data-bs-theme="dark"</code> con soporte para todos los componentes de la aplicacion.</p>
+
+                        <div class="solution">
+                            <strong>Implementacion Completa:</strong>
+                            <ul>
+                                <li><strong>ThemeService:</strong> Servicio Angular con signals para gestionar el tema reactivamente</li>
+                                <li><strong>Toggle accesible:</strong> Boton en la barra de navegacion con iconos sol/luna y aria-labels</li>
+                                <li><strong>Persistencia:</strong> Preferencia guardada en localStorage</li>
+                                <li><strong>Sistema:</strong> Respeta <code>prefers-color-scheme</code> del sistema operativo</li>
+                                <li><strong>Componentes cubiertos:</strong>
+                                    <ul>
+                                        <li>Cards, tablas, formularios e inputs</li>
+                                        <li>Modales, dropdowns y tooltips</li>
+                                        <li>Header, sidebar y footer</li>
+                                        <li>Graficas ApexCharts (ejes, leyendas, tooltips)</li>
+                                        <li>Paginas de autenticacion (login/registro)</li>
+                                        <li>Dropdown de notificaciones y perfil</li>
+                                        <li>Badges de SLA y prioridad</li>
+                                        <li>Componentes iGAS personalizados</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Archivos modificados:</strong>
+                                    <ul>
+                                        <li><code>src/app/core/services/theme.service.ts</code> - Servicio de tema</li>
+                                        <li><code>src/scss/_custom.scss</code> - Estilos globales dark mode (~1200 lineas)</li>
+                                        <li><code>src/scss/_igas-components.scss</code> - Componentes iGAS dark mode</li>
+                                        <li><code>nav-right.component.html/scss</code> - Toggle de tema</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Mejoras de Accesibilidad y UX Implementadas:</strong>
+                <ul>
+                    <li>Formularios de login/registro con labels accesibles</li>
+                    <li>Botones con aria-labels descriptivos</li>
+                    <li>Tablas con scope en headers y aria-labels</li>
+                    <li>Indicadores de carga con aria-live regions</li>
+                    <li>Mensajes de error con role="alert"</li>
+                    <li>Navegacion con landmarks apropiados</li>
+                    <li>Paginacion con navegacion accesible</li>
+                    <li>Componentes de badge con roles y descripciones</li>
+                    <li><strong>Modo oscuro completo:</strong>
+                        <ul>
+                            <li>Toggle accesible en navbar (sol/luna)</li>
+                            <li>Persistencia de preferencia del usuario</li>
+                            <li>Respeta configuracion del sistema operativo</li>
+                            <li>Todos los componentes con estilos dark mode</li>
+                            <li>Graficas ApexCharts adaptadas</li>
+                            <li>Dropdowns de notificaciones y perfil</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>Herramientas Recomendadas para Pruebas:</strong>
+                <ul>
+                    <li>axe DevTools - Extension de navegador para auditoria de accesibilidad</li>
+                    <li>Lighthouse - Auditoria integrada en Chrome DevTools</li>
+                    <li>NVDA/VoiceOver - Testing con lectores de pantalla reales</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCION 6: MANTENIBILIDAD -->
+        <section class="section" id="mantenibilidad">
+            <h2 class="section-title">6. Mantenibilidad</h2>
+
+            <div class="card">
+                <div class="card-header info">
+                    Mejoras de Arquitectura
+                </div>
+                <div class="card-body">
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p2">P2</span>
+                            Servicios con demasiada responsabilidad
+                        </h4>
+                        <p>Algunos servicios tienen mas de 700 lineas de codigo y manejan multiples responsabilidades.</p>
+                        <p><span class="location">Ejemplo: ticket.service.ts</span></p>
+
+                        <div class="solution">
+                            <strong>Solucion:</strong> Dividir servicios grandes en:
+                            <ul>
+                                <li>TicketCrudService - Operaciones CRUD basicas</li>
+                                <li>TicketQueryService - Consultas y filtros complejos</li>
+                                <li>TicketSlaService - Logica de SLA</li>
+                                <li>TicketNotificationService - Notificaciones relacionadas</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="issue-item">
+                        <h4>
+                            <span class="priority-badge priority-p2">P2</span>
+                            Patrones CRUD repetidos
+                        </h4>
+                        <p>Codigo de CRUD, filtros y paginacion repetido en multiples servicios.</p>
+
+                        <div class="solution">
+                            <strong>Solucion:</strong> Crear un BaseService abstracto con operaciones comunes:
+                            <div class="code-block">
+<span class="keyword">abstract class</span> BaseService&lt;T&gt; {
+  <span class="keyword">abstract</span> tableName: string;
+
+  <span class="function">getAll</span>(): Observable&lt;T[]&gt; { ... }
+  <span class="function">getById</span>(id: string): Observable&lt;T&gt; { ... }
+  <span class="function">create</span>(entity: Partial&lt;T&gt;): Observable&lt;T&gt; { ... }
+  <span class="function">update</span>(id: string, entity: Partial&lt;T&gt;): Observable&lt;T&gt; { ... }
+  <span class="function">delete</span>(id: string): Observable&lt;void&gt; { ... }
+}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            Nombres de tablas centralizados
+                        </h4>
+                        <p><s>Los nombres de tablas de Supabase estaban hardcodeados en cada servicio.</s></p>
+                        <p>Creado archivo <code>core/constants/tables.ts</code> con TABLES, VIEWS y STORAGE_BUCKETS.</p>
+                        <p><span class="location">217 referencias actualizadas en 12 servicios</span></p>
+
+                        <div class="solution">
+                            <strong>Implementacion:</strong>
+                            <ol>
+                                <li>Creado <code>TABLES</code> con 30+ nombres de tablas</li>
+                                <li>Creado <code>VIEWS</code> con 11 vistas</li>
+                                <li>Creado <code>STORAGE_BUCKETS</code> con 6 buckets</li>
+                                <li>Script de migracion automatica en <code>scripts/replace-table-names.js</code></li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
+                        <h4>
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            strictTemplates habilitado
+                        </h4>
+                        <p><s>La opcion strictTemplates estaba deshabilitada permitiendo errores en templates.</s></p>
+                        <p>Habilitado <code>strictTemplates: true</code> en tsconfig.json. Corregidos 19 errores de tipado.</p>
+                        <p><span class="location">Archivos: tsconfig.json, 8 componentes, 3 modelos actualizados</span></p>
+
+                        <div class="solution">
+                            <strong>Correcciones:</strong>
+                            <ol>
+                                <li>Expuesto <code>Math</code> en 3 componentes de reportes/auditoria</li>
+                                <li>Corregidos tipos de badges (añadido 'medium')</li>
+                                <li>Actualizados modelos (InstalacionModulo, Role)</li>
+                                <li>Corregidos nombres de propiedades/eventos en templates</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>Aspectos Positivos de Mantenibilidad:</strong>
+                <ul>
+                    <li>Buena separacion entre core, features y shared</li>
+                    <li>Modelos tipados centralizados en <code>core/models</code></li>
+                    <li>Guards reutilizables y bien estructurados</li>
+                    <li>Uso consistente de observables y BehaviorSubjects</li>
+                    <li>Documentacion inline con comentarios descriptivos</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECCION 7: DOCUMENTACION -->
+        <section class="section" id="documentacion">
+            <h2 class="section-title">7. Documentacion</h2>
+
+            <div class="card">
+                <div class="card-header info">
+                    Estado de la Documentacion
+                </div>
+                <div class="card-body">
+                    <h4>Documentacion Existente</h4>
+                    <ul class="checklist">
+                        <li class="done">README.md con instrucciones basicas</li>
+                        <li class="done">ARQUITECTURA.md detallado</li>
+                        <li class="done">SUPABASE.md con configuracion de base de datos</li>
+                        <li class="done">AUTENTICACION.md con flujos de auth</li>
+                        <li class="done">Wiki completa en carpeta documentacion/</li>
+                        <li class="done">Plan de proyecto en carpeta planificacion/</li>
+                    </ul>
+
+                    <h4 style="margin-top: 20px;">Documentacion Faltante</h4>
+                    <ul class="checklist">
+                        <li>Diagrama de base de datos (ERD)</li>
+                        <li>Manual de API/Endpoints</li>
+                        <li>Guia de contribucion (CONTRIBUTING.md)</li>
+                        <li>Documentacion de componentes (Compodoc/Storybook)</li>
+                        <li>Changelog automatizado</li>
+                        <li>Documentacion de despliegue CI/CD</li>
+                    </ul>
+
+                    <div class="solution" style="margin-top: 20px;">
+                        <strong>Herramientas Recomendadas:</strong>
+                        <ul>
+                            <li><strong>Compodoc:</strong> Documentacion automatica de Angular</li>
+                            <li><strong>Storybook:</strong> Catalogo visual de componentes</li>
+                            <li><strong>dbdiagram.io:</strong> Diagramas de base de datos</li>
+                            <li><strong>Conventional Commits:</strong> Para changelog automatizado</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCION 8: CHECKLIST -->
+        <section class="section" id="checklist">
+            <h2 class="section-title">8. Checklist de Implementacion</h2>
+
+            <div class="card">
+                <div class="card-header critical">
+                    Fase 1: Acciones Inmediatas (P0) - Esta Semana
+                </div>
+                <div class="card-body">
+                    <ul class="checklist">
+                        <li>Rotar credenciales de Supabase</li>
+                        <li>Agregar .env al .gitignore y limpiar historial de Git</li>
+                        <li class="done">Corregir memory leaks en InactivityService (bound function + OnDestroy)</li>
+                        <li>Configurar framework de testing (Jasmine/Karma)</li>
+                        <li>Escribir tests para auth.service.ts</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header high">
+                    Fase 2: Prioridad Alta (P1) - Proximas 2 Semanas
+                </div>
+                <div class="card-body">
+                    <ul class="checklist">
+                        <li class="done">Remover todos los console.log de produccion (237 statements envueltos en 49 archivos)</li>
+                        <li class="done">Implementar servicio de logging configurable (LoggerService creado)</li>
+                        <li class="done">Agregar ChangeDetectionStrategy.OnPush a 71 componentes</li>
+                        <li class="done">Track en @for - Angular 17+ lo requiere obligatorio (124 loops verificados)</li>
+                        <li>Implementar desuscripcion consistente con takeUntilDestroyed</li>
+                        <li>Tests para servicios core (user, ticket, supabase)</li>
+                        <li>Sanitizar mensajes de error en produccion</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header medium">
+                    Fase 3: Prioridad Media (P2) - Proximo Mes
+                </div>
+                <div class="card-body">
+                    <ul class="checklist">
+                        <li class="done">Mejorar accesibilidad (labels, aria-*, autocomplete)</li>
+                        <li class="done">Implementar lazy loading selectivo (SelectivePreloadingStrategy)</li>
+                        <li>Refactorizar servicios grandes</li>
+                        <li>Crear BaseService para operaciones CRUD</li>
+                        <li class="done">Centralizar constantes de tablas (TABLES, VIEWS, STORAGE_BUCKETS)</li>
+                        <li class="done">Habilitar strictTemplates (19 errores corregidos)</li>
+                        <li>Tests para guards y componentes principales</li>
+                        <li>Documentar API con Compodoc</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header low">
+                    Fase 4: Mejoras Continuas (P3)
+                </div>
+                <div class="card-body">
+                    <ul class="checklist">
+                        <li class="done">Implementar modo oscuro completo (ThemeService, toggle, todos componentes, ApexCharts)</li>
+                        <li>E2E tests con Cypress/Playwright</li>
+                        <li>Storybook para componentes</li>
+                        <li>CI/CD pipeline con GitHub Actions</li>
+                        <li>Optimizar bundle size con source-map-explorer</li>
+                        <li>Implementar PWA features</li>
+                        <li>Agregar diagrama ERD de base de datos</li>
+                        <li>Conventional commits + changelog automatizado</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla Resumen -->
+        <section class="section">
+            <h2 class="section-title">Tabla Resumen de Mejoras</h2>
+
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Prioridad</th>
+                        <th>Area</th>
+                        <th>Problema</th>
+                        <th>Impacto</th>
+                        <th>Esfuerzo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="priority-badge priority-p0">P0</span></td>
+                        <td>Seguridad</td>
+                        <td>Credenciales expuestas en Git</td>
+                        <td>Critico</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Memoria</td>
+                        <td><s>Memory leaks en InactivityService</s> - Corregido con bound function + OnDestroy</td>
+                        <td>Alto</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr>
+                        <td><span class="priority-badge priority-p0">P0</span></td>
+                        <td>Testing</td>
+                        <td>Sin cobertura de tests</td>
+                        <td>Critico</td>
+                        <td>Alto</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Rendimiento</td>
+                        <td><s>Console logs en produccion</s> - 237 statements protegidos + LoggerService</td>
+                        <td>Medio</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Rendimiento</td>
+                        <td><s>Sin ChangeDetectionStrategy.OnPush</s> - 71 componentes actualizados</td>
+                        <td>Medio</td>
+                        <td>Medio</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Rendimiento</td>
+                        <td><s>Sin trackBy en *ngFor</s> - Angular 17+ @for con track obligatorio (124 loops)</td>
+                        <td>Medio</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr>
+                        <td><span class="priority-badge priority-p1">P1</span></td>
+                        <td>Seguridad</td>
+                        <td>Mensajes de error exponen info interna</td>
+                        <td>Medio</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Seguridad</td>
+                        <td><s>localStorage para tokens</s> - Migrado a sessionStorage</td>
+                        <td>Medio</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Accesibilidad</td>
+                        <td><s>Inputs sin labels, sin ARIA</s> - Implementado en formularios y listas</td>
+                        <td>Medio</td>
+                        <td>Medio</td>
+                    </tr>
+                    <tr>
+                        <td><span class="priority-badge priority-p2">P2</span></td>
+                        <td>Mantenibilidad</td>
+                        <td>Servicios muy grandes</td>
+                        <td>Bajo</td>
+                        <td>Alto</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Mantenibilidad</td>
+                        <td><s>Nombres de tablas hardcodeados</s> - TABLES, VIEWS, STORAGE_BUCKETS centralizados</td>
+                        <td>Bajo</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Rendimiento</td>
+                        <td><s>PreloadAllModules sin filtrar</s> - SelectivePreloadingStrategy implementado</td>
+                        <td>Bajo</td>
+                        <td>Bajo</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>UX</td>
+                        <td><s>Sin modo oscuro</s> - Implementado completo: ThemeService, toggle accesible, todos los componentes, ApexCharts, dropdowns</td>
+                        <td>Bajo</td>
+                        <td>Medio</td>
+                    </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Mantenibilidad</td>
+                        <td><s>strictTemplates deshabilitado</s> - Habilitado con 19 errores corregidos</td>
+                        <td>Bajo</td>
+                        <td>Medio</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <section class="section" style="text-align: center; padding: 40px 0; border-top: 2px solid #eee;">
+            <p style="color: #666;">
+                <strong>Documento generado automaticamente</strong><br>
+                APP Mesa de Ayuda iGAS - Plan de Mejoras v1.9<br>
+                Ultima actualizacion: 24 Enero 2026 - strictTemplates habilitado
+            </p>
+        </section>
+    </div>
+
+    <script>
+        // Marcar enlace activo en navbar
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+            document.querySelectorAll('.navbar a').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

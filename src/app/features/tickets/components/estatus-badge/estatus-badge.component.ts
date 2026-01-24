@@ -4,7 +4,7 @@
 // Componente para mostrar el estatus del ticket con colores de BD
 // ============================================================================
 
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -17,11 +17,13 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
       [class]="badgeClasses()"
       [style.background-color]="color"
       [ngbTooltip]="tooltip"
+      role="status"
+      [attr.aria-label]="'Estatus: ' + nombre"
     >
       @if (showIcon && icon) {
-        <i [class]="'feather icon-' + icon"></i>
+        <i [class]="'feather icon-' + icon" aria-hidden="true"></i>
       }
-      {{ nombre }}
+      <span class="badge-text">{{ nombre }}</span>
     </span>
   `,
   styles: [`

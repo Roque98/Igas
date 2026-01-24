@@ -4,7 +4,7 @@
 // Componente reutilizable para ejecutar checklist de mantenimientos/instalaciones
 // ============================================================================
 
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule, NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';

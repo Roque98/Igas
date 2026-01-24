@@ -4,7 +4,7 @@
 // Formulario para crear/editar mantenimientos
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -23,6 +23,7 @@ import {
   Sucursal,
   Profile
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-mantenimiento-form',
@@ -35,7 +36,8 @@ import {
     SharedModule
   ],
   templateUrl: './mantenimiento-form.component.html',
-  styleUrls: ['./mantenimiento-form.component.scss']
+  styleUrls: ['./mantenimiento-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MantenimientoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -179,7 +181,7 @@ export class MantenimientoFormComponent implements OnInit {
         this.loadingMantenimiento.set(false);
       },
       error: (err) => {
-        console.error('Error loading mantenimiento:', err);
+        if (!environment.production) { console.error('Error loading mantenimiento:', err); }
         this.notificationService.error('Error al cargar el mantenimiento');
         this.loadingMantenimiento.set(false);
         this.router.navigate(['/mantenimientos']);
@@ -239,7 +241,7 @@ export class MantenimientoFormComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error creating mantenimiento:', err);
+        if (!environment.production) { console.error('Error creating mantenimiento:', err); }
         this.notificationService.error('Error al crear el mantenimiento');
         this.loading.set(false);
       }
@@ -261,7 +263,7 @@ export class MantenimientoFormComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error updating mantenimiento:', err);
+        if (!environment.production) { console.error('Error updating mantenimiento:', err); }
         this.notificationService.error('Error al actualizar el mantenimiento');
         this.loading.set(false);
       }

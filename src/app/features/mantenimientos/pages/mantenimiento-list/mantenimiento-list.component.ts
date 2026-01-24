@@ -4,7 +4,7 @@
 // Lista de mantenimientos con filtros y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -26,6 +26,7 @@ import {
   Profile,
   PaginationOptions
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-mantenimiento-list',
@@ -40,7 +41,8 @@ import {
     SharedModule
   ],
   templateUrl: './mantenimiento-list.component.html',
-  styleUrls: ['./mantenimiento-list.component.scss']
+  styleUrls: ['./mantenimiento-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MantenimientoListComponent implements OnInit {
   private mantenimientoService = inject(MantenimientoService);
@@ -164,7 +166,7 @@ export class MantenimientoListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading mantenimientos:', err);
+        if (!environment.production) { console.error('Error loading mantenimientos:', err); }
         this.error.set('Error al cargar mantenimientos');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de mantenimientos');

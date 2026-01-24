@@ -1,3 +1,54 @@
 // Nav Right Styles - Notifications
 .notification-toggle{position:relative;.notification-badge{position:absolute;top:-5px;right:-5px;font-size:10px;min-width:18px;height:18px;padding:0 4px;line-height:18px;border-radius:10px}}
+
+// Theme Toggle Button
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  margin: 0 8px;
+
+  button {
+    background: transparent;
+    border: none;
+    color: #5b6b79;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #04a9f5;
+      background: rgba(4, 169, 245, 0.1);
+    }
+
+    &:focus {
+      outline: 2px solid #04a9f5;
+      outline-offset: 2px;
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    i {
+      font-size: 18px;
+    }
+  }
+}
+
+// Dark mode styles for theme toggle only (dropdown styles are in global _custom.scss)
+[data-bs-theme="dark"] {
+  .theme-toggle button {
+    color: #a9b7c6;
+
+    &:hover {
+      color: #f4c22b;
+      background: rgba(244, 194, 43, 0.1);
+    }
+  }
+}
 .dropdown-menu.notification{width:350px;max-width:90vw;padding:0;.notification-head{padding:15px 20px;border-bottom:1px solid #e9ecef;background:#f8f9fa;h6{margin:0;font-weight:600}a{font-size:12px;color:#04a9f5;&:hover{text-decoration:underline !important}}}.notification-body{list-style:none;padding:0;margin:0;max-height:300px;overflow-y:auto;li.notification{padding:12px 20px;border-bottom:1px solid #f1f1f1;cursor:pointer;transition:background .2s;&:hover{background:#f8f9fa}&:last-child{border-bottom:none}&.unread{background:#f0f7ff;&:hover{background:#e5f1ff}}.notification-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0;i{color:#fff;font-size:16px}}.n-time{font-size:11px;margin-left:8px}.unread-dot{width:8px;height:8px;background:#04a9f5;border-radius:50%;margin-left:8px;flex-shrink:0}}}.notification-footer{padding:12px;text-align:center;border-top:1px solid #e9ecef;background:#f8f9fa;a{color:#04a9f5;font-size:13px;font-weight:500;text-decoration:none;&:hover{text-decoration:underline}}}}

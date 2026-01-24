@@ -4,7 +4,7 @@
 // Página de reporte de casos con filtros, gráficas y tabla
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -42,13 +42,17 @@ import {
     SharedModule
   ],
   templateUrl: './reporte-casos.component.html',
-  styleUrls: ['./reporte-casos.component.scss']
+  styleUrls: ['./reporte-casos.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReporteCasosComponent implements OnInit {
   private reporteService = inject(ReporteService);
   private exportService = inject(ExportService);
   private clienteService = inject(ClienteService);
   private userService = inject(UserService);
+
+  // Exponer Math para uso en templates
+  Math = Math;
 
   // Estado
   loading = signal(false);

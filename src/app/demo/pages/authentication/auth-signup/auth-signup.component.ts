@@ -1,5 +1,5 @@
 // angular import
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
@@ -7,12 +7,13 @@ import { email, Field, form, minLength, required } from '@angular/forms/signals'
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ErrorMessages } from 'src/app/core/helpers/error-messages';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-auth-signup',
   imports: [CommonModule, RouterModule, SharedModule, Field],
   templateUrl: './auth-signup.component.html',
-  styleUrls: ['./auth-signup.component.scss']
+  styleUrls: ['./auth-signup.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthSignupComponent {
 
@@ -39,7 +40,7 @@ export class AuthSignupComponent {
     this.error.set('');
     event.preventDefault();
     const credentials = this.registerModel();
-    console.log('register user logged in with:', credentials);
+    if (!environment.production) { console.log('register user logged in with:', credentials); }
   }
 
   togglePasswordVisibility() {

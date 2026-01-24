@@ -1,5 +1,5 @@
 // angular import
-import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Field, form, minLength, required } from '@angular/forms/signals';
@@ -15,12 +15,14 @@ import {
   calculatePasswordStrength,
   getPasswordStrengthMessage
 } from 'src/app/core/validators/custom-validators';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-auth-reset-password',
   imports: [CommonModule, RouterModule, SharedModule, Field],
   templateUrl: './auth-reset-password.component.html',
-  styleUrls: ['./auth-reset-password.component.scss']
+  styleUrls: ['./auth-reset-password.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthResetPasswordComponent implements OnInit {
   private supabase = inject(SupabaseService);
@@ -74,12 +76,12 @@ export class AuthResetPasswordComponent implements OnInit {
       if (data.session) {
         // Session established successfully
         this.sessionLoading.set(false);
-        console.log('Password reset session established');
+        if (!environment.production) { console.log('Password reset session established'); }
       } else {
         // No session - possibly invalid or expired token
         this.sessionError.set(true);
         this.sessionLoading.set(false);
-        console.error('No session found for password reset');
+        if (!environment.production) { console.error('No session found for password reset'); }
       }
     }, 1000); // Give Supabase 1 second to process the hash token
   }
@@ -124,9 +126,9 @@ export class AuthResetPasswordComponent implements OnInit {
 
       if (error) {
         this.error.set(getErrorMessage(error));
-        console.error('Password update error:', error);
+        if (!environment.production) { console.error('Password update error:', error); }
       } else {
-        console.log('Password updated successfully');
+        if (!environment.production) { console.log('Password updated successfully'); }
 
         // Show success notification
         this.notificationService.success('Tu contraseña ha sido actualizada correctamente.');
@@ -136,7 +138,7 @@ export class AuthResetPasswordComponent implements OnInit {
       }
     } catch (err: any) {
       this.error.set(getErrorMessage(err));
-      console.error('Unexpected error:', err);
+      if (!environment.production) { console.error('Unexpected error:', err); }
     } finally {
       this.loading.set(false);
     }

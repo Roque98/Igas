@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../services/notification.service';
 import { Router } from '@angular/router';
-
+import { environment } from '../../../environments/environment';
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const notificationService = inject(NotificationService);
   const router = inject(Router);
@@ -16,13 +16,15 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
       errorMessage = notificationService.formatHttpError(error);
 
       // Log error for debugging
-      console.error('HTTP Error:', {
-        status: error.status,
-        message: errorMessage,
-        url: error.url,
-        error: error.error,
-        timestamp: new Date().toISOString()
-      });
+      if (!environment.production) {
+        console.error('HTTP Error:', {
+          status: error.status,
+          message: errorMessage,
+          url: error.url,
+          error: error.error,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // Handle specific status codes
       switch (error.status) {

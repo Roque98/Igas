@@ -1,5 +1,5 @@
 // angular import
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy} from '@angular/core';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
@@ -8,7 +8,8 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
   selector: 'app-basic-collapse',
   imports: [SharedModule],
   templateUrl: './basic-collapse.component.html',
-  styleUrls: ['./basic-collapse.component.scss']
+  styleUrls: ['./basic-collapse.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BasicCollapseComponent {
   // private props

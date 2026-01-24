@@ -4,7 +4,7 @@
 // Componente para crear y editar equipos/áreas
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { EquipoService } from 'src/app/core/services/equipo.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { EquipoWithRelations, ProfileWithRelations } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-equipo-form',
   standalone: true,
@@ -26,7 +26,8 @@ import { EquipoWithRelations, ProfileWithRelations } from 'src/app/core/models';
     SharedModule
   ],
   templateUrl: './equipo-form.component.html',
-  styleUrls: ['./equipo-form.component.scss']
+  styleUrls: ['./equipo-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -167,7 +168,7 @@ export class EquipoFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error creating equipo:', err);
+        if (!environment.production) { console.error('Error creating equipo:', err); }
         this.notificationService.error('Error al crear equipo');
         this.submitting.set(false);
       }
@@ -196,7 +197,7 @@ export class EquipoFormComponent implements OnInit {
         this.submitting.set(false);
       },
       error: (err) => {
-        console.error('Error updating equipo:', err);
+        if (!environment.production) { console.error('Error updating equipo:', err); }
         this.notificationService.error('Error al actualizar equipo');
         this.submitting.set(false);
       }

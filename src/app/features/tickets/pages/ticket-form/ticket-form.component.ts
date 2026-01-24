@@ -4,7 +4,7 @@
 // Componente para crear y editar tickets
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -34,7 +34,8 @@ import { PrioridadBadgeComponent } from '../../components';
     PrioridadBadgeComponent
   ],
   templateUrl: './ticket-form.component.html',
-  styleUrls: ['./ticket-form.component.scss']
+  styleUrls: ['./ticket-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketFormComponent implements OnInit {
   private fb = inject(FormBuilder);

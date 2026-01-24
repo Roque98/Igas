@@ -4,7 +4,7 @@
 // Vista de calendario mensual de mantenimientos
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +14,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { MantenimientoService } from 'src/app/core/services/mantenimiento.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { MantenimientoCalendario, DiaCalendario, MESES, DIAS_SEMANA } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-mantenimiento-calendar',
   standalone: true,
@@ -26,7 +26,8 @@ import { MantenimientoCalendario, DiaCalendario, MESES, DIAS_SEMANA } from 'src/
     SharedModule
   ],
   templateUrl: './mantenimiento-calendar.component.html',
-  styleUrls: ['./mantenimiento-calendar.component.scss']
+  styleUrls: ['./mantenimiento-calendar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MantenimientoCalendarComponent implements OnInit {
   private mantenimientoService = inject(MantenimientoService);
@@ -71,7 +72,7 @@ export class MantenimientoCalendarComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading mantenimientos:', err);
+        if (!environment.production) { console.error('Error loading mantenimientos:', err); }
         this.notificationService.error('Error al cargar el calendario');
         this.loading.set(false);
       }

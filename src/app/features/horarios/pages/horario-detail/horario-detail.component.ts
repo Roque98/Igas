@@ -4,7 +4,7 @@
 // Componente para ver detalles de un horario y usuarios asignados
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -13,7 +13,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { HorarioService } from 'src/app/core/services/horario.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { HorarioWithCount, DIAS_SEMANA_NOMBRES } from 'src/app/core/models';
-
+import { environment } from '../../../../../environments/environment';
 @Component({
   selector: 'app-horario-detail',
   standalone: true,
@@ -23,7 +23,8 @@ import { HorarioWithCount, DIAS_SEMANA_NOMBRES } from 'src/app/core/models';
     SharedModule
   ],
   templateUrl: './horario-detail.component.html',
-  styleUrls: ['./horario-detail.component.scss']
+  styleUrls: ['./horario-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HorarioDetailComponent implements OnInit {
   private horarioService = inject(HorarioService);
@@ -76,7 +77,7 @@ export class HorarioDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading horario:', err);
+        if (!environment.production) { console.error('Error loading horario:', err); }
         this.error.set('Error al cargar el horario');
         this.loading.set(false);
       }

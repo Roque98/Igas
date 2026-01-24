@@ -4,7 +4,7 @@
 // Componente reutilizable para gestionar evidencias (fotos/documentos)
 // ============================================================================
 
-import { Component, Input, Output, EventEmitter, signal, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, ElementRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule, NgbModalModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -42,7 +42,9 @@ export interface EvidenciaUploadEvent {
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h6 class="mb-0">
           <i class="feather icon-image me-2"></i>
-          Evidencias ({{ evidencias().length }})
+          Evidencias ({{ evidencias().length },
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
         </h6>
         @if (!disabled()) {
           <button type="button" class="btn btn-sm btn-primary" (click)="openUploadModal(uploadModal)">

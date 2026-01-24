@@ -72,6 +72,23 @@
     </div>
   </li>
 
+  <!-- Toggle de Tema -->
+  <li class="theme-toggle">
+    <button
+      type="button"
+      class="btn btn-link nav-link p-0"
+      (click)="themeService.toggleTheme()"
+      [attr.aria-label]="themeService.isDarkMode() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+      [attr.title]="themeService.isDarkMode() ? 'Modo claro' : 'Modo oscuro'"
+    >
+      @if (themeService.isDarkMode()) {
+        <i class="icon feather icon-sun" aria-hidden="true"></i>
+      } @else {
+        <i class="icon feather icon-moon" aria-hidden="true"></i>
+      }
+    </button>
+  </li>
+
   <!-- Perfil de Usuario -->
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">

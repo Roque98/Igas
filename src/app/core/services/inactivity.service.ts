@@ -1,13 +1,14 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { SupabaseService } from './supabase.service';
 import { filter } from 'rxjs/operators';
-
+import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class InactivityService {
-  private inactivityTimer: any;
+export class InactivityService implements OnDestroy {
+  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos en milisegundos
   private events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
   private isWatching = false;
@@ -16,18 +17,32 @@ export class InactivityService {
   private excludedRoutes = ['/dashboard'];
   private currentRoute = '';
 
+  // Referencia bound para poder remover correctamente los event listeners
+  private boundOnUserActivity = this.onUserActivity.bind(this);
+
+  // Subscription para cleanup
+  private routerSubscription: Subscription | null = null;
+
   constructor(
     private supabase: SupabaseService,
     private router: Router,
     private ngZone: NgZone
   ) {
     // Monitorear cambios de ruta
-    this.router.events
+    this.routerSubscription = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
         this.checkRouteAndUpdateWatching();
       });
+  }
+
+  /**
+   * Cleanup al destruir el servicio
+   */
+  ngOnDestroy(): void {
+    this.stopWatching();
+    this.routerSubscription?.unsubscribe();
   }
 
   /**
@@ -41,9 +56,9 @@ export class InactivityService {
     this.isWatching = true;
     this.resetTimer();
 
-    // Registrar eventos de actividad del usuario
+    // Registrar eventos de actividad del usuario usando la referencia bound
     this.events.forEach((event) => {
-      window.addEventListener(event, () => this.onUserActivity(), true);
+      window.addEventListener(event, this.boundOnUserActivity, true);
     });
   }
 
@@ -58,9 +73,9 @@ export class InactivityService {
     this.isWatching = false;
     this.clearTimer();
 
-    // Remover event listeners
+    // Remover event listeners usando la misma referencia bound
     this.events.forEach((event) => {
-      window.removeEventListener(event, () => this.onUserActivity(), true);
+      window.removeEventListener(event, this.boundOnUserActivity, true);
     });
   }
 
@@ -116,7 +131,9 @@ export class InactivityService {
    * Se ejecuta cuando se alcanza el timeout de inactividad
    */
   private async onInactivityTimeout(): Promise<void> {
-    console.log('Sesión cerrada por inactividad');
+    if (!environment.production) {
+      console.log('Sesión cerrada por inactividad');
+    }
 
     // Detener el monitoreo
     this.stopWatching();

@@ -1,18 +1,19 @@
 // angular import
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, ChangeDetectionStrategy} from '@angular/core';
 import { Location } from '@angular/common';
 
 // project import
-import { environment } from 'src/environments/environment';
 import { NavigationItem, NavigationItems } from '../navigation';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { NavGroupComponent } from './nav-group/nav-group.component';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-nav-content',
   imports: [SharedModule, NavGroupComponent],
   templateUrl: './nav-content.component.html',
-  styleUrls: ['./nav-content.component.scss']
+  styleUrls: ['./nav-content.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavContentComponent {
   private location = inject(Location);

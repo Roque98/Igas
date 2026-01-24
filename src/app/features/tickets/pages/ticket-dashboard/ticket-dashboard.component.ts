@@ -4,7 +4,7 @@
 // Dashboard principal de tickets con widgets, gráficas y alertas
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -33,6 +33,7 @@ import {
   ApexNonAxisChartSeries,
   ApexResponsive
 } from 'ng-apexcharts';
+import { environment } from '../../../../../environments/environment';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries | ApexNonAxisChartSeries;
@@ -63,7 +64,8 @@ export type ChartOptions = {
     ProgressBarSLAComponent
   ],
   templateUrl: './ticket-dashboard.component.html',
-  styleUrls: ['./ticket-dashboard.component.scss']
+  styleUrls: ['./ticket-dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketDashboardComponent implements OnInit {
   private ticketService = inject(TicketService);
@@ -127,7 +129,7 @@ export class TicketDashboardComponent implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error loading dashboard:', error);
+      if (!environment.production) { console.error('Error loading dashboard:', error); }
       this.notificationService.error('Error al cargar el dashboard');
     } finally {
       this.loading.set(false);

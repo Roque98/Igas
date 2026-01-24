@@ -405,6 +405,11 @@
   color: $igas-gray-dark !important;
 }
 
+// In dark mode, override igas-gray to be light
+[data-bs-theme="dark"] .text-igas-gray {
+  color: #e5e9ef !important;
+}
+
 // Background colors
 .bg-igas-yellow {
   background-color: $igas-yellow-primary !important;
@@ -421,4 +426,111 @@
 
 .border-igas-gray {
   border-color: $igas-gray-dark !important;
+}
+
+// ============================================================================
+// DARK MODE OVERRIDES FOR iGAS COMPONENTS
+// ============================================================================
+
+[data-bs-theme="dark"] {
+  // Card iGAS en modo oscuro
+  .card-igas {
+    border-color: #3a3f47;
+    background-color: #212529;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-body-igas {
+      color: #c5cdd6;
+    }
+
+    .card-footer-igas {
+      background-color: #252a31;
+      border-color: #3a3f47;
+    }
+  }
+
+  .card-igas-minimal {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  // Progress iGAS en modo oscuro
+  .progress-igas {
+    background-color: #343a40;
+  }
+
+  // Status badges en modo oscuro
+  .status-badge {
+    &.status-active {
+      background-color: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.4);
+    }
+
+    &.status-inactive {
+      background-color: #343a40;
+      border-color: #3a3f47;
+      color: #8b95a0;
+    }
+
+    &.status-suspended {
+      background-color: rgba(255, 152, 0, 0.2);
+      border-color: rgba(255, 152, 0, 0.4);
+    }
+
+    &.status-processing {
+      background-color: rgba(33, 150, 243, 0.2);
+      border-color: rgba(33, 150, 243, 0.4);
+    }
+  }
+
+  // Badge SLA en modo oscuro
+  .badge-sla {
+    &.badge-sla-ok {
+      background-color: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.4);
+      color: lighten($sla-green, 20%);
+    }
+
+    &.badge-sla-warning {
+      background-color: rgba(255, 193, 7, 0.2);
+      border-color: rgba(255, 193, 7, 0.4);
+      color: lighten($sla-yellow, 10%);
+    }
+
+    &.badge-sla-critical {
+      background-color: rgba(244, 67, 54, 0.2);
+      border-color: rgba(244, 67, 54, 0.4);
+      color: lighten($sla-red, 20%);
+    }
+  }
+
+  // Badge Priority en modo oscuro
+  .badge-priority {
+    &.badge-priority-critical {
+      background-color: rgba(244, 67, 54, 0.2);
+      border-color: rgba(244, 67, 54, 0.4);
+      color: lighten($priority-critical, 20%);
+    }
+
+    &.badge-priority-high {
+      background-color: rgba(255, 152, 0, 0.2);
+      border-color: rgba(255, 152, 0, 0.4);
+      color: lighten($priority-high, 10%);
+    }
+
+    &.badge-priority-medium {
+      background-color: rgba(255, 193, 7, 0.2);
+      border-color: rgba(255, 193, 7, 0.4);
+      color: lighten($priority-medium, 10%);
+    }
+
+    &.badge-priority-low {
+      background-color: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.4);
+      color: lighten($priority-low, 20%);
+    }
+  }
 }

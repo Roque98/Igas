@@ -4,7 +4,7 @@
 // Componente para mostrar el semáforo de SLA con colores visuales
 // ============================================================================
 
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SemaforoSLA, SEMAFORO_CONFIG } from 'src/app/core/models';
@@ -19,12 +19,14 @@ import { SemaforoSLA, SEMAFORO_CONFIG } from 'src/app/core/models';
       [style.background-color]="config().color"
       [style.border-color]="config().color"
       [ngbTooltip]="tooltipText()"
+      role="status"
+      [attr.aria-label]="ariaLabel()"
     >
       @if (showIcon) {
-        <i [class]="iconClass()"></i>
+        <i [class]="iconClass()" aria-hidden="true"></i>
       }
       @if (showLabel) {
-        {{ config().label }}
+        <span class="badge-text">{{ config().label }}</span>
       }
     </span>
   `,
@@ -46,6 +48,10 @@ import { SemaforoSLA, SEMAFORO_CONFIG } from 'src/app/core/models';
       padding: 2px 6px;
       font-size: 11px;
     }
+    .semaforo-badge.medium {
+      padding: 5px 10px;
+      font-size: 13px;
+    }
     .semaforo-badge.large {
       padding: 6px 12px;
       font-size: 14px;
@@ -53,14 +59,15 @@ import { SemaforoSLA, SEMAFORO_CONFIG } from 'src/app/core/models';
     .semaforo-badge i {
       font-size: 1em;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SemaforoBadgeComponent {
   @Input({ required: true }) semaforo!: SemaforoSLA;
   @Input() porcentaje?: number;
   @Input() showIcon = true;
   @Input() showLabel = true;
-  @Input() size: 'small' | 'normal' | 'large' = 'normal';
+  @Input() size: 'small' | 'normal' | 'medium' | 'large' = 'normal';
 
   config = computed(() => {
     return SEMAFORO_CONFIG[this.semaforo] || SEMAFORO_CONFIG.verde;
@@ -80,5 +87,13 @@ export class SemaforoBadgeComponent {
       return `${base} - ${this.porcentaje.toFixed(1)}% del SLA`;
     }
     return base;
+  });
+
+  ariaLabel = computed(() => {
+    const label = this.config().label;
+    if (this.porcentaje !== undefined) {
+      return `Estado SLA: ${label}. ${this.porcentaje.toFixed(1)} por ciento del tiempo de SLA consumido`;
+    }
+    return `Estado SLA: ${label}`;
   });
 }

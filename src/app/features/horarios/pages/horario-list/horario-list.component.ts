@@ -4,7 +4,7 @@
 // Componente para listar horarios/turnos con filtros, búsqueda y paginación
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,6 +20,7 @@ import {
   PaginationOptions,
   DIAS_SEMANA_ABREV
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-horario-list',
@@ -34,7 +35,8 @@ import {
     SharedModule
   ],
   templateUrl: './horario-list.component.html',
-  styleUrls: ['./horario-list.component.scss']
+  styleUrls: ['./horario-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HorarioListComponent implements OnInit {
   private horarioService = inject(HorarioService);
@@ -99,7 +101,7 @@ export class HorarioListComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading horarios:', err);
+        if (!environment.production) { console.error('Error loading horarios:', err); }
         this.error.set('Error al cargar horarios');
         this.loading.set(false);
         this.notificationService.error('Error al cargar la lista de horarios');

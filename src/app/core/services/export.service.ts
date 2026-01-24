@@ -10,7 +10,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { ExportConfig } from '../models';
-
+import { environment } from '../../../environments/environment';
 // Tipos para las librerías (cuando estén instaladas)
 declare const jsPDF: any;
 declare const XLSX: any;
@@ -88,7 +88,7 @@ export class ExportService {
 
       XLSX.writeFile(workbook, `${filename}.xlsx`);
     } catch (error) {
-      console.error('Error exporting to XLSX:', error);
+      if (!environment.production) { console.error('Error exporting to XLSX:', error); }
       // Fallback a CSV
       this.exportToCSV(data, columns, filename);
     }
@@ -138,7 +138,7 @@ export class ExportService {
   ): void {
     // Verificar si jsPDF está disponible
     if (typeof jsPDF === 'undefined') {
-      console.warn('jsPDF no está instalado. Exportando como tabla HTML...');
+      if (!environment.production) { console.warn('jsPDF no está instalado. Exportando como tabla HTML...'); }
       this.exportToPrintableHTML(data, columns, filename, config);
       return;
     }
@@ -231,7 +231,7 @@ export class ExportService {
 
       doc.save(`${filename}.pdf`);
     } catch (error) {
-      console.error('Error exporting to PDF:', error);
+      if (!environment.production) { console.error('Error exporting to PDF:', error); }
       this.exportToPrintableHTML(data, columns, filename, config);
     }
   }

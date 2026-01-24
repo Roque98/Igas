@@ -1,5 +1,5 @@
 // angular import
-import { Component, ElementRef, Input, OnInit, TemplateRef, inject, contentChild, input } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, TemplateRef, inject, contentChild, input, ChangeDetectionStrategy} from '@angular/core';
 import { animate, AUTO_STYLE, state, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 
@@ -19,8 +19,9 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
         'collapsed, void',
         style({
           overflow: 'hidden',
-          height: '0px'
-        })
+          height: '0px',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
       ),
       state(
         'expanded',

@@ -16,3 +16,5 @@ export * from './mantenimiento.service';
 export * from './instalacion.service';
 export * from './reporte.service';
 export * from './export.service';
+export * from './theme.service';
+export * from './logger.service';

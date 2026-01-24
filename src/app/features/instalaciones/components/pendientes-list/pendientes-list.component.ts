@@ -4,7 +4,7 @@
 // Lista y gestión de pendientes de instalación
 // ============================================================================
 
-import { Component, Input, Output, EventEmitter, signal, TemplateRef, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, TemplateRef, inject, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';

@@ -4,7 +4,7 @@
 // Componente para mostrar el detalle de un caso con bitácora y acciones
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -29,6 +29,7 @@ import {
   PrioridadBadgeComponent,
   ProgressBarSLAComponent
 } from '../../../tickets/components';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-caso-detail',
@@ -46,7 +47,8 @@ import {
     ProgressBarSLAComponent
   ],
   templateUrl: './caso-detail.component.html',
-  styleUrls: ['./caso-detail.component.scss']
+  styleUrls: ['./caso-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CasoDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -149,7 +151,7 @@ export class CasoDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading caso:', err);
+        if (!environment.production) { console.error('Error loading caso:', err); }
         this.error.set('Error al cargar el caso');
         this.loading.set(false);
       }

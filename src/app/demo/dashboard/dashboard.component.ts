@@ -4,7 +4,7 @@
 // Dashboard principal con estadísticas de usuarios del sistema
 // ============================================================================
 
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -29,6 +29,7 @@ import {
   ApexAxisChartSeries,
   ApexFill
 } from 'ng-apexcharts';
+import { environment } from '../../../environments/environment';
 
 export type PieChartOptions = {
   series: ApexNonAxisChartSeries;
@@ -56,7 +57,8 @@ export type BarChartOptions = {
   standalone: true,
   imports: [CommonModule, SharedModule, NgApexchartsModule, RouterLink, NgbTooltipModule],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
   private userService = inject(UserService);
@@ -273,7 +275,7 @@ export class DashboardComponent implements OnInit {
 
       this.loading.set(false);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      if (!environment.production) { console.error('Error loading stats:', error); }
       this.loading.set(false);
     }
   }
@@ -299,7 +301,7 @@ export class DashboardComponent implements OnInit {
         this.loadingAlertas.set(false);
       },
       error: (err) => {
-        console.error('Error loading alertas:', err);
+        if (!environment.production) { console.error('Error loading alertas:', err); }
         this.loadingAlertas.set(false);
       }
     });
@@ -310,7 +312,7 @@ export class DashboardComponent implements OnInit {
       const stats = await this.clienteService.getClienteStats();
       this.clienteStats.set(stats);
     } catch (error) {
-      console.error('Error loading cliente stats:', error);
+      if (!environment.production) { console.error('Error loading cliente stats:', error); }
     }
   }
 
@@ -365,7 +367,7 @@ export class DashboardComponent implements OnInit {
       const stats = await this.reporteService.getDashboardStats();
       this.ticketCasoStats.set(stats);
     } catch (error) {
-      console.error('Error loading ticket/caso stats:', error);
+      if (!environment.production) { console.error('Error loading ticket/caso stats:', error); }
     }
   }
 }

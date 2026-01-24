@@ -4,7 +4,7 @@
 // Componente para mostrar el detalle de un cliente con pestañas
 // ============================================================================
 
-import { Component, OnInit, inject, signal, TemplateRef } from '@angular/core';
+import { Component, OnInit, inject, signal, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -38,6 +38,7 @@ import {
   TipoContacto,
   TipoPoliza
 } from 'src/app/core/models';
+import { environment } from '../../../../../environments/environment';
 
 // Interfaces para formularios
 interface SucursalForm {
@@ -105,7 +106,8 @@ interface PolizaForm {
     SharedModule
   ],
   templateUrl: './cliente-detail.component.html',
-  styleUrls: ['./cliente-detail.component.scss']
+  styleUrls: ['./cliente-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClienteDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -226,7 +228,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading cliente:', err);
+        if (!environment.production) { console.error('Error loading cliente:', err); }
         this.error.set('Error al cargar el cliente');
         this.loading.set(false);
         this.notificationService.error('Error al cargar el cliente');
@@ -244,7 +246,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loadingSucursales.set(false);
       },
       error: (err) => {
-        console.error('Error loading sucursales:', err);
+        if (!environment.production) { console.error('Error loading sucursales:', err); }
         this.loadingSucursales.set(false);
       }
     });
@@ -260,7 +262,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loadingContactos.set(false);
       },
       error: (err) => {
-        console.error('Error loading contactos:', err);
+        if (!environment.production) { console.error('Error loading contactos:', err); }
         this.loadingContactos.set(false);
       }
     });
@@ -276,7 +278,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loadingFiscales.set(false);
       },
       error: (err) => {
-        console.error('Error loading datos fiscales:', err);
+        if (!environment.production) { console.error('Error loading datos fiscales:', err); }
         this.loadingFiscales.set(false);
       }
     });
@@ -290,7 +292,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loadingLicencias.set(false);
       },
       error: (err) => {
-        console.error('Error loading licencias:', err);
+        if (!environment.production) { console.error('Error loading licencias:', err); }
         this.loadingLicencias.set(false);
       }
     });
@@ -304,7 +306,7 @@ export class ClienteDetailComponent implements OnInit {
         this.loadingPolizas.set(false);
       },
       error: (err) => {
-        console.error('Error loading polizas:', err);
+        if (!environment.production) { console.error('Error loading polizas:', err); }
         this.loadingPolizas.set(false);
       }
     });
@@ -494,7 +496,7 @@ export class ClienteDetailComponent implements OnInit {
         this.savingAction.set(false);
       },
       error: (err) => {
-        console.error('Error renovando licencia:', err);
+        if (!environment.production) { console.error('Error renovando licencia:', err); }
         this.notificationService.error('Error al renovar licencia');
         this.savingAction.set(false);
       }
@@ -537,7 +539,7 @@ export class ClienteDetailComponent implements OnInit {
         this.savingAction.set(false);
       },
       error: (err) => {
-        console.error('Error renovando póliza:', err);
+        if (!environment.production) { console.error('Error renovando póliza:', err); }
         this.notificationService.error('Error al renovar póliza');
         this.savingAction.set(false);
       }

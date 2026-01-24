@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService, Toast } from '../../services/notification.service';
 
@@ -7,7 +7,8 @@ import { NotificationService, Toast } from '../../services/notification.service'
   standalone: true,
   imports: [CommonModule],
   templateUrl: './toast-container.component.html',
-  styleUrls: ['./toast-container.component.scss']
+  styleUrls: ['./toast-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ToastContainerComponent implements OnInit {
   private notificationService = inject(NotificationService);

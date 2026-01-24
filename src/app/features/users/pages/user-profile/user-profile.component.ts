@@ -4,7 +4,7 @@
 // Componente para ver y editar el perfil del usuario actual
 // ============================================================================
 
-import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ElementRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbNavModule, NgbModalModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -34,7 +34,8 @@ import { getErrorMessage } from 'src/app/core/helpers/error-messages';
     SharedModule
   ],
   templateUrl: './user-profile.component.html',
-  styleUrls: ['./user-profile.component.scss']
+  styleUrls: ['./user-profile.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;

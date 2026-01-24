@@ -22,6 +22,8 @@ import {
   TicketReporteDetalle,
   CasoReporteDetalle
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { VIEWS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -51,13 +53,13 @@ export class ReporteService {
       });
 
       if (error) {
-        console.error('Error fetching tickets resumen:', error);
+        if (!environment.production) { console.error('Error fetching tickets resumen:', error); }
         return { data: null, error: error.message, success: false };
       }
 
       return { data: data as TicketResumen, error: null, success: true };
     } catch (err: any) {
-      console.error('Error in fetchTicketsResumen:', err);
+      if (!environment.production) { console.error('Error in fetchTicketsResumen:', err); }
       return { data: null, error: err.message, success: false };
     }
   }
@@ -83,13 +85,13 @@ export class ReporteService {
       });
 
       if (error) {
-        console.error('Error fetching tickets tendencia:', error);
+        if (!environment.production) { console.error('Error fetching tickets tendencia:', error); }
         return { data: null, error: error.message, success: false };
       }
 
       return { data: (data || []) as TicketTendenciaMensual[], error: null, success: true };
     } catch (err: any) {
-      console.error('Error in fetchTicketsTendencia:', err);
+      if (!environment.production) { console.error('Error in fetchTicketsTendencia:', err); }
       return { data: null, error: err.message, success: false };
     }
   }
@@ -114,7 +116,7 @@ export class ReporteService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_reporte_tickets')
+      .from(VIEWS.V_REPORTE_TICKETS)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -149,7 +151,7 @@ export class ReporteService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching tickets detalle:', error);
+      if (!environment.production) { console.error('Error fetching tickets detalle:', error); }
       return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
 
@@ -185,13 +187,13 @@ export class ReporteService {
       });
 
       if (error) {
-        console.error('Error fetching casos resumen:', error);
+        if (!environment.production) { console.error('Error fetching casos resumen:', error); }
         return { data: null, error: error.message, success: false };
       }
 
       return { data: data as CasoResumen, error: null, success: true };
     } catch (err: any) {
-      console.error('Error in fetchCasosResumen:', err);
+      if (!environment.production) { console.error('Error in fetchCasosResumen:', err); }
       return { data: null, error: err.message, success: false };
     }
   }
@@ -217,13 +219,13 @@ export class ReporteService {
       });
 
       if (error) {
-        console.error('Error fetching casos tendencia:', error);
+        if (!environment.production) { console.error('Error fetching casos tendencia:', error); }
         return { data: null, error: error.message, success: false };
       }
 
       return { data: (data || []) as CasoTendenciaMensual[], error: null, success: true };
     } catch (err: any) {
-      console.error('Error in fetchCasosTendencia:', err);
+      if (!environment.production) { console.error('Error in fetchCasosTendencia:', err); }
       return { data: null, error: err.message, success: false };
     }
   }
@@ -248,7 +250,7 @@ export class ReporteService {
     const to_row = from_row + pageSize - 1;
 
     let query = this.supabase.client
-      .from('v_reporte_casos')
+      .from(VIEWS.V_REPORTE_CASOS)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -283,7 +285,7 @@ export class ReporteService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching casos detalle:', error);
+      if (!environment.production) { console.error('Error fetching casos detalle:', error); }
       return { data: [], total: 0, page, pageSize, totalPages: 0 };
     }
 
@@ -320,13 +322,13 @@ export class ReporteService {
       });
 
       if (error) {
-        console.error('Error fetching productividad:', error);
+        if (!environment.production) { console.error('Error fetching productividad:', error); }
         return { data: null, error: error.message, success: false };
       }
 
       return { data: (data || []) as ProductividadUsuario[], error: null, success: true };
     } catch (err: any) {
-      console.error('Error in fetchProductividad:', err);
+      if (!environment.production) { console.error('Error in fetchProductividad:', err); }
       return { data: null, error: err.message, success: false };
     }
   }
@@ -350,32 +352,32 @@ export class ReporteService {
 
     // Tickets hoy
     const { count: ticketsHoy } = await this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*', { count: 'exact', head: true })
       .gte('fecha_creacion', today);
 
     // Tickets abiertos (usando la vista que ya tiene estatus_es_final)
     const { count: ticketsAbiertos } = await this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*', { count: 'exact', head: true })
       .eq('estatus_es_final', false);
 
     // Tickets en rojo (usando la vista que ya tiene semaforo calculado)
     const { count: ticketsEnRojo } = await this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*', { count: 'exact', head: true })
       .eq('semaforo', 'rojo')
       .eq('estatus_es_final', false);
 
     // Casos abiertos (usando la vista v_casos_con_sla)
     const { count: casosAbiertos } = await this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*', { count: 'exact', head: true })
       .eq('estatus_es_final', false);
 
     // Casos vencidos (usando la vista que ya tiene compromiso_vencido)
     const { count: casosVencidos } = await this.supabase.client
-      .from('v_casos_con_sla')
+      .from(VIEWS.V_CASOS_CON_SLA)
       .select('*', { count: 'exact', head: true })
       .eq('compromiso_vencido', true);
 

@@ -16,7 +16,8 @@ import {
   EquipoFilters
 } from '../models';
 import { ServiceResponse, PaginatedResponse, PaginationOptions } from '../models';
-
+import { environment } from '../../../environments/environment';
+import { TABLES } from '../constants/tables';
 @Injectable({
   providedIn: 'root'
 })
@@ -51,7 +52,7 @@ export class EquipoService {
 
     // Query base con relación al supervisor
     let query = this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .select(`
         *,
         supervisor:profiles!equipos_supervisor_id_fkey(
@@ -83,7 +84,7 @@ export class EquipoService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching equipos:', error);
+      if (!environment.production) { console.error('Error fetching equipos:', error); }
       return {
         data: [],
         total: 0,
@@ -115,7 +116,7 @@ export class EquipoService {
 
   private async fetchEquipoById(id: string): Promise<ServiceResponse<EquipoWithRelations>> {
     const { data, error } = await this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .select(`
         *,
         supervisor:profiles!equipos_supervisor_id_fkey(
@@ -129,7 +130,7 @@ export class EquipoService {
       .single();
 
     if (error) {
-      console.error('Error fetching equipo by ID:', error);
+      if (!environment.production) { console.error('Error fetching equipo by ID:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -158,7 +159,7 @@ export class EquipoService {
 
   private async fetchEquipoMembers(equipoId: string): Promise<EquipoMember[]> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select(`
         id,
         nombre_completo,
@@ -172,7 +173,7 @@ export class EquipoService {
       .order('nombre_completo');
 
     if (error) {
-      console.error('Error fetching equipo members:', error);
+      if (!environment.production) { console.error('Error fetching equipo members:', error); }
       return [];
     }
 
@@ -195,13 +196,13 @@ export class EquipoService {
 
     // Obtener conteo de miembros por equipo
     const { data: counts, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select('area_equipo_id')
       .eq('estatus', 'Activo')
       .not('area_equipo_id', 'is', null);
 
     if (error) {
-      console.error('Error fetching member counts:', error);
+      if (!environment.production) { console.error('Error fetching member counts:', error); }
       return equipos.map(e => ({ ...e, _count: { miembros: 0 } }));
     }
 
@@ -227,13 +228,13 @@ export class EquipoService {
 
   private async fetchEquiposActivos(): Promise<ServiceResponse<Equipo[]>> {
     const { data, error } = await this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .select('*')
       .eq('estatus', 'Activo')
       .order('nombre');
 
     if (error) {
-      console.error('Error fetching equipos activos:', error);
+      if (!environment.production) { console.error('Error fetching equipos activos:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -253,7 +254,7 @@ export class EquipoService {
 
   private async createEquipoAsync(equipoData: CreateEquipoDTO): Promise<ServiceResponse<Equipo>> {
     const { data, error } = await this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .insert({
         nombre: equipoData.nombre,
         descripcion: equipoData.descripcion,
@@ -264,7 +265,7 @@ export class EquipoService {
       .single();
 
     if (error) {
-      console.error('Error creating equipo:', error);
+      if (!environment.production) { console.error('Error creating equipo:', error); }
       return { data: null, error: this.mapError(error.message), success: false };
     }
 
@@ -284,7 +285,7 @@ export class EquipoService {
 
   private async updateEquipoAsync(id: string, equipoData: UpdateEquipoDTO): Promise<ServiceResponse<Equipo>> {
     const { data, error } = await this.supabase.client
-      .from('equipos')
+      .from(TABLES.EQUIPOS)
       .update({
         ...equipoData,
         updated_at: new Date().toISOString()
@@ -294,7 +295,7 @@ export class EquipoService {
       .single();
 
     if (error) {
-      console.error('Error updating equipo:', error);
+      if (!environment.production) { console.error('Error updating equipo:', error); }
       return { data: null, error: this.mapError(error.message), success: false };
     }
 
@@ -339,7 +340,7 @@ export class EquipoService {
 
   private async assignMemberAsync(userId: string, equipoId: string): Promise<ServiceResponse<boolean>> {
     const { error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         area_equipo_id: equipoId,
         updated_at: new Date().toISOString()
@@ -347,7 +348,7 @@ export class EquipoService {
       .eq('id', userId);
 
     if (error) {
-      console.error('Error assigning member to equipo:', error);
+      if (!environment.production) { console.error('Error assigning member to equipo:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -363,7 +364,7 @@ export class EquipoService {
 
   private async removeMemberAsync(userId: string): Promise<ServiceResponse<boolean>> {
     const { error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .update({
         area_equipo_id: null,
         updated_at: new Date().toISOString()
@@ -371,7 +372,7 @@ export class EquipoService {
       .eq('id', userId);
 
     if (error) {
-      console.error('Error removing member from equipo:', error);
+      if (!environment.production) { console.error('Error removing member from equipo:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -387,7 +388,7 @@ export class EquipoService {
 
   private async fetchUnassignedUsers(): Promise<ServiceResponse<EquipoMember[]>> {
     const { data, error } = await this.supabase.client
-      .from('profiles')
+      .from(TABLES.PROFILES)
       .select(`
         id,
         nombre_completo,
@@ -401,7 +402,7 @@ export class EquipoService {
       .order('nombre_completo');
 
     if (error) {
-      console.error('Error fetching unassigned users:', error);
+      if (!environment.production) { console.error('Error fetching unassigned users:', error); }
       return { data: null, error: error.message, success: false };
     }
 

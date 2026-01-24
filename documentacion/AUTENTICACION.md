@@ -5,6 +5,7 @@ Esta guía explica el funcionamiento del sistema de autenticación implementado 
 ## Tabla de Contenidos
 
 - [Arquitectura General](#arquitectura-general)
+- [Seguridad](#seguridad)
 - [Componentes Principales](#componentes-principales)
 - [Flujo de Autenticación](#flujo-de-autenticación)
 - [Guards de Rutas](#guards-de-rutas)
@@ -46,6 +47,113 @@ El sistema de autenticación está construido sobre **Supabase** y utiliza el pa
 │  • Database                                                  │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## Seguridad
+
+El sistema implementa múltiples capas de seguridad para proteger la autenticación y los tokens de sesión.
+
+### Almacenamiento Seguro de Tokens
+
+A diferencia del almacenamiento tradicional en `localStorage`, el sistema usa `sessionStorage` para mayor seguridad:
+
+| Característica | localStorage | sessionStorage (actual) |
+|---------------|--------------|------------------------|
+| Persistencia | Indefinida | Hasta cerrar navegador |
+| Exposición XSS | Mayor riesgo | Menor riesgo |
+| Compartido entre pestañas | Sí | No |
+
+```typescript
+// Configuración en SupabaseService
+this.supabase = createClient(url, key, {
+  auth: {
+    storage: window.sessionStorage,  // Más seguro que localStorage
+    storageKey: 'igas-auth-token',
+    flowType: 'pkce'                 // Flujo PKCE para mayor seguridad
+  }
+});
+```
+
+### Monitoreo de Visibilidad
+
+El sistema detecta cuando la página está oculta (minimizada, otra pestaña activa) y revalida la sesión si estuvo inactiva por más de 30 minutos:
+
+```typescript
+// Configuración de seguridad
+const SECURITY_CONFIG = {
+  MAX_HIDDEN_DURATION_MS: 30 * 60 * 1000,  // 30 minutos
+  SESSION_CHECK_INTERVAL_MS: 5 * 60 * 1000  // Verificación cada 5 minutos
+};
+```
+
+**Comportamiento:**
+1. Cuando la página se oculta, se registra el timestamp
+2. Cuando la página vuelve a ser visible, se verifica cuánto tiempo estuvo oculta
+3. Si estuvo oculta >30 minutos, se fuerza la revalidación de la sesión
+4. Si la sesión es inválida, el usuario es desconectado automáticamente
+
+### Validación Periódica de Sesión
+
+Cada 5 minutos se verifica la integridad de la sesión:
+
+```typescript
+private async validateSessionIntegrity(): Promise<void> {
+  if (!this.currentUser.value) return;
+
+  const { data, error } = await this.supabase.auth.getSession();
+
+  if (error || !data.session) {
+    // Sesión inválida - limpiar estado
+    this.currentUser.next(null);
+  }
+}
+```
+
+### Limpieza de Event Listeners
+
+Para prevenir memory leaks, todos los listeners se limpian correctamente:
+
+```typescript
+// Los handlers se almacenan como referencias para poder removerlos
+private boundVisibilityHandler: () => void;
+
+ngOnDestroy(): void {
+  document.removeEventListener('visibilitychange', this.boundVisibilityHandler);
+  if (this.sessionCheckInterval) {
+    clearInterval(this.sessionCheckInterval);
+  }
+}
+```
+
+### Logs Solo en Desarrollo
+
+Los logs de autenticación solo se muestran en modo desarrollo para evitar exposición de información sensible en producción:
+
+```typescript
+private logDebug(message: string, data?: unknown): void {
+  if (!environment.production) {
+    console.log(message, data);
+  }
+}
+```
+
+### Características de Seguridad Implementadas
+
+| Característica | Estado | Descripción |
+|---------------|--------|-------------|
+| PKCE Flow | ✅ | Previene ataques de interceptación |
+| sessionStorage | ✅ | Tokens se borran al cerrar navegador |
+| Revalidación por inactividad | ✅ | Después de 30 min oculta |
+| Verificación periódica | ✅ | Cada 5 minutos |
+| Cleanup de listeners | ✅ | Previene memory leaks |
+| Logs condicionales | ✅ | Solo en desarrollo |
+| Limpieza al logout | ✅ | Elimina datos residuales |
+
+### Implicaciones para el Usuario
+
+- **Cierre de navegador**: La sesión se termina automáticamente
+- **Múltiples pestañas**: Cada pestaña tiene su propia sesión
+- **Inactividad prolongada**: Se revalida la sesión al volver
+- **Seguridad mejorada**: Menor ventana de exposición ante XSS
 
 ## Componentes Principales
 
@@ -192,13 +300,39 @@ App Init
    ↓
 SupabaseService constructor
    ↓
-Recupera sesión de localStorage
+Recupera sesión de sessionStorage
+   ↓
+Configura security listeners
+   │  • visibilitychange (detecta página oculta)
+   │  • Intervalo de validación cada 5 min
    ↓
 onAuthStateChange listener
    ↓
 Actualiza currentUser$ BehaviorSubject
    ↓
 Todos los componentes suscritos reciben actualización
+```
+
+### Flujo de Revalidación por Inactividad
+
+```
+Página se oculta (usuario cambia de pestaña/minimiza)
+   ↓
+Se guarda timestamp en sessionStorage
+   ↓
+... tiempo pasa ...
+   ↓
+Página vuelve a ser visible
+   ↓
+¿Estuvo oculta > 30 minutos?
+   │
+   ├─ Sí → Forzar refresh de sesión
+   │         ↓
+   │       ¿Sesión válida?
+   │         ├─ Sí → Continuar normalmente
+   │         └─ No → Cerrar sesión automáticamente
+   │
+   └─ No → Continuar normalmente
 ```
 
 ## Guards de Rutas
@@ -329,19 +463,49 @@ En el template:
 
 ### Cómo implementar "Remember Me"
 
-Supabase gestiona automáticamente la persistencia de sesión usando localStorage. No necesitas implementar nada adicional para "Remember Me".
+> **Nota de Seguridad**: Por defecto, el sistema usa `sessionStorage` que se borra al cerrar el navegador. Esto es más seguro pero significa que los usuarios deben iniciar sesión cada vez que abren el navegador.
 
-Si quieres permitir sesiones temporales (que se borren al cerrar el navegador):
+Si deseas implementar una opción "Recordarme" que permita sesiones persistentes:
 
 ```typescript
-// En SupabaseService constructor
-this.supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
-  auth: {
-    persistSession: true, // false para sesiones temporales
-    storage: window.localStorage // o window.sessionStorage
+// auth-signin.component.ts
+rememberMe = signal(false);
+
+async onSubmit() {
+  // Cambiar storage dinámicamente según la preferencia del usuario
+  if (this.rememberMe()) {
+    // Usar localStorage para sesiones persistentes (menos seguro)
+    this.supabaseService.setStorage(window.localStorage);
+  } else {
+    // Usar sessionStorage para sesiones temporales (más seguro)
+    this.supabaseService.setStorage(window.sessionStorage);
   }
-});
+
+  // Proceder con login...
+}
 ```
+
+```html
+<!-- En el formulario de login -->
+<div class="form-check">
+  <input type="checkbox"
+         class="form-check-input"
+         id="rememberMe"
+         (change)="rememberMe.set($event.target.checked)">
+  <label class="form-check-label" for="rememberMe">
+    Recordarme (menos seguro)
+  </label>
+</div>
+```
+
+**Consideraciones de seguridad:**
+
+| Opción | Storage | Persistencia | Seguridad |
+|--------|---------|--------------|-----------|
+| Sin "Recordarme" | sessionStorage | Hasta cerrar navegador | Alta |
+| Con "Recordarme" | localStorage | Indefinida | Media |
+
+> **Recomendación**: Mantener `sessionStorage` como predeterminado y solo ofrecer `localStorage` si el usuario lo solicita explícitamente, informándole de los riesgos.
 
 ## Ejemplos de Código
 
@@ -542,13 +706,15 @@ this.supabase.auth.onAuthStateChange((event, session) => {
 
 Posibles mejoras para el sistema de autenticación:
 
-1. Implementar recuperación de contraseña
+1. ~~Implementar recuperación de contraseña~~ ✅ Implementado
 2. Agregar autenticación con redes sociales (Google, GitHub, etc.)
-3. Implementar sistema de roles y permisos
+3. ~~Implementar sistema de roles y permisos~~ ✅ Implementado
 4. Agregar autenticación de dos factores (2FA)
-5. Implementar refresh token automático
+5. ~~Implementar refresh token automático~~ ✅ Implementado
 6. Agregar logout en todas las pestañas simultáneamente
+7. ~~Mejorar seguridad de almacenamiento de tokens~~ ✅ Implementado (sessionStorage + validación)
+8. Implementar httpOnly cookies (requiere backend proxy)
 
 ---
 
-**Última actualización**: 2026-01-11
+**Última actualización**: 2026-01-23

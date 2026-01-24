@@ -1,5 +1,5 @@
 // angular import
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy} from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -12,7 +12,8 @@ import { NavItemComponent } from '../nav-item/nav-item.component';
   selector: 'app-nav-collapse',
   imports: [SharedModule, NavItemComponent, RouterModule, CommonModule],
   templateUrl: './nav-collapse.component.html',
-  styleUrls: ['./nav-collapse.component.scss']
+  styleUrls: ['./nav-collapse.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavCollapseComponent {
   // public props

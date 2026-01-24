@@ -28,6 +28,8 @@ import {
   PaginatedResponse,
   ServiceResponse
 } from '../models';
+import { environment } from '../../../environments/environment';
+import { TABLES, VIEWS, STORAGE_BUCKETS } from '../constants/tables';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +65,7 @@ export class TicketService {
 
     // Usar la vista con SLA calculado
     let query = this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*', { count: 'exact' });
 
     // Aplicar filtros
@@ -126,7 +128,7 @@ export class TicketService {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching tickets:', error);
+      if (!environment.production) { console.error('Error fetching tickets:', error); }
       return {
         data: [],
         total: 0,
@@ -155,13 +157,13 @@ export class TicketService {
 
   private async fetchTicketById(id: string): Promise<ServiceResponse<TicketConSLA>> {
     const { data, error } = await this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Error fetching ticket:', error);
+      if (!environment.production) { console.error('Error fetching ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -177,13 +179,13 @@ export class TicketService {
 
   private async fetchTicketByFolio(folio: string): Promise<ServiceResponse<TicketConSLA>> {
     const { data, error } = await this.supabase.client
-      .from('v_tickets_con_sla')
+      .from(VIEWS.V_TICKETS_CON_SLA)
       .select('*')
       .eq('folio', folio)
       .single();
 
     if (error) {
-      console.error('Error fetching ticket by folio:', error);
+      if (!environment.production) { console.error('Error fetching ticket by folio:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -207,7 +209,7 @@ export class TicketService {
     let slaMinutos = ticketData.sla_objetivo_minutos;
     if (!slaMinutos && ticketData.categoria_id) {
       const { data: categoria } = await this.supabase.client
-        .from('categorias_servicio')
+        .from(TABLES.CATEGORIAS_SERVICIO)
         .select('sla_minutos')
         .eq('id', ticketData.categoria_id)
         .single();
@@ -216,7 +218,7 @@ export class TicketService {
 
     // Obtener estatus "Nuevo" por defecto
     const { data: estatusNuevo } = await this.supabase.client
-      .from('estatus_tickets')
+      .from(TABLES.ESTATUS_TICKETS)
       .select('id')
       .eq('nombre', 'Nuevo')
       .single();
@@ -226,7 +228,7 @@ export class TicketService {
     }
 
     const { data, error } = await this.supabase.client
-      .from('tickets')
+      .from(TABLES.TICKETS)
       .insert({
         ...ticketData,
         sla_objetivo_minutos: slaMinutos || 240,
@@ -237,13 +239,13 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error creating ticket:', error);
+      if (!environment.production) { console.error('Error creating ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('ticket_bitacora')
+      .from(TABLES.TICKET_BITACORA)
       .insert({
         ticket_id: data.id,
         usuario_id: userId,
@@ -264,7 +266,7 @@ export class TicketService {
 
   private async updateTicketAsync(id: string, ticketData: UpdateTicketDTO): Promise<ServiceResponse<Ticket>> {
     const { data, error } = await this.supabase.client
-      .from('tickets')
+      .from(TABLES.TICKETS)
       .update({
         ...ticketData,
         updated_at: new Date().toISOString()
@@ -274,7 +276,7 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error updating ticket:', error);
+      if (!environment.production) { console.error('Error updating ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -297,7 +299,7 @@ export class TicketService {
 
     // Actualizar ticket
     const { data, error } = await this.supabase.client
-      .from('tickets')
+      .from(TABLES.TICKETS)
       .update({
         estatus_id: dto.estatus_id,
         updated_at: new Date().toISOString()
@@ -307,14 +309,14 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error changing ticket status:', error);
+      if (!environment.production) { console.error('Error changing ticket status:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Si hay nota, agregarla
     if (dto.nota) {
       await this.supabase.client
-        .from('ticket_bitacora')
+        .from(TABLES.TICKET_BITACORA)
         .insert({
           ticket_id: ticketId,
           usuario_id: userId,
@@ -338,14 +340,14 @@ export class TicketService {
 
     // Obtener ticket actual para historial
     const { data: ticketActual } = await this.supabase.client
-      .from('tickets')
+      .from(TABLES.TICKETS)
       .select('responsable_id')
       .eq('id', ticketId)
       .single();
 
     // Actualizar ticket
     const { data, error } = await this.supabase.client
-      .from('tickets')
+      .from(TABLES.TICKETS)
       .update({
         responsable_id: dto.usuario_id,
         updated_at: new Date().toISOString()
@@ -355,13 +357,13 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error assigning ticket:', error);
+      if (!environment.production) { console.error('Error assigning ticket:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en historial de asignaciones
     await this.supabase.client
-      .from('ticket_historial_asignaciones')
+      .from(TABLES.TICKET_HISTORIAL_ASIGNACIONES)
       .insert({
         ticket_id: ticketId,
         de_usuario_id: ticketActual?.responsable_id || null,
@@ -371,7 +373,7 @@ export class TicketService {
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('ticket_bitacora')
+      .from(TABLES.TICKET_BITACORA)
       .insert({
         ticket_id: ticketId,
         usuario_id: userId,
@@ -397,7 +399,7 @@ export class TicketService {
     const userId = this.supabase.user?.id;
 
     const { data, error } = await this.supabase.client
-      .from('ticket_bitacora')
+      .from(TABLES.TICKET_BITACORA)
       .insert({
         ticket_id: ticketId,
         usuario_id: userId,
@@ -409,7 +411,7 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error adding note:', error);
+      if (!environment.production) { console.error('Error adding note:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -429,7 +431,7 @@ export class TicketService {
 
   private async fetchTicketBitacora(ticketId: string): Promise<ServiceResponse<TicketBitacora[]>> {
     const { data, error } = await this.supabase.client
-      .from('ticket_bitacora')
+      .from(TABLES.TICKET_BITACORA)
       .select(`
         *,
         usuario:profiles(nombre_completo, avatar_url)
@@ -438,7 +440,7 @@ export class TicketService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching ticket timeline:', error);
+      if (!environment.production) { console.error('Error fetching ticket timeline:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -454,7 +456,7 @@ export class TicketService {
 
   private async fetchTicketAdjuntos(ticketId: string): Promise<ServiceResponse<TicketAdjunto[]>> {
     const { data, error } = await this.supabase.client
-      .from('ticket_adjuntos')
+      .from(TABLES.TICKET_ADJUNTOS)
       .select(`
         *,
         usuario:profiles(nombre_completo)
@@ -463,7 +465,7 @@ export class TicketService {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching attachments:', error);
+      if (!environment.production) { console.error('Error fetching attachments:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -471,7 +473,7 @@ export class TicketService {
     const adjuntosConUrl = await Promise.all(
       (data as TicketAdjunto[]).map(async (adj) => {
         const { data: urlData } = await this.supabase.client.storage
-          .from('ticket-attachments')
+          .from(STORAGE_BUCKETS.TICKET_ATTACHMENTS)
           .createSignedUrl(adj.ruta_storage, 3600);
         return { ...adj, url: urlData?.signedUrl };
       })
@@ -498,9 +500,9 @@ export class TicketService {
     if (file.type.startsWith('image/')) {
       try {
         processedFile = await compressImage(file, IMAGE_PRESETS.evidencia);
-        console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`);
+        if (!environment.production) { console.log(`Adjunto comprimido: ${file.size} -> ${processedFile.size} bytes`); }
       } catch (err) {
-        console.warn('No se pudo comprimir la imagen:', err);
+        if (!environment.production) { console.warn('No se pudo comprimir la imagen:', err); }
       }
     }
 
@@ -509,17 +511,17 @@ export class TicketService {
 
     // Subir archivo a storage
     const { error: uploadError } = await this.supabase.client.storage
-      .from('ticket-attachments')
+      .from(STORAGE_BUCKETS.TICKET_ATTACHMENTS)
       .upload(fileName, processedFile);
 
     if (uploadError) {
-      console.error('Error uploading file:', uploadError);
+      if (!environment.production) { console.error('Error uploading file:', uploadError); }
       return { data: null, error: 'Error al subir archivo', success: false };
     }
 
     // Registrar en base de datos
     const { data, error } = await this.supabase.client
-      .from('ticket_adjuntos')
+      .from(TABLES.TICKET_ADJUNTOS)
       .insert({
         ticket_id: ticketId,
         nombre_archivo: processedFile.name,
@@ -532,13 +534,13 @@ export class TicketService {
       .single();
 
     if (error) {
-      console.error('Error registering attachment:', error);
+      if (!environment.production) { console.error('Error registering attachment:', error); }
       return { data: null, error: error.message, success: false };
     }
 
     // Registrar en bitácora
     await this.supabase.client
-      .from('ticket_bitacora')
+      .from(TABLES.TICKET_BITACORA)
       .insert({
         ticket_id: ticketId,
         usuario_id: userId,
@@ -563,7 +565,7 @@ export class TicketService {
 
       // Obtener tickets de la vista
       const { data: tickets } = await this.supabase.client
-        .from('v_tickets_con_sla')
+        .from(VIEWS.V_TICKETS_CON_SLA)
         .select('*');
 
       if (!tickets || tickets.length === 0) {
@@ -630,7 +632,7 @@ export class TicketService {
         cumplimiento_sla
       };
     } catch (error) {
-      console.error('Error getting ticket stats:', error);
+      if (!environment.production) { console.error('Error getting ticket stats:', error); }
       return this.emptyStats();
     }
   }
@@ -663,7 +665,7 @@ export class TicketService {
       .rpc('get_tickets_alertas', { p_limite: limite });
 
     if (error) {
-      console.error('Error fetching ticket alerts:', error);
+      if (!environment.production) { console.error('Error fetching ticket alerts:', error); }
       return { data: null, error: error.message, success: false };
     }
 
@@ -683,7 +685,7 @@ export class TicketService {
 
   private async fetchCategorias(): Promise<ServiceResponse<CategoriaServicio[]>> {
     const { data, error } = await this.supabase.client
-      .from('categorias_servicio')
+      .from(TABLES.CATEGORIAS_SERVICIO)
       .select('*')
       .eq('estatus', 'Activo')
       .order('orden');
@@ -704,7 +706,7 @@ export class TicketService {
 
   private async fetchEstatus(): Promise<ServiceResponse<EstatusTicket[]>> {
     const { data, error } = await this.supabase.client
-      .from('estatus_tickets')
+      .from(TABLES.ESTATUS_TICKETS)
       .select('*')
       .order('orden');
 
@@ -724,7 +726,7 @@ export class TicketService {
 
   private async fetchCanales(): Promise<ServiceResponse<CanalContacto[]>> {
     const { data, error } = await this.supabase.client
-      .from('canales_contacto')
+      .from(TABLES.CANALES_CONTACTO)
       .select('*')
       .eq('activo', true);
 
