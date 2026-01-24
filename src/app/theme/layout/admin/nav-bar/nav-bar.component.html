@@ -1,11 +1,9 @@
 <header>
   <div class="m-header" [style.display]="this.headerStyle">
     <a class="mobile-menu" id="mobile-collapse1" href="javascript:void(0)" (click)="this.NavCollapsedMob.emit()"><span></span></a>
-    <a [routerLink]="['/dashboard/default']" class="b-brand">
-      <div class="b-bg">
-        <i class="feather icon-trending-up"></i>
-      </div>
-      <span class="b-title">Datta Able</span>
+    <a [routerLink]="['/dashboard']" class="b-brand">
+      <img src="assets/images/logo-igas.png" alt="iGAS" class="logo-igas-mobile" style="height: 30px;" />
+      <span class="b-title">iGAS Helpdesk</span>
     </a>
   </div>
   <a class="mobile-menu" [ngClass]="{ on: this.menuClass }" id="mobile-header" href="javascript:void(0)" (click)="toggleMobOption()">
