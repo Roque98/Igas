@@ -49,7 +49,7 @@
       </div>
       <!-- Tickets Hoy -->
       <div class="col-xl col-md-4 col-6">
-        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none">
+        <a routerLink="/tickets/lista" [queryParams]="{filter: 'hoy'}" class="card card-hover mb-3 text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
@@ -67,7 +67,7 @@
       </div>
       <!-- Tickets Abiertos -->
       <div class="col-xl col-md-4 col-6">
-        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none">
+        <a routerLink="/tickets/lista" [queryParams]="{filter: 'abiertos'}" class="card card-hover mb-3 text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
@@ -85,7 +85,7 @@
       </div>
       <!-- Tickets en Rojo -->
       <div class="col-xl col-md-4 col-6">
-        <a routerLink="/tickets/lista" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.ticketsEnRojo > 0">
+        <a routerLink="/tickets/lista" [queryParams]="{filter: 'rojo'}" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.ticketsEnRojo > 0">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
@@ -103,7 +103,7 @@
       </div>
       <!-- Casos Abiertos -->
       <div class="col-xl col-md-6 col-6">
-        <a routerLink="/casos/lista" class="card card-hover mb-3 text-decoration-none">
+        <a routerLink="/casos/lista" [queryParams]="{filter: 'abiertos'}" class="card card-hover mb-3 text-decoration-none">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-3">
@@ -121,7 +121,7 @@
       </div>
       <!-- Casos Vencidos -->
       <div class="col-xl col-md-6 col-6">
-        <a routerLink="/casos/lista" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.casosVencidos > 0">
+        <a routerLink="/casos/lista" [queryParams]="{filter: 'vencidos'}" class="card card-hover mb-3 text-decoration-none" [class.border-danger]="ticketCasoStats()!.casosVencidos > 0">
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="flex-shrink-0 me-3">

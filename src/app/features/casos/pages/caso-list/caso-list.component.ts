@@ -80,6 +80,7 @@ export class CasoListComponent implements OnInit {
   soloMisCasos = signal(false);
   soloSinAsignar = signal(false);
   soloCompromisoVencido = signal(false);
+  soloAbiertos = signal(false);
 
   // Ordenamiento
   sortBy = signal<string>('fecha_creacion');
@@ -127,6 +128,9 @@ export class CasoListComponent implements OnInit {
         case 'vencidos':
           this.soloCompromisoVencido.set(true);
           break;
+        case 'abiertos':
+          this.soloAbiertos.set(true);
+          break;
         case 'verde':
         case 'amarillo':
         case 'rojo':
@@ -164,6 +168,7 @@ export class CasoListComponent implements OnInit {
     if (this.soloMisCasos()) filters.solo_mis_casos = true;
     if (this.soloSinAsignar()) filters.solo_sin_asignar = true;
     if (this.soloCompromisoVencido()) filters.compromiso_vencido = true;
+    if (this.soloAbiertos()) filters.solo_abiertos = true;
 
     const pagination: PaginationOptions = {
       page: this.currentPage(),

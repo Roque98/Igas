@@ -156,6 +156,15 @@ export class TicketService {
     if (filters.solo_sin_asignar) {
       query = query.is('responsable_id', null);
     }
+    if (filters.fecha_hoy) {
+      const today = new Date();
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999).toISOString();
+      query = query.gte('fecha_creacion', startOfDay).lte('fecha_creacion', endOfDay);
+    }
+    if (filters.solo_abiertos) {
+      query = query.eq('estatus_es_final', false);
+    }
 
     return query;
   }

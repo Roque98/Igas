@@ -126,12 +126,22 @@ export class TicketListComponent implements OnInit {
           this.selectedSemaforo.set(params['filter'] as SemaforoSLA);
           break;
         case 'alertas':
-          this.selectedSemaforo.set(null);
-          // Filtrar solo amarillos y rojos via estatus o semáforo
+          // Filtrar solo amarillos y rojos - usamos rojo como default
+          this.selectedSemaforo.set('rojo');
+          break;
+        case 'hoy':
+          this.filterHoy.set(true);
+          break;
+        case 'abiertos':
+          this.filterAbiertos.set(true);
           break;
       }
     }
   }
+
+  // Filtros especiales desde dashboard
+  filterHoy = signal(false);
+  filterAbiertos = signal(false);
 
   private loadCatalogos(): void {
     // Cargar categorías
@@ -167,6 +177,8 @@ export class TicketListComponent implements OnInit {
     if (this.selectedResponsableId()) filters.responsable_id = this.selectedResponsableId()!;
     if (this.soloMisTickets()) filters.solo_mis_tickets = true;
     if (this.soloSinAsignar()) filters.solo_sin_asignar = true;
+    if (this.filterHoy()) filters.fecha_hoy = true;
+    if (this.filterAbiertos()) filters.solo_abiertos = true;
 
     const pagination: PaginationOptions = {
       page: this.currentPage(),

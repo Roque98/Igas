@@ -106,6 +106,9 @@ export class CasoService {
       if (filters.solo_sin_asignar) {
         query = query.is('responsable_id', null);
       }
+      if (filters.solo_abiertos) {
+        query = query.eq('estatus_es_final', false);
+      }
     }
 
     // Ordenamiento y paginación

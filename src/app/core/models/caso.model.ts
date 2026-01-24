@@ -178,6 +178,7 @@ export interface CasoFilters {
   solo_mis_casos?: boolean;
   solo_sin_asignar?: boolean;
   compromiso_vencido?: boolean;
+  solo_abiertos?: boolean;
   fecha_desde?: string;
   fecha_hasta?: string;
 }

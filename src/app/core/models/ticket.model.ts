@@ -280,6 +280,8 @@ export interface TicketFilters {
   fecha_hasta?: string;
   solo_mis_tickets?: boolean;
   solo_sin_asignar?: boolean;
+  fecha_hoy?: boolean;
+  solo_abiertos?: boolean;
 }
 
 // ============================================================================
