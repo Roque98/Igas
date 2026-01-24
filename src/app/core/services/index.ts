@@ -4,6 +4,9 @@
 // Exporta todos los servicios del sistema
 // ============================================================================
 
+// Base service for CRUD operations
+export * from './base.service';
+
 export * from './supabase.service';
 export * from './user.service';
 export * from './equipo.service';

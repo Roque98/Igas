@@ -510,7 +510,7 @@
                     <div class="label">Problemas Medios (P2)</div>
                 </div>
                 <div class="stat-card success">
-                    <div class="number">11</div>
+                    <div class="number">12</div>
                     <div class="label">Problemas Resueltos</div>
                 </div>
             </div>
@@ -1099,24 +1099,38 @@ npm install --save-dev @cypress/schematic cypress
                         </div>
                     </div>
 
-                    <div class="issue-item">
+                    <div class="issue-item" style="background: #d4edda; border-left-color: #28a745;">
                         <h4>
-                            <span class="priority-badge priority-p2">P2</span>
-                            Patrones CRUD repetidos
+                            <span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span>
+                            BaseService abstracto para CRUD
                         </h4>
-                        <p>Codigo de CRUD, filtros y paginacion repetido en multiples servicios.</p>
+                        <p><s>Codigo de CRUD, filtros y paginacion repetido en multiples servicios.</s></p>
+                        <p>Creado <code>BaseService&lt;T&gt;</code> abstracto generico con operaciones CRUD, filtros y paginacion reutilizables.</p>
+                        <p><span class="location">Archivo: core/services/base.service.ts</span></p>
 
                         <div class="solution">
-                            <strong>Solucion:</strong> Crear un BaseService abstracto con operaciones comunes:
+                            <strong>Implementacion:</strong>
+                            <ul>
+                                <li><code>getAll(filters, pagination)</code> - Lista paginada con filtros</li>
+                                <li><code>getById(id)</code> - Obtener por ID</li>
+                                <li><code>create(dto)</code> - Crear registro</li>
+                                <li><code>update(id, dto)</code> - Actualizar registro</li>
+                                <li><code>delete(id)</code> - Eliminar (soft/hard configurable)</li>
+                                <li><code>search(term)</code> - Busqueda para autocomplete</li>
+                                <li>Hooks: <code>beforeCreate</code>, <code>beforeUpdate</code>, <code>applyFilters</code></li>
+                                <li>Manejo de errores centralizado con <code>mapError</code></li>
+                                <li>Configuracion via <code>BaseServiceConfig</code></li>
+                            </ul>
                             <div class="code-block">
-<span class="keyword">abstract class</span> BaseService&lt;T&gt; {
-  <span class="keyword">abstract</span> tableName: string;
-
-  <span class="function">getAll</span>(): Observable&lt;T[]&gt; { ... }
-  <span class="function">getById</span>(id: string): Observable&lt;T&gt; { ... }
-  <span class="function">create</span>(entity: Partial&lt;T&gt;): Observable&lt;T&gt; { ... }
-  <span class="function">update</span>(id: string, entity: Partial&lt;T&gt;): Observable&lt;T&gt; { ... }
-  <span class="function">delete</span>(id: string): Observable&lt;void&gt; { ... }
+<span class="comment">// Ejemplo de uso</span>
+@<span class="function">Injectable</span>({ providedIn: <span class="string">'root'</span> })
+<span class="keyword">export class</span> MiServicio <span class="keyword">extends</span> BaseService&lt;MiEntidad, CreateDTO, UpdateDTO&gt; {
+  <span class="keyword">protected</span> config = {
+    tableName: TABLES.MI_TABLA,
+    viewName: VIEWS.V_MI_VISTA,
+    searchFields: [<span class="string">'nombre'</span>, <span class="string">'descripcion'</span>],
+    softDelete: <span class="keyword">true</span>
+  };
 }
                             </div>
                         </div>
@@ -1263,7 +1277,7 @@ npm install --save-dev @cypress/schematic cypress
                         <li class="done">Mejorar accesibilidad (labels, aria-*, autocomplete)</li>
                         <li class="done">Implementar lazy loading selectivo (SelectivePreloadingStrategy)</li>
                         <li>Refactorizar servicios grandes</li>
-                        <li>Crear BaseService para operaciones CRUD</li>
+                        <li class="done">Crear BaseService para operaciones CRUD</li>
                         <li class="done">Centralizar constantes de tablas (TABLES, VIEWS, STORAGE_BUCKETS)</li>
                         <li class="done">Habilitar strictTemplates (19 errores corregidos)</li>
                         <li>Tests para guards y componentes principales</li>
@@ -1404,6 +1418,13 @@ npm install --save-dev @cypress/schematic cypress
                         <td>Bajo</td>
                         <td>Medio</td>
                     </tr>
+                    <tr style="background: #d4edda;">
+                        <td><span class="priority-badge" style="background: #28a745; color: white;">RESUELTO</span></td>
+                        <td>Mantenibilidad</td>
+                        <td><s>Patrones CRUD repetidos</s> - BaseService abstracto con CRUD, filtros, paginacion y hooks</td>
+                        <td>Bajo</td>
+                        <td>Medio</td>
+                    </tr>
                 </tbody>
             </table>
         </section>
@@ -1412,8 +1433,8 @@ npm install --save-dev @cypress/schematic cypress
         <section class="section" style="text-align: center; padding: 40px 0; border-top: 2px solid #eee;">
             <p style="color: #666;">
                 <strong>Documento generado automaticamente</strong><br>
-                APP Mesa de Ayuda iGAS - Plan de Mejoras v1.9<br>
-                Ultima actualizacion: 24 Enero 2026 - strictTemplates habilitado
+                APP Mesa de Ayuda iGAS - Plan de Mejoras v2.0<br>
+                Ultima actualizacion: 24 Enero 2026 - BaseService abstracto implementado
             </p>
         </section>
     </div>
